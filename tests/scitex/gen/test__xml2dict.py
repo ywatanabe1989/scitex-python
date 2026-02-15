@@ -4,6 +4,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import pytest
+
 pytest.importorskip("torch")
 
 from scitex.gen import XmlDictConfig, XmlListConfig, xml2dict
@@ -412,18 +413,18 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Time-stamp: "2021-09-07 13:06:33 (ylab)"
-# 
+#
 # from xml.etree import cElementTree as ElementTree
-# 
-# 
+#
+#
 # def xml2dict(lpath_xml):
 #     # tree = ElementTree.parse('your_file.xml')
 #     tree = ElementTree.parse(lpath_xml)
 #     root = tree.getroot()
 #     xmldict = XmlDictConfig(root)
 #     return xmldict
-# 
-# 
+#
+#
 # class XmlListConfig(list):
 #     def __init__(self, aList):
 #         for element in aList:
@@ -438,24 +439,24 @@ if __name__ == "__main__":
 #                 text = element.text.strip()
 #                 if text:
 #                     self.append(text)
-# 
-# 
+#
+#
 # class XmlDictConfig(dict):
 #     """
 #     Example usage:
-# 
+#
 #     >>> tree = ElementTree.parse('your_file.xml')
 #     >>> root = tree.getroot()
 #     >>> xmldict = XmlDictConfig(root)
-# 
+#
 #     Or, if you want to use an XML string:
-# 
+#
 #     >>> root = ElementTree.XML(xml_string)
 #     >>> xmldict = XmlDictConfig(root)
-# 
+#
 #     And then use xmldict for what it is... a dict.
 #     """
-# 
+#
 #     def __init__(self, parent_element):
 #         if parent_element.items():
 #             self.update(dict(parent_element.items()))

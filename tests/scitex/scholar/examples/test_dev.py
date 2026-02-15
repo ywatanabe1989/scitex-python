@@ -17,18 +17,18 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # from scitex.scholar import ScholarAuthManager
 # from scitex.scholar import ScholarBrowserManager
 # from scitex.scholar import ScholarURLFinder
 # from scitex.scholar.url_finder.helpers._find_functions import (
 #     _find_pdf_urls_by_zotero_translators,
 # )
-# 
+#
 # # Initialize with authenticated browser context
 # auth_manager = ScholarAuthManager()
 # browser_manager = ScholarBrowserManager(
@@ -39,14 +39,14 @@ if __name__ == "__main__":
 # )
 # browser, context = await browser_manager.get_authenticated_browser_and_context_async()
 # page = await context.new_page()
-# 
+#
 # await page.goto("https://www.science.org/doi/10.1126/science.aao0702")
-# 
-# 
+#
+#
 # translator_urls = await _find_pdf_urls_by_zotero_translators(
 #     page, "https://doi.org/10.1016/j.neubiorev.2020.07.005"
 # )
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

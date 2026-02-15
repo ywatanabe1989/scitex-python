@@ -14,16 +14,16 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/stats/_mcp.handlers.py
 # # ----------------------------------------
-# 
+#
 # """Handler implementations for the scitex-stats MCP server."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import asyncio
 # from datetime import datetime
-# 
+#
 # import numpy as np
-# 
+#
 # __all__ = [
 #     "recommend_tests_handler",
 #     "run_test_handler",
@@ -36,8 +36,8 @@ if __name__ == "__main__":
 #     "posthoc_test_handler",
 #     "p_to_stars_handler",
 # ]
-# 
-# 
+#
+#
 # async def recommend_tests_handler(
 #     n_groups: int = 2,
 #     sample_sizes: list[int] | None = None,
@@ -50,9 +50,9 @@ if __name__ == "__main__":
 #     """Recommend appropriate statistical tests based on data characteristics."""
 #     try:
 #         from scitex.stats.auto import StatContext, recommend_tests
-# 
+#
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_recommend():
 #             ctx = StatContext(
 #                 n_groups=n_groups,
@@ -64,10 +64,10 @@ if __name__ == "__main__":
 #                 n_factors=1,
 #             )
 #             tests = recommend_tests(ctx, top_k=top_k)
-# 
+#
 #             # Get details about each recommended test
 #             from scitex.stats.auto._rules import TEST_RULES
-# 
+#
 #             recommendations = []
 #             for test_name in tests:
 #                 rule = TEST_RULES.get(test_name)
@@ -82,11 +82,11 @@ if __name__ == "__main__":
 #                             "rationale": _get_test_rationale(test_name),
 #                         }
 #                     )
-# 
+#
 #             return recommendations
-# 
+#
 #         recommendations = await loop.run_in_executor(None, do_recommend)
-# 
+#
 #         return {
 #             "success": True,
 #             "context": {
@@ -100,11 +100,11 @@ if __name__ == "__main__":
 #             "recommendations": recommendations,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # def _get_test_rationale(test_name: str) -> str:
 #     """Get rationale for recommending a specific test."""
 #     rationales = {
@@ -123,8 +123,8 @@ if __name__ == "__main__":
 #         "kendall": "Robust nonparametric correlation for ordinal data",
 #     }
 #     return rationales.get(test_name, "Applicable to the given context")
-# 
-# 
+#
+#
 # async def run_test_handler(
 #     test_name: str,
 #     data: list[list[float]],
@@ -133,15 +133,15 @@ if __name__ == "__main__":
 #     """Execute a statistical test on provided data."""
 #     try:
 #         from scipy import stats as scipy_stats
-# 
+#
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_test():
 #             # Convert data to numpy arrays
 #             groups = [np.array(g, dtype=float) for g in data]
-# 
+#
 #             result = {}
-# 
+#
 #             # Run the appropriate test
 #             if test_name == "ttest_ind":
 #                 if len(groups) != 2:
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 #                     "p_value": float(p_value),
 #                     "df": df,
 #                 }
-# 
+#
 #             elif test_name == "ttest_paired":
 #                 if len(groups) != 2:
 #                     raise ValueError("Paired t-test requires exactly 2 groups")
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 #                     "p_value": float(p_value),
 #                     "df": df,
 #                 }
-# 
+#
 #             elif test_name == "ttest_1samp":
 #                 if len(groups) != 1:
 #                     raise ValueError("One-sample t-test requires exactly 1 group")
@@ -187,7 +187,7 @@ if __name__ == "__main__":
 #                     "p_value": float(p_value),
 #                     "df": df,
 #                 }
-# 
+#
 #             elif test_name == "brunner_munzel":
 #                 if len(groups) != 2:
 #                     raise ValueError("Brunner-Munzel requires exactly 2 groups")
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 #                     "statistic_name": "BM",
 #                     "p_value": float(res.pvalue),
 #                 }
-# 
+#
 #             elif test_name == "mannwhitneyu":
 #                 if len(groups) != 2:
 #                     raise ValueError("Mann-Whitney U requires exactly 2 groups")
@@ -213,7 +213,7 @@ if __name__ == "__main__":
 #                     "statistic_name": "U",
 #                     "p_value": float(p_value),
 #                 }
-# 
+#
 #             elif test_name == "wilcoxon":
 #                 if len(groups) != 2:
 #                     raise ValueError("Wilcoxon requires exactly 2 paired groups")
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 #                     "statistic_name": "W",
 #                     "p_value": float(p_value),
 #                 }
-# 
+#
 #             elif test_name == "anova":
 #                 if len(groups) < 2:
 #                     raise ValueError("ANOVA requires at least 2 groups")
@@ -241,7 +241,7 @@ if __name__ == "__main__":
 #                     "df_between": df_between,
 #                     "df_within": df_within,
 #                 }
-# 
+#
 #             elif test_name == "kruskal":
 #                 if len(groups) < 2:
 #                     raise ValueError("Kruskal-Wallis requires at least 2 groups")
@@ -253,7 +253,7 @@ if __name__ == "__main__":
 #                     "p_value": float(p_value),
 #                     "df": len(groups) - 1,
 #                 }
-# 
+#
 #             elif test_name == "chi2":
 #                 # Expects contingency table as data
 #                 table = np.array(data)
@@ -266,7 +266,7 @@ if __name__ == "__main__":
 #                     "df": int(dof),
 #                     "expected_frequencies": expected.tolist(),
 #                 }
-# 
+#
 #             elif test_name == "fisher_exact":
 #                 # Expects 2x2 contingency table
 #                 table = np.array(data)
@@ -281,7 +281,7 @@ if __name__ == "__main__":
 #                     "statistic_name": "odds_ratio",
 #                     "p_value": float(p_value),
 #                 }
-# 
+#
 #             elif test_name == "pearson":
 #                 if len(groups) != 2:
 #                     raise ValueError("Pearson correlation requires exactly 2 variables")
@@ -292,7 +292,7 @@ if __name__ == "__main__":
 #                     "statistic_name": "r",
 #                     "p_value": float(p_value),
 #                 }
-# 
+#
 #             elif test_name == "spearman":
 #                 if len(groups) != 2:
 #                     raise ValueError(
@@ -305,7 +305,7 @@ if __name__ == "__main__":
 #                     "statistic_name": "rho",
 #                     "p_value": float(p_value),
 #                 }
-# 
+#
 #             elif test_name == "kendall":
 #                 if len(groups) != 2:
 #                     raise ValueError("Kendall correlation requires exactly 2 variables")
@@ -316,10 +316,10 @@ if __name__ == "__main__":
 #                     "statistic_name": "tau",
 #                     "p_value": float(p_value),
 #                 }
-# 
+#
 #             else:
 #                 raise ValueError(f"Unknown test: {test_name}")
-# 
+#
 #             # Calculate effect size if applicable
 #             if test_name in [
 #                 "ttest_ind",
@@ -328,7 +328,7 @@ if __name__ == "__main__":
 #                 "mannwhitneyu",
 #             ]:
 #                 from scitex.stats.effect_sizes import cliffs_delta, cohens_d
-# 
+#
 #                 if len(groups) == 2:
 #                     d = cohens_d(groups[0], groups[1])
 #                     delta = cliffs_delta(groups[0], groups[1])
@@ -336,16 +336,16 @@ if __name__ == "__main__":
 #                         "cohens_d": float(d),
 #                         "cliffs_delta": float(delta),
 #                     }
-# 
+#
 #             # Add significance determination
 #             alpha = 0.05
 #             result["significant"] = result["p_value"] < alpha
 #             result["alpha"] = alpha
-# 
+#
 #             return result
-# 
+#
 #         result = await loop.run_in_executor(None, do_test)
-# 
+#
 #         return {
 #             "success": True,
 #             "test_name": test_name,
@@ -353,11 +353,11 @@ if __name__ == "__main__":
 #             **result,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def format_results_handler(
 #     test_name: str,
 #     statistic: float,
@@ -372,11 +372,11 @@ if __name__ == "__main__":
 #     """Format statistical results in journal style."""
 #     try:
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_format():
 #             from scitex.stats.auto import format_test_line, p_to_stars
 #             from scitex.stats.auto._formatting import EffectResultDict, TestResultDict
-# 
+#
 #             # Build test result dict
 #             test_result: TestResultDict = {
 #                 "test_name": test_name,
@@ -385,7 +385,7 @@ if __name__ == "__main__":
 #             }
 #             if df is not None:
 #                 test_result["df"] = df
-# 
+#
 #             # Build effect result if provided
 #             effects = None
 #             if effect_size is not None:
@@ -398,7 +398,7 @@ if __name__ == "__main__":
 #                         ci_upper=ci_upper,
 #                     )
 #                 ]
-# 
+#
 #             # Map style names
 #             style_map = {
 #                 "apa": "apa_latex",
@@ -407,7 +407,7 @@ if __name__ == "__main__":
 #                 "brief": "brief",
 #             }
 #             style_id = style_map.get(style, "apa_latex")
-# 
+#
 #             # Format the line
 #             formatted = format_test_line(
 #                 test_result,
@@ -415,28 +415,28 @@ if __name__ == "__main__":
 #                 style=style_id,
 #                 include_n=False,
 #             )
-# 
+#
 #             # Get stars representation
 #             stars = p_to_stars(p_value)
-# 
+#
 #             return {
 #                 "formatted": formatted,
 #                 "stars": stars,
 #             }
-# 
+#
 #         result = await loop.run_in_executor(None, do_format)
-# 
+#
 #         return {
 #             "success": True,
 #             "style": style,
 #             **result,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def power_analysis_handler(
 #     test_type: str = "ttest",
 #     effect_size: float | None = None,
@@ -449,12 +449,12 @@ if __name__ == "__main__":
 #     """Calculate statistical power or required sample size."""
 #     try:
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_power():
 #             from scitex.stats.power._power import power_ttest, sample_size_ttest
-# 
+#
 #             result = {}
-# 
+#
 #             if test_type == "ttest":
 #                 if n is not None and effect_size is not None:
 #                     # Calculate power given n and effect size
@@ -492,16 +492,16 @@ if __name__ == "__main__":
 #                     }
 #                 else:
 #                     raise ValueError("Either n or effect_size must be provided")
-# 
+#
 #             elif test_type == "anova":
 #                 # Simplified ANOVA power (using f = d * sqrt(k-1) / sqrt(2k))
 #                 if effect_size is None:
 #                     raise ValueError("effect_size required for ANOVA power")
-# 
+#
 #                 # Convert Cohen's f to d for approximation
 #                 # This is a simplified calculation
 #                 from scipy import stats as scipy_stats
-# 
+#
 #                 if n is not None:
 #                     df1 = n_groups - 1
 #                     df2 = n_groups * n - n_groups
@@ -530,7 +530,7 @@ if __name__ == "__main__":
 #                             n_min = n_mid
 #                         else:
 #                             n_max = n_mid
-# 
+#
 #                     result = {
 #                         "mode": "sample_size_calculation",
 #                         "required_n_per_group": n_max,
@@ -540,14 +540,14 @@ if __name__ == "__main__":
 #                         "target_power": power,
 #                         "alpha": alpha,
 #                     }
-# 
+#
 #             elif test_type == "correlation":
 #                 # Power for correlation coefficient
 #                 from scipy import stats as scipy_stats
-# 
+#
 #                 if effect_size is None:
 #                     raise ValueError("effect_size (r) required for correlation power")
-# 
+#
 #                 if n is not None:
 #                     # Calculate power
 #                     z = 0.5 * np.log((1 + effect_size) / (1 - effect_size))
@@ -578,16 +578,16 @@ if __name__ == "__main__":
 #                         "target_power": power,
 #                         "alpha": alpha,
 #                     }
-# 
+#
 #             elif test_type == "chi2":
 #                 # Chi-square power (simplified)
 #                 from scipy import stats as scipy_stats
-# 
+#
 #                 if effect_size is None:
 #                     raise ValueError("effect_size (w) required for chi2 power")
-# 
+#
 #                 df = n_groups - 1  # Simplified: using n_groups as number of cells
-# 
+#
 #                 if n is not None:
 #                     nc = effect_size**2 * n
 #                     chi2_crit = scipy_stats.chi2.ppf(1 - alpha, df)
@@ -612,7 +612,7 @@ if __name__ == "__main__":
 #                             n_min = n_mid
 #                         else:
 #                             n_max = n_mid
-# 
+#
 #                     result = {
 #                         "mode": "sample_size_calculation",
 #                         "required_n": n_max,
@@ -621,25 +621,25 @@ if __name__ == "__main__":
 #                         "target_power": power,
 #                         "alpha": alpha,
 #                     }
-# 
+#
 #             else:
 #                 raise ValueError(f"Unknown test_type: {test_type}")
-# 
+#
 #             return result
-# 
+#
 #         result = await loop.run_in_executor(None, do_power)
-# 
+#
 #         return {
 #             "success": True,
 #             "test_type": test_type,
 #             **result,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def correct_pvalues_handler(
 #     pvalues: list[float],
 #     method: str = "fdr_bh",
@@ -648,10 +648,10 @@ if __name__ == "__main__":
 #     """Apply multiple comparison correction to p-values."""
 #     try:
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_correct():
 #             from statsmodels.stats.multitest import multipletests
-# 
+#
 #             # Map method names
 #             method_map = {
 #                 "bonferroni": "bonferroni",
@@ -661,12 +661,12 @@ if __name__ == "__main__":
 #                 "sidak": "sidak",
 #             }
 #             sm_method = method_map.get(method, "fdr_bh")
-# 
+#
 #             pvals = np.array(pvalues)
 #             reject, pvals_corrected, _, _ = multipletests(
 #                 pvals, alpha=alpha, method=sm_method
 #             )
-# 
+#
 #             return {
 #                 "original_pvalues": pvalues,
 #                 "corrected_pvalues": pvals_corrected.tolist(),
@@ -674,9 +674,9 @@ if __name__ == "__main__":
 #                 "n_significant": int(reject.sum()),
 #                 "n_tests": len(pvalues),
 #             }
-# 
+#
 #         result = await loop.run_in_executor(None, do_correct)
-# 
+#
 #         return {
 #             "success": True,
 #             "method": method,
@@ -684,13 +684,13 @@ if __name__ == "__main__":
 #             **result,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except ImportError:
 #         # Fallback implementation without statsmodels
 #         try:
 #             n = len(pvalues)
 #             pvals = np.array(pvalues)
-# 
+#
 #             if method == "bonferroni":
 #                 corrected = np.minimum(pvals * n, 1.0)
 #             elif method == "holm":
@@ -716,7 +716,7 @@ if __name__ == "__main__":
 #                 corrected = 1 - (1 - pvals) ** n
 #             else:
 #                 corrected = pvals
-# 
+#
 #             return {
 #                 "success": True,
 #                 "method": method,
@@ -728,14 +728,14 @@ if __name__ == "__main__":
 #                 "n_tests": n,
 #                 "timestamp": datetime.now().isoformat(),
 #             }
-# 
+#
 #         except Exception as e:
 #             return {"success": False, "error": str(e)}
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def describe_handler(
 #     data: list[float],
 #     percentiles: list[float] | None = None,
@@ -743,17 +743,17 @@ if __name__ == "__main__":
 #     """Calculate descriptive statistics for data."""
 #     try:
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_describe():
 #             arr = np.array(data, dtype=float)
 #             arr = arr[~np.isnan(arr)]  # Remove NaN
-# 
+#
 #             if len(arr) == 0:
 #                 return {"error": "No valid data points"}
-# 
+#
 #             percs = percentiles or [25, 50, 75]
 #             percentile_values = np.percentile(arr, percs)
-# 
+#
 #             result = {
 #                 "n": int(len(arr)),
 #                 "mean": float(np.mean(arr)),
@@ -773,30 +773,30 @@ if __name__ == "__main__":
 #                 },
 #                 "iqr": float(np.percentile(arr, 75) - np.percentile(arr, 25)),
 #             }
-# 
+#
 #             # Add skewness and kurtosis if scipy available
 #             try:
 #                 from scipy import stats as scipy_stats
-# 
+#
 #                 result["skewness"] = float(scipy_stats.skew(arr))
 #                 result["kurtosis"] = float(scipy_stats.kurtosis(arr))
 #             except ImportError:
 #                 pass
-# 
+#
 #             return result
-# 
+#
 #         result = await loop.run_in_executor(None, do_describe)
-# 
+#
 #         return {
 #             "success": True,
 #             **result,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def effect_size_handler(
 #     group1: list[float],
 #     group2: list[float],
@@ -811,15 +811,15 @@ if __name__ == "__main__":
 #             interpret_cliffs_delta,
 #             interpret_cohens_d,
 #         )
-# 
+#
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_effect_size():
 #             g1 = np.array(group1, dtype=float)
 #             g2 = np.array(group2, dtype=float)
-# 
+#
 #             result = {}
-# 
+#
 #             if measure == "cohens_d":
 #                 d = cohens_d(g1, g2)
 #                 result = {
@@ -827,7 +827,7 @@ if __name__ == "__main__":
 #                     "value": float(d),
 #                     "interpretation": interpret_cohens_d(d),
 #                 }
-# 
+#
 #             elif measure == "hedges_g":
 #                 # Hedges' g is Cohen's d with bias correction
 #                 d = cohens_d(g1, g2)
@@ -839,7 +839,7 @@ if __name__ == "__main__":
 #                     "value": float(g),
 #                     "interpretation": interpret_cohens_d(g),  # Same thresholds
 #                 }
-# 
+#
 #             elif measure == "glass_delta":
 #                 # Glass's delta uses only control group std
 #                 mean_diff = np.mean(g1) - np.mean(g2)
@@ -849,7 +849,7 @@ if __name__ == "__main__":
 #                     "value": float(delta),
 #                     "interpretation": interpret_cohens_d(delta),
 #                 }
-# 
+#
 #             elif measure == "cliffs_delta":
 #                 delta = cliffs_delta(g1, g2)
 #                 result = {
@@ -857,10 +857,10 @@ if __name__ == "__main__":
 #                     "value": float(delta),
 #                     "interpretation": interpret_cliffs_delta(delta),
 #                 }
-# 
+#
 #             else:
 #                 raise ValueError(f"Unknown measure: {measure}")
-# 
+#
 #             # Add confidence interval approximation for Cohen's d
 #             if measure in ["cohens_d", "hedges_g", "glass_delta"]:
 #                 n1, n2 = len(g1), len(g2)
@@ -869,11 +869,11 @@ if __name__ == "__main__":
 #                 )
 #                 result["ci_lower"] = float(result["value"] - 1.96 * se)
 #                 result["ci_upper"] = float(result["value"] + 1.96 * se)
-# 
+#
 #             return result
-# 
+#
 #         result = await loop.run_in_executor(None, do_effect_size)
-# 
+#
 #         return {
 #             "success": True,
 #             "group1_n": len(group1),
@@ -881,11 +881,11 @@ if __name__ == "__main__":
 #             **result,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def normality_test_handler(
 #     data: list[float],
 #     method: str = "shapiro",
@@ -893,18 +893,18 @@ if __name__ == "__main__":
 #     """Test whether data follows a normal distribution."""
 #     try:
 #         from scipy import stats as scipy_stats
-# 
+#
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_normality():
 #             arr = np.array(data, dtype=float)
 #             arr = arr[~np.isnan(arr)]
-# 
+#
 #             if len(arr) < 3:
 #                 return {"error": "Need at least 3 data points"}
-# 
+#
 #             result = {}
-# 
+#
 #             if method == "shapiro":
 #                 stat, p_value = scipy_stats.shapiro(arr)
 #                 result = {
@@ -913,7 +913,7 @@ if __name__ == "__main__":
 #                     "statistic_name": "W",
 #                     "p_value": float(p_value),
 #                 }
-# 
+#
 #             elif method == "dagostino":
 #                 if len(arr) < 8:
 #                     return {"error": "D'Agostino test requires at least 8 samples"}
@@ -924,7 +924,7 @@ if __name__ == "__main__":
 #                     "statistic_name": "K2",
 #                     "p_value": float(p_value),
 #                 }
-# 
+#
 #             elif method == "anderson":
 #                 res = scipy_stats.anderson(arr, dist="norm")
 #                 # Use 5% significance level
@@ -936,11 +936,11 @@ if __name__ == "__main__":
 #                     "critical_value_5pct": float(res.critical_values[idx]),
 #                     "normal": bool(res.statistic < res.critical_values[idx]),
 #                 }
-# 
+#
 #             elif method == "lilliefors":
 #                 try:
 #                     from statsmodels.stats.diagnostic import lilliefors
-# 
+#
 #                     stat, p_value = lilliefors(arr, dist="norm")
 #                     result = {
 #                         "test": "Lilliefors",
@@ -950,10 +950,10 @@ if __name__ == "__main__":
 #                     }
 #                 except ImportError:
 #                     return {"error": "statsmodels required for Lilliefors test"}
-# 
+#
 #             else:
 #                 raise ValueError(f"Unknown method: {method}")
-# 
+#
 #             # Add interpretation
 #             if "p_value" in result:
 #                 result["is_normal"] = result["p_value"] >= 0.05
@@ -962,11 +962,11 @@ if __name__ == "__main__":
 #                     if result["is_normal"]
 #                     else "Data deviates from normal distribution (p < 0.05)"
 #                 )
-# 
+#
 #             return result
-# 
+#
 #         result = await loop.run_in_executor(None, do_normality)
-# 
+#
 #         return {
 #             "success": True,
 #             "method": method,
@@ -974,11 +974,11 @@ if __name__ == "__main__":
 #             **result,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def posthoc_test_handler(
 #     groups: list[list[float]],
 #     group_names: list[str] | None = None,
@@ -988,28 +988,28 @@ if __name__ == "__main__":
 #     """Run post-hoc pairwise comparisons."""
 #     try:
 #         loop = asyncio.get_event_loop()
-# 
+#
 #         def do_posthoc():
 #             group_arrays = [np.array(g, dtype=float) for g in groups]
 #             names = group_names or [f"Group_{i + 1}" for i in range(len(groups))]
-# 
+#
 #             comparisons = []
-# 
+#
 #             if method == "tukey":
 #                 from scipy import stats as scipy_stats
-# 
+#
 #                 # All pairwise comparisons with Tukey HSD approximation
 #                 all_data = np.concatenate(group_arrays)
 #                 group_labels = np.concatenate(
 #                     [[names[i]] * len(g) for i, g in enumerate(group_arrays)]
 #                 )
-# 
+#
 #                 # Use statsmodels if available, otherwise manual calculation
 #                 try:
 #                     from statsmodels.stats.multicomp import pairwise_tukeyhsd
-# 
+#
 #                     tukey = pairwise_tukeyhsd(all_data, group_labels)
-# 
+#
 #                     for i in range(len(tukey.summary().data) - 1):
 #                         row = tukey.summary().data[i + 1]
 #                         comparisons.append(
@@ -1046,14 +1046,14 @@ if __name__ == "__main__":
 #                                     "reject": p_adj < 0.05,
 #                                 }
 #                             )
-# 
+#
 #             elif method == "dunnett":
 #                 from scipy import stats as scipy_stats
-# 
+#
 #                 # Compare all groups to control
 #                 control = group_arrays[control_group]
 #                 n_comparisons = len(groups) - 1
-# 
+#
 #                 for i, (name, group) in enumerate(zip(names, group_arrays)):
 #                     if i == control_group:
 #                         continue
@@ -1070,10 +1070,10 @@ if __name__ == "__main__":
 #                             "reject": p_adj < 0.05,
 #                         }
 #                     )
-# 
+#
 #             elif method == "games_howell":
 #                 from scipy import stats as scipy_stats
-# 
+#
 #                 # Games-Howell doesn't assume equal variances
 #                 for i in range(len(groups)):
 #                     for j in range(i + 1, len(groups)):
@@ -1081,19 +1081,19 @@ if __name__ == "__main__":
 #                         n1, n2 = len(g1), len(g2)
 #                         m1, m2 = np.mean(g1), np.mean(g2)
 #                         v1, v2 = np.var(g1, ddof=1), np.var(g2, ddof=1)
-# 
+#
 #                         se = np.sqrt(v1 / n1 + v2 / n2)
 #                         t_stat = (m1 - m2) / se
-# 
+#
 #                         # Welch-Satterthwaite df
 #                         df = (v1 / n1 + v2 / n2) ** 2 / (
 #                             (v1 / n1) ** 2 / (n1 - 1) + (v2 / n2) ** 2 / (n2 - 1)
 #                         )
-# 
+#
 #                         p = 2 * (1 - scipy_stats.t.cdf(abs(t_stat), df))
 #                         n_comparisons = len(groups) * (len(groups) - 1) // 2
 #                         p_adj = min(p * n_comparisons, 1.0)
-# 
+#
 #                         comparisons.append(
 #                             {
 #                                 "group1": names[i],
@@ -1106,34 +1106,34 @@ if __name__ == "__main__":
 #                                 "reject": p_adj < 0.05,
 #                             }
 #                         )
-# 
+#
 #             elif method == "dunn":
 #                 from scipy import stats as scipy_stats
-# 
+#
 #                 # Dunn's test for Kruskal-Wallis post-hoc
 #                 all_data = np.concatenate(group_arrays)
 #                 ranks = scipy_stats.rankdata(all_data)
-# 
+#
 #                 # Assign ranks to groups
 #                 idx = 0
 #                 group_ranks = []
 #                 for g in group_arrays:
 #                     group_ranks.append(ranks[idx : idx + len(g)])
 #                     idx += len(g)
-# 
+#
 #                 n_total = len(all_data)
 #                 n_comparisons = len(groups) * (len(groups) - 1) // 2
-# 
+#
 #                 for i in range(len(groups)):
 #                     for j in range(i + 1, len(groups)):
 #                         n_i, n_j = len(group_arrays[i]), len(group_arrays[j])
 #                         r_i, r_j = np.mean(group_ranks[i]), np.mean(group_ranks[j])
-# 
+#
 #                         se = np.sqrt(n_total * (n_total + 1) / 12 * (1 / n_i + 1 / n_j))
 #                         z = (r_i - r_j) / se
 #                         p = 2 * (1 - scipy_stats.norm.cdf(abs(z)))
 #                         p_adj = min(p * n_comparisons, 1.0)
-# 
+#
 #                         comparisons.append(
 #                             {
 #                                 "group1": names[i],
@@ -1145,14 +1145,14 @@ if __name__ == "__main__":
 #                                 "reject": p_adj < 0.05,
 #                             }
 #                         )
-# 
+#
 #             else:
 #                 raise ValueError(f"Unknown method: {method}")
-# 
+#
 #             return comparisons
-# 
+#
 #         comparisons = await loop.run_in_executor(None, do_posthoc)
-# 
+#
 #         return {
 #             "success": True,
 #             "method": method,
@@ -1161,11 +1161,11 @@ if __name__ == "__main__":
 #             "comparisons": comparisons,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # async def p_to_stars_handler(
 #     p_value: float,
 #     thresholds: list[float] | None = None,
@@ -1173,7 +1173,7 @@ if __name__ == "__main__":
 #     """Convert p-value to significance stars."""
 #     try:
 #         thresh = thresholds or [0.001, 0.01, 0.05]
-# 
+#
 #         if p_value < thresh[0]:
 #             stars = "***"
 #             significance = f"p < {thresh[0]}"
@@ -1186,7 +1186,7 @@ if __name__ == "__main__":
 #         else:
 #             stars = "ns"
 #             significance = f"p >= {thresh[2]} (not significant)"
-# 
+#
 #         return {
 #             "success": True,
 #             "p_value": p_value,
@@ -1195,11 +1195,11 @@ if __name__ == "__main__":
 #             "thresholds": thresh,
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {"success": False, "error": str(e)}
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

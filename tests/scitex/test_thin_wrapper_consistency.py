@@ -43,12 +43,12 @@ class TestWriterThinWrapper:
             "prompts",
             "tables",
         }
-        assert expected_modules <= scitex_core, (
-            f"Missing modules: {expected_modules - scitex_core}"
-        )
-        assert expected_modules <= standalone_exports, (
-            f"Standalone missing: {expected_modules - standalone_exports}"
-        )
+        assert (
+            expected_modules <= scitex_core
+        ), f"Missing modules: {expected_modules - scitex_core}"
+        assert (
+            expected_modules <= standalone_exports
+        ), f"Standalone missing: {expected_modules - standalone_exports}"
 
     def test_mcp_tools_identical(self):
         """scitex writer MCP tools should match scitex-writer MCP tools."""

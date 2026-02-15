@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+
 pytest.importorskip("zarr")
 from scitex.plt.ax._style import set_size
 
@@ -120,6 +121,7 @@ class TestMainFunctionality:
         actual_spath = os.path.join(ACTUAL_SAVE_DIR, spath)
         assert os.path.exists(actual_spath), f"Failed to save figure to {spath}"
 
+
 if __name__ == "__main__":
     import os
 
@@ -133,8 +135,8 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2022-12-09 13:38:11 (ywatanabe)"
-# 
-# 
+#
+#
 # def set_size(ax, w, h):
 #     """w, h: width, height in inches"""
 #     # if not ax: ax=plt.gca()

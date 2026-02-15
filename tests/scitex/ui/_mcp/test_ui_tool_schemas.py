@@ -13,16 +13,16 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2026-01-13 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/ui/_mcp/tool_schemas.py
-# 
+#
 # """Tool schemas for the scitex-notify MCP server."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import mcp.types as types
-# 
+#
 # __all__ = ["get_tool_schemas"]
-# 
-# 
+#
+#
 # def get_tool_schemas() -> list[types.Tool]:
 #     """Return all tool schemas for the notification MCP server."""
 #     return [
@@ -114,8 +114,8 @@ if __name__ == "__main__":
 #             inputSchema={"type": "object", "properties": {}},
 #         ),
 #     ]
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

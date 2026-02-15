@@ -14,41 +14,41 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: _wrappers.py - Seaborn plot wrappers
-# 
+#
 # """Seaborn plot wrappers with SciTeX integration."""
-# 
+#
 # import os
 # from typing import Optional, Union
-# 
+#
 # import numpy as np
 # import pandas as pd
 # import seaborn as sns
-# 
+#
 # from scitex.types import ArrayLike
-# 
+#
 # from ._base import sns_copy_doc
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
-# 
-# 
+#
+#
 # class SeabornWrappersMixin:
 #     """Mixin providing sns_ prefixed seaborn wrappers.
-# 
+#
 #     All methods use the seaborn DataFrame-centric interface:
 #     - data: DataFrame containing the data
 #     - x, y: Column names for axes
 #     - hue: Column name for color grouping
-# 
+#
 #     These methods integrate with SciTeX tracking and styling.
 #     """
-# 
+#
 #     def _get_ax_module(self):
 #         """Lazy import ax module to avoid circular imports."""
 #         from .....plt import ax as ax_module
-# 
+#
 #         return ax_module
-# 
+#
 #     @sns_copy_doc
 #     def sns_barplot(
 #         self,
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a bar plot showing point estimates and error bars.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `seaborn.barplot`.
-# 
+#
 #         See Also
 #         --------
 #         stx_bar : Array-based bar plot.
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 #         self._sns_base_xyhue(
 #             "sns_barplot", data=data, x=x, y=y, track=track, id=id, **kwargs
 #         )
-# 
+#
 #     @sns_copy_doc
 #     def sns_boxplot(
 #         self,
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a box plot showing distributions with quartiles.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `seaborn.boxplot`.
-# 
+#
 #         See Also
 #         --------
 #         stx_box : Array-based boxplot.
@@ -124,12 +124,12 @@ if __name__ == "__main__":
 #         self._sns_base_xyhue(
 #             "sns_boxplot", data=data, x=x, y=y, track=track, id=id, **kwargs
 #         )
-# 
+#
 #         # Post-processing: Style boxplot with black medians
 #         from scitex.plt.utils import mm_to_pt
-# 
+#
 #         lw_pt = mm_to_pt(0.2)
-# 
+#
 #         for line in self._axis_mpl.get_lines():
 #             line.set_linewidth(lw_pt)
 #             xdata = line.get_xdata()
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 #                     x_span = abs(xdata[1] - xdata[0])
 #                     if x_span < 0.4:
 #                         line.set_color("black")
-# 
+#
 #         if strip:
 #             strip_kwargs = kwargs.copy()
 #             strip_kwargs.pop("notch", None)
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 #                 id=f"{id}_strip",
 #                 **strip_kwargs,
 #             )
-# 
+#
 #     @sns_copy_doc
 #     def sns_heatmap(
 #         self,
@@ -164,7 +164,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a heatmap from rectangular data.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame or array-like
@@ -177,20 +177,20 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `seaborn.heatmap`.
-# 
+#
 #         See Also
 #         --------
 #         stx_heatmap : Array-based annotated heatmap.
 #         stx_image : Simple image display.
 #         """
 #         import scitex
-# 
+#
 #         method_name = "sns_heatmap"
 #         df = data
 #         if xyz:
 #             df = scitex.pd.to_xyz(df)
 #         self._sns_base(method_name, df, track=track, track_obj=df, id=id, **kwargs)
-# 
+#
 #     @sns_copy_doc
 #     def sns_histplot(
 #         self,
@@ -205,7 +205,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a histogram with optional kernel density estimate.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -225,14 +225,14 @@ if __name__ == "__main__":
 #         **kwargs
 #             Additional arguments passed to `seaborn.histplot`.
 #             Common options: kde, stat, element, hue.
-# 
+#
 #         See Also
 #         --------
 #         hist : Array-based histogram.
 #         stx_kde : Kernel density estimate.
 #         """
 #         method_name = "sns_histplot"
-# 
+#
 #         plot_data = None
 #         if data is not None and x is not None:
 #             plot_data = (
@@ -240,24 +240,24 @@ if __name__ == "__main__":
 #                 if hasattr(data, "columns") and x in data.columns
 #                 else None
 #             )
-# 
+#
 #         axis_id = str(hash(self._axis_mpl))
 #         hist_id = id if id is not None else str(self.id)
 #         range_value = kwargs.get("binrange", None)
-# 
+#
 #         if align_bins and plot_data is not None:
 #             from .....plt.utils import histogram_bin_manager
-# 
+#
 #             bins_val, range_val = histogram_bin_manager.register_histogram(
 #                 axis_id, hist_id, plot_data, bins, range_value
 #             )
 #             kwargs["bins"] = bins_val
 #             if range_value is not None:
 #                 kwargs["binrange"] = range_val
-# 
+#
 #         with self._no_tracking():
 #             sns_plot = sns.histplot(data=data, x=x, y=y, ax=self._axis_mpl, **kwargs)
-# 
+#
 #             hist_result = None
 #             if hasattr(sns_plot, "patches") and sns_plot.patches:
 #                 patches = sns_plot.patches
@@ -269,7 +269,7 @@ if __name__ == "__main__":
 #                     if patches:
 #                         bin_edges.append(patches[-1].get_x() + patches[-1].get_width())
 #                     hist_result = (counts, np.array(bin_edges))
-# 
+#
 #         track_obj = self._sns_prepare_xyhue(data, x, y, kwargs.get("hue"))
 #         tracked_dict = {
 #             "data": track_obj,
@@ -277,9 +277,9 @@ if __name__ == "__main__":
 #             "hist_result": hist_result,
 #         }
 #         self._track(track, id, method_name, tracked_dict, kwargs)
-# 
+#
 #         return sns_plot
-# 
+#
 #     @sns_copy_doc
 #     def sns_kdeplot(
 #         self,
@@ -294,7 +294,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a kernel density estimate plot.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -313,14 +313,14 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the KDE function.
-# 
+#
 #         See Also
 #         --------
 #         stx_kde : Array-based KDE plot.
 #         sns_histplot : Histogram with optional KDE.
 #         """
 #         hue_col = kwargs.pop("hue", None)
-# 
+#
 #         if hue_col:
 #             hues = data[hue_col]
 #             if x is not None:
@@ -339,7 +339,7 @@ if __name__ == "__main__":
 #             if y is not None:
 #                 _data, lim = data[y], ylim
 #             self.stx_kde(_data, xlim=lim, **kwargs)
-# 
+#
 #     @sns_copy_doc
 #     def sns_pairplot(
 #         self,
@@ -349,7 +349,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a grid of pairwise relationships in a dataset.
-# 
+#
 #         Parameters
 #         ----------
 #         *args
@@ -362,7 +362,7 @@ if __name__ == "__main__":
 #             Additional arguments passed to `seaborn.pairplot`.
 #         """
 #         self._sns_base("sns_pairplot", *args, track=track, id=id, **kwargs)
-# 
+#
 #     @sns_copy_doc
 #     def sns_scatterplot(
 #         self,
@@ -375,7 +375,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a scatter plot with semantic mappings.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -391,7 +391,7 @@ if __name__ == "__main__":
 #         **kwargs
 #             Additional arguments passed to `seaborn.scatterplot`.
 #             Common options: hue, size, style.
-# 
+#
 #         See Also
 #         --------
 #         stx_scatter : Array-based scatter plot.
@@ -405,7 +405,7 @@ if __name__ == "__main__":
 #             id=id,
 #             **kwargs,
 #         )
-# 
+#
 #     @sns_copy_doc
 #     def sns_lineplot(
 #         self,
@@ -418,7 +418,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a line plot with semantic mappings.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -434,7 +434,7 @@ if __name__ == "__main__":
 #         **kwargs
 #             Additional arguments passed to `seaborn.lineplot`.
 #             Common options: hue, size, style, estimator.
-# 
+#
 #         See Also
 #         --------
 #         stx_line : Array-based line plot.
@@ -449,7 +449,7 @@ if __name__ == "__main__":
 #             id=id,
 #             **kwargs,
 #         )
-# 
+#
 #     @sns_copy_doc
 #     def sns_swarmplot(
 #         self,
@@ -462,7 +462,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a categorical scatter plot with non-overlapping points.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -477,7 +477,7 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `seaborn.swarmplot`.
-# 
+#
 #         See Also
 #         --------
 #         sns_stripplot : Jittered categorical scatter.
@@ -486,7 +486,7 @@ if __name__ == "__main__":
 #         self._sns_base_xyhue(
 #             "sns_swarmplot", data=data, x=x, y=y, track=track, id=id, **kwargs
 #         )
-# 
+#
 #     @sns_copy_doc
 #     def sns_stripplot(
 #         self,
@@ -499,7 +499,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a categorical scatter plot with jittered points.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -514,7 +514,7 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `seaborn.stripplot`.
-# 
+#
 #         See Also
 #         --------
 #         sns_swarmplot : Non-overlapping categorical scatter.
@@ -523,7 +523,7 @@ if __name__ == "__main__":
 #         self._sns_base_xyhue(
 #             "sns_stripplot", data=data, x=x, y=y, track=track, id=id, **kwargs
 #         )
-# 
+#
 #     @sns_copy_doc
 #     def sns_violinplot(
 #         self,
@@ -537,7 +537,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a violin plot combining box plot with kernel density.
-# 
+#
 #         Parameters
 #         ----------
 #         data : DataFrame, optional
@@ -554,7 +554,7 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `seaborn.violinplot`.
-# 
+#
 #         See Also
 #         --------
 #         stx_violin : Array-based violin plot.
@@ -575,12 +575,12 @@ if __name__ == "__main__":
 #                 id=id,
 #                 **kwargs,
 #             )
-# 
+#
 #         track_obj = self._sns_prepare_xyhue(data, x, y, kwargs.get("hue"))
 #         self._track(track, id, "sns_violinplot", track_obj, kwargs)
-# 
+#
 #         return self._axis_mpl
-# 
+#
 #     @sns_copy_doc
 #     def sns_jointplot(
 #         self,
@@ -590,7 +590,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ):
 #         """Create a figure with joint and marginal distributions.
-# 
+#
 #         Parameters
 #         ----------
 #         *args
@@ -601,14 +601,14 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to `seaborn.jointplot`.
-# 
+#
 #         See Also
 #         --------
 #         stx_scatter_hist : Array-based scatter with marginal histograms.
 #         """
 #         self._sns_base("sns_jointplot", *args, track=track, id=id, **kwargs)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

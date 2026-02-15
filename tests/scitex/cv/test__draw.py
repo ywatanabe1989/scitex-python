@@ -14,15 +14,15 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/cv/_draw.py
 # """Drawing utilities using cv2."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # from typing import Tuple
-# 
+#
 # import cv2
 # import numpy as np
-# 
-# 
+#
+#
 # def rectangle(
 #     img: np.ndarray,
 #     pt1: Tuple[int, int],
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 #     filled: bool = False,
 # ) -> np.ndarray:
 #     """Draw a rectangle on an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 #         Line thickness (-1 for filled).
 #     filled : bool
 #         If True, fill the rectangle.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -56,8 +56,8 @@ if __name__ == "__main__":
 #     t = -1 if filled else thickness
 #     cv2.rectangle(img, pt1, pt2, color, t)
 #     return img
-# 
-# 
+#
+#
 # def circle(
 #     img: np.ndarray,
 #     center: Tuple[int, int],
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 #     filled: bool = False,
 # ) -> np.ndarray:
 #     """Draw a circle on an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 #         Line thickness.
 #     filled : bool
 #         If True, fill the circle.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -91,8 +91,8 @@ if __name__ == "__main__":
 #     t = -1 if filled else thickness
 #     cv2.circle(img, center, radius, color, t)
 #     return img
-# 
-# 
+#
+#
 # def line(
 #     img: np.ndarray,
 #     pt1: Tuple[int, int],
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 #     thickness: int = 2,
 # ) -> np.ndarray:
 #     """Draw a line on an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 #         BGR color.
 #     thickness : int
 #         Line thickness.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -122,8 +122,8 @@ if __name__ == "__main__":
 #     """
 #     cv2.line(img, pt1, pt2, color, thickness)
 #     return img
-# 
-# 
+#
+#
 # def text(
 #     img: np.ndarray,
 #     text: str,
@@ -134,7 +134,7 @@ if __name__ == "__main__":
 #     font: str = "simplex",
 # ) -> np.ndarray:
 #     """Draw text on an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 #         Text thickness.
 #     font : str
 #         Font type: 'simplex', 'plain', 'duplex', 'complex', 'triplex'.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -167,8 +167,8 @@ if __name__ == "__main__":
 #     font_face = font_map.get(font, cv2.FONT_HERSHEY_SIMPLEX)
 #     cv2.putText(img, text, position, font_face, scale, color, thickness)
 #     return img
-# 
-# 
+#
+#
 # def polylines(
 #     img: np.ndarray,
 #     points: np.ndarray,
@@ -177,7 +177,7 @@ if __name__ == "__main__":
 #     thickness: int = 2,
 # ) -> np.ndarray:
 #     """Draw polylines on an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -190,7 +190,7 @@ if __name__ == "__main__":
 #         BGR color.
 #     thickness : int
 #         Line thickness.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -200,8 +200,8 @@ if __name__ == "__main__":
 #         points = points.reshape((-1, 1, 2))
 #     cv2.polylines(img, [points.astype(np.int32)], closed, color, thickness)
 #     return img
-# 
-# 
+#
+#
 # def arrow(
 #     img: np.ndarray,
 #     pt1: Tuple[int, int],
@@ -211,7 +211,7 @@ if __name__ == "__main__":
 #     tip_length: float = 0.1,
 # ) -> np.ndarray:
 #     """Draw an arrowed line on an image.
-# 
+#
 #     Parameters
 #     ----------
 #     img : np.ndarray
@@ -226,7 +226,7 @@ if __name__ == "__main__":
 #         Line thickness.
 #     tip_length : float
 #         Arrow tip length as fraction of line length.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
@@ -234,8 +234,8 @@ if __name__ == "__main__":
 #     """
 #     cv2.arrowedLine(img, pt1, pt2, color, thickness, tipLength=tip_length)
 #     return img
-# 
-# 
+#
+#
 # __all__ = [
 #     "rectangle",
 #     "circle",
@@ -244,7 +244,7 @@ if __name__ == "__main__":
 #     "polylines",
 #     "arrow",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

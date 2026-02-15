@@ -9,8 +9,8 @@ This script updates each test function to:
 3. Add CSV file existence assertions
 """
 
-import re
 import os
+import re
 
 # Path to the test file
 test_file = "/data/gpfs/projects/punim2354/ywatanabe/scitex_repo/tests/scitex/plt/_subplots/_AxisWrapperMixins/test__MatplotlibPlotMixin.py"

@@ -16,24 +16,24 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/plt/ax/_plot/_plot_conf_mat.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/plt/ax/_plot/_plot_conf_mat.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # from typing import List, Optional, Tuple, Union
-# 
+#
 # import matplotlib
 # import matplotlib.pyplot as plt
 # import numpy as np
 # import pandas as pd
 # import seaborn as sns
-# 
+#
 # from scitex.plt.utils._calc_bacc_from_conf_mat import calc_bacc_from_conf_mat
 # from scitex.plt.utils import assert_valid_axis
 # from .._style._extend import extend as scitex_plt_extend
-# 
-# 
+#
+#
 # def stx_conf_mat(
 #     axis: plt.Axes,
 #     conf_mat_2d: Union[np.ndarray, pd.DataFrame],
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 #     **kwargs,
 # ) -> Union[plt.Axes, Tuple[plt.Axes, float]]:
 #     """Creates a confusion matrix heatmap with optional balanced accuracy.
-# 
+#
 #     Parameters
 #     ----------
 #     axis : plt.Axes or scitex.plt._subplots.AxisWrapper
@@ -77,12 +77,12 @@ if __name__ == "__main__":
 #         Y-axis extension ratio
 #     calc_bacc : bool, optional
 #         Calculate Balanced Accuracy from Confusion Matrix
-# 
+#
 #     Returns
 #     -------
 #     Union[plt.Axes, Tuple[plt.Axes, float]] or Union[scitex.plt._subplots.AxisWrapper, Tuple[scitex.plt._subplots.AxisWrapper, float]]
 #         Axes object and optionally balanced accuracy
-# 
+#
 #     Example
 #     -------
 #     >>> data = np.array([[10, 2, 0], [1, 15, 3], [0, 2, 20]])
@@ -92,17 +92,17 @@ if __name__ == "__main__":
 #     >>> print(f"Balanced Accuracy: {bacc:.3f}")
 #     Balanced Accuracy: 0.889
 #     """
-# 
+#
 #     assert_valid_axis(
 #         axis, "First argument must be a matplotlib axis or scitex axis wrapper"
 #     )
-# 
+#
 #     if not isinstance(conf_mat_2d, pd.DataFrame):
 #         conf_mat_2d = pd.DataFrame(conf_mat_2d)
-# 
+#
 #     bacc_val = calc_bacc_from_conf_mat(conf_mat_2d.values)
 #     title = f"{title} (bACC = {bacc_val:.3f})"
-# 
+#
 #     res = sns.heatmap(
 #         conf_mat_2d,
 #         ax=axis,
@@ -113,21 +113,21 @@ if __name__ == "__main__":
 #         vmin=0,
 #         **kwargs,
 #     )
-# 
+#
 #     res.invert_yaxis()
-# 
+#
 #     for _, spine in res.spines.items():
 #         spine.set_visible(False)
-# 
+#
 #     axis.set_xlabel("Predicted label")
 #     axis.set_ylabel("True label")
 #     axis.set_title(title)
-# 
+#
 #     if x_labels is not None:
 #         axis.set_xticklabels(x_labels)
 #     if y_labels is not None:
 #         axis.set_yticklabels(y_labels)
-# 
+#
 #     axis = scitex_plt_extend(axis, x_extend_ratio, y_extend_ratio)
 #     if conf_mat_2d.shape[0] == conf_mat_2d.shape[1]:
 #         axis.set_box_aspect(1)
@@ -141,13 +141,13 @@ if __name__ == "__main__":
 #             rotation=label_rotation_xy[1],
 #             fontdict={"horizontalalignment": "right"},
 #         )
-# 
+#
 #     if calc_bacc:
 #         return axis, bacc_val
 #     else:
 #         return axis, None
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

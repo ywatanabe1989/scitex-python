@@ -7,9 +7,10 @@
 Test module for scitex.dsp.template
 """
 
-import pytest
 import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestTemplate:

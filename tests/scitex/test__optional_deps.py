@@ -13,23 +13,23 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # """
 # Utility for handling optional dependencies with helpful error messages.
-# 
+#
 # SciTeX uses module-oriented optional dependencies. Install what you need:
 #     pip install scitex[audio]       # Audio/TTS module
 #     pip install scitex[scholar]     # Paper management
 #     pip install scitex[stats]       # Statistical analysis
 #     pip install scitex[io]          # File I/O operations
 #     pip install scitex[all]         # Everything
-# 
+#
 # Multiple modules:
 #     pip install scitex[audio,scholar,stats]
 # """
-# 
+#
 # import importlib
 # from typing import Any, Callable, Dict, List, Optional, TypeVar
-# 
+#
 # F = TypeVar("F", bound=Callable[..., Any])
-# 
+#
 # # Mapping of package imports to their installation extras
 # # Format: import_name -> (pip_package, install_extra)
 # PACKAGE_TO_EXTRA: Dict[str, tuple] = {
@@ -155,27 +155,27 @@ if __name__ == "__main__":
 #     "dearpygui": ("dearpygui", "gui"),
 #     "PyQt6": ("PyQt6", "gui"),
 # }
-# 
+#
 # # Backwards compatibility: simple mapping
 # DEPENDENCY_GROUPS: Dict[str, str] = {
 #     module: info[1] for module, info in PACKAGE_TO_EXTRA.items()
 # }
-# 
-# 
+#
+#
 # def optional_import(
 #     module_name: str, package_name: Optional[str] = None, raise_error: bool = True
 # ) -> Optional[Any]:
 #     """
 #     Import an optional dependency with helpful error message.
-# 
+#
 #     Args:
 #         module_name: Name of the module to import (e.g., 'torch')
 #         package_name: Name of the package to install if different from module
 #         raise_error: If True, raise ImportError. If False, return None.
-# 
+#
 #     Returns:
 #         The imported module, or None if raise_error=False and import fails
-# 
+#
 #     Examples:
 #         >>> torch = optional_import('torch')
 #         >>> torch = optional_import('torch', raise_error=False)  # Returns None if not installed
@@ -185,14 +185,14 @@ if __name__ == "__main__":
 #     except ImportError:
 #         if not raise_error:
 #             return None
-# 
+#
 #         pkg_info = PACKAGE_TO_EXTRA.get(module_name)
 #         if pkg_info:
 #             pip_pkg, extra = pkg_info
 #         else:
 #             pip_pkg = package_name or module_name
 #             extra = "all"
-# 
+#
 #         error_msg = (
 #             f"\n{'=' * 70}\n"
 #             f"Optional dependency '{pip_pkg}' is not installed.\n\n"
@@ -203,18 +203,18 @@ if __name__ == "__main__":
 #             f"{'=' * 70}\n"
 #         )
 #         raise ImportError(error_msg)
-# 
-# 
+#
+#
 # def check_optional_deps(*module_names: str) -> Dict[str, bool]:
 #     """
 #     Check which optional dependencies are available.
-# 
+#
 #     Args:
 #         *module_names: Names of modules to check
-# 
+#
 #     Returns:
 #         Dictionary mapping module names to availability (True/False)
-# 
+#
 #     Example:
 #         >>> available = check_optional_deps('torch', 'transformers')
 #         >>> if available['torch']:
@@ -228,18 +228,18 @@ if __name__ == "__main__":
 #         except ImportError:
 #             result[name] = False
 #     return result
-# 
-# 
+#
+#
 # def get_install_command(module_name: str) -> str:
 #     """
 #     Get the pip install command for a module.
-# 
+#
 #     Args:
 #         module_name: Name of the module
-# 
+#
 #     Returns:
 #         pip install command string
-# 
+#
 #     Example:
 #         >>> get_install_command('torch')
 #         'pip install scitex[nn]'
@@ -248,12 +248,12 @@ if __name__ == "__main__":
 #     if pkg_info:
 #         return f"pip install scitex[{pkg_info[1]}]"
 #     return "pip install scitex[all]"
-# 
-# 
+#
+#
 # def list_available_extras() -> List[str]:
 #     """
 #     List all available installation extras.
-# 
+#
 #     Returns:
 #         List of extra names (e.g., ['audio', 'scholar', 'stats', ...])
 #     """
@@ -263,70 +263,70 @@ if __name__ == "__main__":
 #         ["science", "dl", "ml", "jupyter", "neuro", "webdev", "gui", "dev", "all"]
 #     )
 #     return sorted(extras)
-# 
-# 
+#
+#
 # # Convenience functions for common checks
 # def has_deep_learning() -> bool:
 #     """Check if deep learning dependencies are available."""
 #     return check_optional_deps("torch")["torch"]
-# 
-# 
+#
+#
 # def has_transformers() -> bool:
 #     """Check if transformers is available."""
 #     return check_optional_deps("transformers")["transformers"]
-# 
-# 
+#
+#
 # def has_scholar() -> bool:
 #     """Check if scholar dependencies are available."""
 #     deps = check_optional_deps("selenium", "bs4")
 #     return all(deps.values())
-# 
-# 
+#
+#
 # def has_jupyter() -> bool:
 #     """Check if Jupyter dependencies are available."""
 #     return check_optional_deps("IPython")["IPython"]
-# 
-# 
+#
+#
 # def has_audio() -> bool:
 #     """Check if audio/TTS dependencies are available."""
 #     deps = check_optional_deps("pyttsx3", "gtts")
 #     return any(deps.values())
-# 
-# 
+#
+#
 # def has_stats() -> bool:
 #     """Check if stats dependencies are available."""
 #     return check_optional_deps("scipy", "statsmodels") == {
 #         "scipy": True,
 #         "statsmodels": True,
 #     }
-# 
-# 
+#
+#
 # def has_io() -> bool:
 #     """Check if IO dependencies are available."""
 #     return check_optional_deps("h5py")["h5py"]
-# 
-# 
+#
+#
 # def has_plotting() -> bool:
 #     """Check if plotting dependencies are available."""
 #     return check_optional_deps("matplotlib")["matplotlib"]
-# 
-# 
+#
+#
 # def has_mcp() -> bool:
 #     """Check if MCP (Model Context Protocol) dependencies are available."""
 #     return check_optional_deps("mcp")["mcp"]
-# 
-# 
+#
+#
 # def check_mcp_deps(server_name: str = "scitex") -> None:
 #     """
 #     Check MCP dependencies and exit with helpful message if missing.
-# 
+#
 #     Use at the start of MCP server main() functions for graceful handling.
-# 
+#
 #     Args:
 #         server_name: Name of the MCP server for error messages
 #     """
 #     import sys
-# 
+#
 #     try:
 #         import mcp  # noqa: F401
 #     except ImportError:
@@ -340,8 +340,8 @@ if __name__ == "__main__":
 #         print("  pip install scitex[mcp]")
 #         print(f"{'=' * 60}")
 #         sys.exit(1)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

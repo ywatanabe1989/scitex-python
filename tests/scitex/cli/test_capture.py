@@ -270,6 +270,7 @@ class TestCaptureWindow:
             assert result.exit_code == 0  # Still 0 since window was captured
             assert "Window captured" in result.output
 
+
 if __name__ == "__main__":
     import os
 
@@ -283,20 +284,20 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # """
 # SciTeX CLI - Capture Commands (Screenshot/Monitoring)
-# 
+#
 # Provides screen capture, monitoring, and GIF creation.
 # """
-# 
+#
 # import sys
-# 
+#
 # import click
-# 
-# 
+#
+#
 # @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 # def capture():
 #     """
 #     Screen capture and monitoring utilities
-# 
+#
 #     \b
 #     Commands:
 #       snap          Take a single screenshot
@@ -305,7 +306,7 @@ if __name__ == "__main__":
 #       gif           Create GIF from session
 #       info          Display info (monitors, windows)
 #       window        Capture specific window by handle
-# 
+#
 #     \b
 #     Examples:
 #       scitex capture snap                      # Take screenshot
@@ -316,8 +317,8 @@ if __name__ == "__main__":
 #       scitex capture info                     # List monitors and windows
 #     """
 #     pass
-# 
-# 
+#
+#
 # @capture.command()
 # @click.option("--message", "-m", default="", help="Message to include in filename")
 # @click.option("--output", "-o", type=click.Path(), help="Output directory")
@@ -331,7 +332,7 @@ if __name__ == "__main__":
 # def snap(message, output, quality, monitor, all_monitors):
 #     """
 #     Take a single screenshot
-# 
+#
 #     \b
 #     Examples:
 #       scitex capture snap
@@ -341,9 +342,9 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.capture import snap as take_snap
-# 
+#
 #         click.echo("Taking screenshot...")
-# 
+#
 #         # Build kwargs
 #         kwargs = {"message": message}
 #         if output:
@@ -354,19 +355,19 @@ if __name__ == "__main__":
 #             kwargs["capture_all"] = True
 #         else:
 #             kwargs["monitor_id"] = monitor
-# 
+#
 #         result = take_snap(**kwargs)
-# 
+#
 #         if result:
 #             click.secho(f"Screenshot saved: {result}", fg="green")
 #         else:
 #             click.secho("Screenshot taken", fg="green")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @capture.command()
 # @click.option(
 #     "--interval",
@@ -386,7 +387,7 @@ if __name__ == "__main__":
 # def start(interval, output, quality, monitor, all_monitors):
 #     """
 #     Start continuous screenshot monitoring
-# 
+#
 #     \b
 #     Examples:
 #       scitex capture start                    # Default 1 second interval
@@ -395,10 +396,10 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.capture import start as start_monitor
-# 
+#
 #         click.echo(f"Starting monitoring (interval: {interval}s)...")
 #         click.echo("Press Ctrl+C or run 'scitex capture stop' to stop")
-# 
+#
 #         kwargs = {"interval": interval}
 #         if output:
 #             kwargs["output_dir"] = output
@@ -408,35 +409,35 @@ if __name__ == "__main__":
 #             kwargs["capture_all"] = True
 #         else:
 #             kwargs["monitor_id"] = monitor
-# 
+#
 #         start_monitor(**kwargs)
 #         click.secho("Monitoring started", fg="green")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @capture.command()
 # def stop():
 #     """
 #     Stop continuous monitoring
-# 
+#
 #     \b
 #     Example:
 #       scitex capture stop
 #     """
 #     try:
 #         from scitex.capture import stop as stop_monitor
-# 
+#
 #         stop_monitor()
 #         click.secho("Monitoring stopped", fg="green")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @capture.command()
 # @click.option(
 #     "--session",
@@ -458,7 +459,7 @@ if __name__ == "__main__":
 # def gif(session, output, duration, max_frames, pattern):
 #     """
 #     Create animated GIF from screenshots
-# 
+#
 #     \b
 #     Examples:
 #       scitex capture gif                         # From latest session
@@ -469,7 +470,7 @@ if __name__ == "__main__":
 #     try:
 #         if pattern:
 #             from scitex.capture import create_gif_from_pattern
-# 
+#
 #             click.echo(f"Creating GIF from pattern: {pattern}")
 #             result = create_gif_from_pattern(
 #                 pattern=pattern,
@@ -479,7 +480,7 @@ if __name__ == "__main__":
 #             )
 #         elif session:
 #             from scitex.capture import create_gif_from_session
-# 
+#
 #             click.echo(f"Creating GIF from session: {session}")
 #             result = create_gif_from_session(
 #                 session_id=session,
@@ -489,30 +490,30 @@ if __name__ == "__main__":
 #             )
 #         else:
 #             from scitex.capture import create_gif_from_latest_session
-# 
+#
 #             click.echo("Creating GIF from latest session...")
 #             result = create_gif_from_latest_session(
 #                 output_path=output,
 #                 duration=duration,
 #                 max_frames=max_frames,
 #             )
-# 
+#
 #         if result:
 #             click.secho(f"GIF created: {result}", fg="green")
 #         else:
 #             click.secho("No screenshots found to create GIF", fg="yellow")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @capture.command()
 # @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 # def info(as_json):
 #     """
 #     Display system info (monitors, windows, virtual desktops)
-# 
+#
 #     \b
 #     Examples:
 #       scitex capture info
@@ -520,24 +521,24 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.capture import get_info
-# 
+#
 #         info_data = get_info()
-# 
+#
 #         if as_json:
 #             import json
-# 
+#
 #             click.echo(json.dumps(info_data, indent=2, default=str))
 #         else:
 #             click.secho("Display Information", fg="cyan", bold=True)
 #             click.echo("=" * 50)
-# 
+#
 #             # Monitors
 #             monitors = info_data.get("Monitors", {})
 #             click.secho(f"\nMonitors ({monitors.get('Count', 0)}):", fg="yellow")
 #             for i, mon in enumerate(monitors.get("Details", [])):
 #                 primary = " (Primary)" if mon.get("Primary") else ""
 #                 click.echo(f"  [{i}] {mon.get('Width')}x{mon.get('Height')}{primary}")
-# 
+#
 #             # Windows
 #             windows = info_data.get("Windows", {})
 #             click.secho(f"\nWindows ({windows.get('Count', 0)}):", fg="yellow")
@@ -547,12 +548,12 @@ if __name__ == "__main__":
 #                 click.echo(f"  [{handle}] {title}")
 #             if windows.get("Count", 0) > 10:
 #                 click.echo(f"  ... and {windows.get('Count') - 10} more")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @capture.command()
 # @click.argument("handle", type=int)
 # @click.option("--output", "-o", type=click.Path(), help="Output file path")
@@ -560,10 +561,10 @@ if __name__ == "__main__":
 # def window(handle, output, quality):
 #     """
 #     Capture a specific window by its handle
-# 
+#
 #     \b
 #     Get window handles with: scitex capture info
-# 
+#
 #     \b
 #     Examples:
 #       scitex capture window 12345
@@ -571,20 +572,20 @@ if __name__ == "__main__":
 #     """
 #     try:
 #         from scitex.capture import capture_window
-# 
+#
 #         click.echo(f"Capturing window {handle}...")
 #         result = capture_window(handle, output)
-# 
+#
 #         if result:
 #             click.secho(f"Window captured: {result}", fg="green")
 #         else:
 #             click.secho("Window captured", fg="green")
-# 
+#
 #     except Exception as e:
 #         click.secho(f"Error: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     capture()
 

@@ -15,17 +15,18 @@ This conftest provides comprehensive fixtures for testing optimizers:
 """
 
 import pytest
+
 torch = pytest.importorskip("torch")
-import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
-from typing import Dict, List, Tuple, Callable
+import os
 import time
 from collections import defaultdict
 from contextlib import contextmanager
-import psutil
-import os
+from typing import Callable, Dict, List, Tuple
 
+import numpy as np
+import psutil
+import torch.nn as nn
+import torch.nn.functional as F
 
 # ============================================================================
 # Model Fixtures
@@ -462,9 +463,11 @@ def convergence_tracker():
                 "total_iterations": len(self.losses),
                 "converged": self.is_converged(),
                 "final_grad_norm": self.gradients[-1] if self.gradients else None,
-                "time_elapsed": self.timestamps[-1] - self.timestamps[0]
-                if len(self.timestamps) > 1
-                else 0,
+                "time_elapsed": (
+                    self.timestamps[-1] - self.timestamps[0]
+                    if len(self.timestamps) > 1
+                    else 0
+                ),
             }
 
     return ConvergenceTracker

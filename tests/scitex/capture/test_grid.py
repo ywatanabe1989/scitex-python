@@ -15,24 +15,24 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/grid.py
 # # ----------------------------------------
 # from __future__ import annotations
-# 
+#
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/capture/grid.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Grid overlay functionality for screenshot coordinate mapping.
-# 
+#
 # Provides utilities to draw coordinate grids on screenshots,
 # helping AI agents understand screen positions for precise targeting.
 # """
-# 
+#
 # from pathlib import Path
 # from typing import Tuple
-# 
-# 
+#
+#
 # def draw_grid_overlay(
 #     filepath: str,
 #     grid_spacing: int = 100,
@@ -44,10 +44,10 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Draw a coordinate grid overlay on a screenshot image.
-# 
+#
 #     This helps AI agents and users understand screen coordinates for
 #     precise click targeting and UI element identification.
-# 
+#
 #     Parameters
 #     ----------
 #     filepath : str
@@ -64,12 +64,12 @@ if __name__ == "__main__":
 #         Width of grid lines in pixels (default: 1)
 #     show_coordinates : bool
 #         Whether to show coordinate labels (default: True)
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Path to the output image with grid overlay
-# 
+#
 #     Examples
 #     --------
 #     >>> from scitex.capture.grid import draw_grid_overlay
@@ -83,50 +83,50 @@ if __name__ == "__main__":
 #             "PIL (Pillow) is required for grid overlay. "
 #             "Install with: pip install Pillow"
 #         )
-# 
+#
 #     # Load image
 #     img = Image.open(filepath)
 #     draw = ImageDraw.Draw(img)
 #     width, height = img.size
-# 
+#
 #     # Try to load a font for coordinate labels
 #     font = None
 #     if show_coordinates:
 #         font = _get_font(size=12)
-# 
+#
 #     # Draw vertical lines
 #     for x in range(0, width, grid_spacing):
 #         draw.line([(x, 0), (x, height)], fill=grid_color, width=line_width)
 #         if show_coordinates and font:
 #             draw.text((x + 2, 10), str(x), fill=text_color, font=font)
-# 
+#
 #     # Draw horizontal lines
 #     for y in range(0, height, grid_spacing):
 #         draw.line([(0, y), (width, y)], fill=grid_color, width=line_width)
 #         if show_coordinates and font:
 #             draw.text((10, y + 2), str(y), fill=text_color, font=font)
-# 
+#
 #     # Generate output path
 #     if output_path is None:
 #         path_obj = Path(filepath)
 #         output_path = str(path_obj.parent / f"{path_obj.stem}_grid{path_obj.suffix}")
-# 
+#
 #     # Save
 #     if filepath.lower().endswith((".jpg", ".jpeg")):
 #         img.save(output_path, "JPEG", quality=85)
 #     else:
 #         img.save(output_path)
-# 
+#
 #     return output_path
-# 
-# 
+#
+#
 # def _get_font(size: int = 12):
 #     """Get a monospace font for coordinate labels."""
 #     try:
 #         from PIL import ImageFont
 #     except ImportError:
 #         return None
-# 
+#
 #     # Try common system fonts
 #     font_paths = [
 #         "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
@@ -137,21 +137,21 @@ if __name__ == "__main__":
 #         "/System/Library/Fonts/Monaco.ttf",
 #         "/System/Library/Fonts/Menlo.ttc",
 #     ]
-# 
+#
 #     for font_path in font_paths:
 #         if Path(font_path).exists():
 #             try:
 #                 return ImageFont.truetype(font_path, size)
 #             except:
 #                 continue
-# 
+#
 #     # Fallback to default
 #     try:
 #         return ImageFont.load_default()
 #     except:
 #         return None
-# 
-# 
+#
+#
 # def add_monitor_info_overlay(
 #     filepath: str,
 #     monitor_info: dict,
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Add monitor boundary and info overlay to a multi-monitor screenshot.
-# 
+#
 #     Parameters
 #     ----------
 #     filepath : str
@@ -168,7 +168,7 @@ if __name__ == "__main__":
 #         Dictionary with monitor information from get_info()
 #     output_path : str, optional
 #         Output path (default: adds '_monitors' suffix)
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -178,11 +178,11 @@ if __name__ == "__main__":
 #         from PIL import Image, ImageDraw
 #     except ImportError:
 #         raise ImportError("PIL (Pillow) is required")
-# 
+#
 #     img = Image.open(filepath)
 #     draw = ImageDraw.Draw(img)
 #     font = _get_font(size=14)
-# 
+#
 #     # Draw monitor boundaries and labels
 #     monitors = monitor_info.get("Monitors", {}).get("Details", [])
 #     colors = [
@@ -193,19 +193,19 @@ if __name__ == "__main__":
 #         (255, 0, 255),  # Magenta
 #         (0, 255, 255),  # Cyan
 #     ]
-# 
+#
 #     for i, mon in enumerate(monitors):
 #         color = colors[i % len(colors)]
 #         x = mon.get("X", 0)
 #         y = mon.get("Y", 0)
 #         w = mon.get("Width", 0)
 #         h = mon.get("Height", 0)
-# 
+#
 #         # Offset for combined image (Y might be negative)
 #         # Find minimum Y to offset
 #         min_y = min(m.get("Y", 0) for m in monitors) if monitors else 0
 #         offset_y = -min_y if min_y < 0 else 0
-# 
+#
 #         # Draw rectangle border
 #         rect_y = y + offset_y
 #         draw.rectangle(
@@ -213,31 +213,31 @@ if __name__ == "__main__":
 #             outline=color,
 #             width=3,
 #         )
-# 
+#
 #         # Draw label
 #         label = f"Monitor {i}: {w}x{h} @ ({x},{y})"
 #         if mon.get("Primary"):
 #             label += " [PRIMARY]"
-# 
+#
 #         if font:
 #             draw.text((x + 10, rect_y + 10), label, fill=color, font=font)
-# 
+#
 #     # Generate output path
 #     if output_path is None:
 #         path_obj = Path(filepath)
 #         output_path = str(
 #             path_obj.parent / f"{path_obj.stem}_monitors{path_obj.suffix}"
 #         )
-# 
+#
 #     # Save
 #     if filepath.lower().endswith((".jpg", ".jpeg")):
 #         img.save(output_path, "JPEG", quality=85)
 #     else:
 #         img.save(output_path)
-# 
+#
 #     return output_path
-# 
-# 
+#
+#
 # def draw_cursor_overlay(
 #     filepath: str,
 #     cursor_pos: Tuple[int, int] = None,
@@ -249,9 +249,9 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Draw cursor position marker on a screenshot.
-# 
+#
 #     Helps verify cursor coordinates for UI automation debugging.
-# 
+#
 #     Parameters
 #     ----------
 #     filepath : str
@@ -268,7 +268,7 @@ if __name__ == "__main__":
 #         Whether to show coordinate text (default: True)
 #     capture_mode : str
 #         "all" for all-monitor capture, or "0", "1" etc. for specific monitor
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -278,19 +278,19 @@ if __name__ == "__main__":
 #         from PIL import Image, ImageDraw
 #     except ImportError:
 #         raise ImportError("PIL (Pillow) is required")
-# 
+#
 #     # Get cursor position if not provided
 #     if cursor_pos is None:
 #         cursor_pos = _get_cursor_position()
 #         if cursor_pos is None:
 #             raise RuntimeError("Could not get cursor position")
-# 
+#
 #     sys_x, sys_y = cursor_pos
-# 
+#
 #     # Get display info to calculate proper offsets
 #     display_info = get_display_info()
 #     monitors = display_info.get("monitors", [])
-# 
+#
 #     # Calculate image coordinate offset based on capture mode
 #     if capture_mode == "all" and monitors:
 #         # For all-monitor capture: offset by the minimum X and Y
@@ -310,11 +310,11 @@ if __name__ == "__main__":
 #     else:
 #         # Fallback: no offset
 #         img_x, img_y = sys_x, sys_y
-# 
+#
 #     img = Image.open(filepath)
 #     draw = ImageDraw.Draw(img)
 #     width, height = img.size
-# 
+#
 #     # Find which monitor the cursor is on
 #     cursor_monitor = "?"
 #     for i, mon in enumerate(monitors):
@@ -323,7 +323,7 @@ if __name__ == "__main__":
 #         if mx <= sys_x < mx + mw and my <= sys_y < my + mh:
 #             cursor_monitor = str(i)
 #             break
-# 
+#
 #     # Check if cursor is within image bounds
 #     if 0 <= img_x < width and 0 <= img_y < height:
 #         # Draw crosshair
@@ -345,7 +345,7 @@ if __name__ == "__main__":
 #             [(img_x - 3, img_y - 3), (img_x + 3, img_y + 3)],
 #             fill=marker_color,
 #         )
-# 
+#
 #         # Draw coordinate text with monitor info
 #         if show_coords:
 #             font = _get_font(size=12)
@@ -358,25 +358,25 @@ if __name__ == "__main__":
 #         text = f"Outside image: Mon:{cursor_monitor} Sys:({sys_x},{sys_y}) Img:({img_x},{img_y})"
 #         if font:
 #             draw.text((10, height - 30), text, fill=(255, 0, 0), font=font)
-# 
+#
 #     # Generate output path
 #     if output_path is None:
 #         path_obj = Path(filepath)
 #         output_path = str(path_obj.parent / f"{path_obj.stem}_cursor{path_obj.suffix}")
-# 
+#
 #     # Save
 #     if filepath.lower().endswith((".jpg", ".jpeg")):
 #         img.save(output_path, "JPEG", quality=85)
 #     else:
 #         img.save(output_path)
-# 
+#
 #     return output_path
-# 
-# 
+#
+#
 # def _get_cursor_position() -> Tuple[int, int]:
 #     """Get current cursor position from Windows via PowerShell."""
 #     import subprocess
-# 
+#
 #     ps_script = """
 # Add-Type @"
 # using System;
@@ -405,12 +405,12 @@ if __name__ == "__main__":
 #     except Exception:
 #         pass
 #     return None
-# 
-# 
+#
+#
 # def _get_dpi_scale() -> float:
 #     """Get Windows DPI scaling factor via PowerShell."""
 #     import subprocess
-# 
+#
 #     ps_script = """
 # Add-Type @"
 # using System;
@@ -443,12 +443,12 @@ if __name__ == "__main__":
 #     except Exception:
 #         pass
 #     return 1.0
-# 
-# 
+#
+#
 # def get_display_info() -> dict:
 #     """Get comprehensive display info including DPI, resolution, monitors."""
 #     import subprocess
-# 
+#
 #     ps_script = """
 # Add-Type -AssemblyName System.Windows.Forms
 # $screens = [System.Windows.Forms.Screen]::AllScreens
@@ -474,7 +474,7 @@ if __name__ == "__main__":
 #         )
 #         if result.returncode == 0:
 #             import json
-# 
+#
 #             monitors = json.loads(result.stdout.strip())
 #             if not isinstance(monitors, list):
 #                 monitors = [monitors]
@@ -487,15 +487,15 @@ if __name__ == "__main__":
 #     except Exception:
 #         pass
 #     return {"monitors": [], "dpi_scale": 1.0, "dpi_percent": 100}
-# 
-# 
+#
+#
 # __all__ = [
 #     "draw_grid_overlay",
 #     "add_monitor_info_overlay",
 #     "draw_cursor_overlay",
 #     "get_display_info",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

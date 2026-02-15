@@ -15,22 +15,22 @@ if __name__ == "__main__":
 # # File: ./src/scitex/vis/canvas.py
 # """
 # Canvas class for scitex.canvas.
-# 
+#
 # Provides object-oriented interface to canvas operations.
 # """
-# 
+#
 # from datetime import datetime
 # from pathlib import Path
 # from typing import Any, Dict, List, Union
-# 
-# 
+#
+#
 # class Canvas:
 #     """
 #     Canvas for composing publication-quality figures.
-# 
+#
 #     A Canvas represents a paper figure workspace containing multiple panels.
 #     It can be saved to a .canvas directory bundle for portability.
-# 
+#
 #     Parameters
 #     ----------
 #     name : str
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 #         Canvas width in millimeters (default: 180)
 #     height_mm : float
 #         Canvas height in millimeters (default: 240)
-# 
+#
 #     Examples
 #     --------
 #     >>> import scitex as stx
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 #     >>> # Save (auto-exports PNG/PDF/SVG)
 #     >>> stx.io.save(canvas, "/output/fig1.canvas")
 #     """
-# 
+#
 #     def __init__(
 #         self,
 #         name: str,
@@ -78,17 +78,17 @@ if __name__ == "__main__":
 #             "width_mm": None,
 #         }
 #         self._source_files: Dict[str, Path] = {}  # panel_name -> source_path
-# 
+#
 #     @property
 #     def name(self) -> str:
 #         """Canvas name."""
 #         return self._name
-# 
+#
 #     @property
 #     def panels(self) -> List[Dict[str, Any]]:
 #         """List of panel configurations."""
 #         return self._panels
-# 
+#
 #     def add_panel(
 #         self,
 #         panel_name: str,
@@ -100,7 +100,7 @@ if __name__ == "__main__":
 #     ) -> "Canvas":
 #         """
 #         Add a panel to the canvas.
-# 
+#
 #         Parameters
 #         ----------
 #         panel_name : str
@@ -115,18 +115,18 @@ if __name__ == "__main__":
 #             Panel label (A, B, C...)
 #         **kwargs
 #             Additional panel properties (rotation_deg, opacity, flip_h, etc.)
-# 
+#
 #         Returns
 #         -------
 #         Canvas
 #             Self for method chaining
 #         """
 #         source = Path(source)
-# 
+#
 #         # Determine panel type
 #         json_sibling = source.parent / f"{source.stem}.json"
 #         panel_type = "scitex" if json_sibling.exists() else "image"
-# 
+#
 #         # Build panel entry
 #         panel_entry = {
 #             "name": panel_name,
@@ -158,10 +158,10 @@ if __name__ == "__main__":
 #                 "width_mm": 0.2,
 #             },
 #         }
-# 
+#
 #         if panel_type == "image":
 #             panel_entry["source"] = f"panel{source.suffix}"
-# 
+#
 #         # Apply any additional kwargs to nested dicts
 #         for key, value in kwargs.items():
 #             if (
@@ -172,27 +172,27 @@ if __name__ == "__main__":
 #                 panel_entry[key].update(value)
 #             elif key not in ["rotation_deg", "opacity", "flip_h", "flip_v", "visible"]:
 #                 panel_entry[key] = value
-# 
+#
 #         # Remove existing panel with same name
 #         self._panels = [p for p in self._panels if p.get("name") != panel_name]
 #         self._panels.append(panel_entry)
-# 
+#
 #         # Store source file path for later
 #         self._source_files[panel_name] = source.resolve()
-# 
+#
 #         return self
-# 
+#
 #     def update_panel(self, panel_name: str, updates: Dict[str, Any]) -> "Canvas":
 #         """
 #         Update panel properties.
-# 
+#
 #         Parameters
 #         ----------
 #         panel_name : str
 #             Name of panel to update
 #         updates : Dict[str, Any]
 #             Properties to update
-# 
+#
 #         Returns
 #         -------
 #         Canvas
@@ -203,16 +203,16 @@ if __name__ == "__main__":
 #                 _deep_merge(panel, updates)
 #                 break
 #         return self
-# 
+#
 #     def remove_panel(self, panel_name: str) -> "Canvas":
 #         """
 #         Remove a panel from the canvas.
-# 
+#
 #         Parameters
 #         ----------
 #         panel_name : str
 #             Name of panel to remove
-# 
+#
 #         Returns
 #         -------
 #         Canvas
@@ -221,7 +221,7 @@ if __name__ == "__main__":
 #         self._panels = [p for p in self._panels if p.get("name") != panel_name]
 #         self._source_files.pop(panel_name, None)
 #         return self
-# 
+#
 #     def add_annotation(
 #         self,
 #         ann_type: str,
@@ -229,14 +229,14 @@ if __name__ == "__main__":
 #     ) -> "Canvas":
 #         """
 #         Add an annotation to the canvas.
-# 
+#
 #         Parameters
 #         ----------
 #         ann_type : str
 #             Annotation type: "text", "arrow", "bracket", "line", "rectangle", "legend"
 #         **kwargs
 #             Type-specific properties
-# 
+#
 #         Returns
 #         -------
 #         Canvas
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 #         annotation = {"type": ann_type, **kwargs}
 #         self._annotations.append(annotation)
 #         return self
-# 
+#
 #     def set_caption(
 #         self,
 #         text: str,
@@ -256,11 +256,11 @@ if __name__ == "__main__":
 #     ) -> "Canvas":
 #         """
 #         Set figure caption (legend in scientific sense).
-# 
+#
 #         Caption is stored as metadata by default. Use render=True to
 #         include it in the exported image. "Figure X." numbering should
 #         be handled by LaTeX/document side, not included in caption text.
-# 
+#
 #         Parameters
 #         ----------
 #         text : str
@@ -276,12 +276,12 @@ if __name__ == "__main__":
 #             Font size when rendered (default: 10)
 #         width_mm : float, optional
 #             Text wrap width in mm. Default: canvas width - 20mm margins
-# 
+#
 #         Returns
 #         -------
 #         Canvas
 #             Self for method chaining
-# 
+#
 #         Examples
 #         --------
 #         >>> # Caption as metadata only (for LaTeX)
@@ -304,15 +304,15 @@ if __name__ == "__main__":
 #         }
 #         if position:
 #             self._caption["position"] = {"x_mm": position[0], "y_mm": position[1]}
-# 
+#
 #         return self
-# 
+#
 #     def set_title(
 #         self, text: str, position: tuple = None, fontsize: int = 14
 #     ) -> "Canvas":
 #         """
 #         Set canvas title.
-# 
+#
 #         Parameters
 #         ----------
 #         text : str
@@ -321,7 +321,7 @@ if __name__ == "__main__":
 #             (x_mm, y_mm) position
 #         fontsize : int
 #             Font size
-# 
+#
 #         Returns
 #         -------
 #         Canvas
@@ -332,11 +332,11 @@ if __name__ == "__main__":
 #             self._title["position"] = {"x_mm": position[0], "y_mm": position[1]}
 #         self._title["fontsize"] = fontsize
 #         return self
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         """
 #         Convert canvas to dictionary representation.
-# 
+#
 #         Returns
 #         -------
 #         Dict[str, Any]
@@ -359,17 +359,17 @@ if __name__ == "__main__":
 #             "manual_overrides": {},
 #             "_source_files": {k: str(v) for k, v in self._source_files.items()},
 #         }
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "Canvas":
 #         """
 #         Create canvas from dictionary.
-# 
+#
 #         Parameters
 #         ----------
 #         data : Dict[str, Any]
 #             Canvas dictionary (from canvas.json or to_dict())
-# 
+#
 #         Returns
 #         -------
 #         Canvas
@@ -387,14 +387,14 @@ if __name__ == "__main__":
 #         canvas._caption = data.get("caption", canvas._caption)
 #         canvas._background = data.get("background", canvas._background)
 #         canvas._metadata = data.get("metadata", canvas._metadata)
-# 
+#
 #         # Restore source files if present
 #         source_files = data.get("_source_files", {})
 #         for panel_name, path_str in source_files.items():
 #             canvas._source_files[panel_name] = Path(path_str)
-# 
+#
 #         return canvas
-# 
+#
 #     def save(
 #         self,
 #         path: Union[str, Path],
@@ -403,7 +403,7 @@ if __name__ == "__main__":
 #     ) -> Path:
 #         """
 #         Save canvas to a .canvas directory.
-# 
+#
 #         Parameters
 #         ----------
 #         path : str or Path
@@ -413,12 +413,12 @@ if __name__ == "__main__":
 #             If True, copy source files. If False (default), use symlinks.
 #         **kwargs
 #             Additional arguments passed to stx.io.save
-# 
+#
 #         Returns
 #         -------
 #         Path
 #             Path to the created .canvas directory.
-# 
+#
 #         Examples
 #         --------
 #         >>> canvas = stx.vis.Canvas("fig1")
@@ -427,13 +427,13 @@ if __name__ == "__main__":
 #         >>> canvas.save("/output/fig1.canvas", bundle=True)  # Copies files
 #         """
 #         import scitex as stx
-# 
+#
 #         return stx.io.save(self, path, bundle=bundle, **kwargs)
-# 
+#
 #     def __repr__(self) -> str:
 #         return f"Canvas(name='{self._name}', panels={len(self._panels)})"
-# 
-# 
+#
+#
 # def _deep_merge(base: Dict, updates: Dict) -> None:
 #     """Deep merge updates into base dictionary (in-place)."""
 #     for key, value in updates.items():
@@ -441,8 +441,8 @@ if __name__ == "__main__":
 #             _deep_merge(base[key], value)
 #         else:
 #             base[key] = value
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

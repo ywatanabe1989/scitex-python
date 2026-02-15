@@ -13,27 +13,27 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/stats/io/_bundle.py
-# 
+#
 # """
 # SciTeX .stats Bundle I/O - Statistics-specific bundle operations.
-# 
+#
 # Handles:
 #     - Statistical results specification validation
 #     - Comparison metadata management
 #     - P-value and effect size validation
 # """
-# 
+#
 # import json
 # from pathlib import Path
 # from typing import Any, Dict, List
-# 
+#
 # __all__ = [
 #     "validate_stats_spec",
 #     "load_stats_bundle",
 #     "save_stats_bundle",
 #     "STATS_SCHEMA_SPEC",
 # ]
-# 
+#
 # # Schema specification for .stats bundles
 # STATS_SCHEMA_SPEC = {
 #     "name": "scitex.stats.stats",
@@ -41,19 +41,19 @@ if __name__ == "__main__":
 #     "required_fields": ["schema"],
 #     "optional_fields": ["comparisons", "metadata", "descriptive", "test_results"],
 # }
-# 
-# 
+#
+#
 # def validate_stats_spec(spec: Dict[str, Any]) -> List[str]:
 #     """Validate .stats-specific fields.
-# 
+#
 #     Args:
 #         spec: The specification dictionary to validate.
-# 
+#
 #     Returns:
 #         List of validation error messages (empty if valid).
 #     """
 #     errors = []
-# 
+#
 #     if "comparisons" in spec:
 #         comparisons = spec["comparisons"]
 #         if not isinstance(comparisons, list):
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 #                 if not isinstance(comp, dict):
 #                     errors.append(f"comparisons[{i}] must be a dictionary")
 #                     continue
-# 
+#
 #                 # Validate p_value if present
 #                 if "p_value" in comp:
 #                     p = comp["p_value"]
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 #                         errors.append(
 #                             f"comparisons[{i}].p_value must be between 0 and 1"
 #                         )
-# 
+#
 #                 # Validate effect_size if present
 #                 if "effect_size" in comp:
 #                     es = comp["effect_size"]
@@ -86,33 +86,33 @@ if __name__ == "__main__":
 #                         errors.append(
 #                             f"comparisons[{i}].effect_size must be numeric or dict"
 #                         )
-# 
+#
 #     # Validate test_results if present
 #     if "test_results" in spec:
 #         test_results = spec["test_results"]
 #         if not isinstance(test_results, (dict, list)):
 #             errors.append("'test_results' must be a dictionary or list")
-# 
+#
 #     # Validate descriptive if present
 #     if "descriptive" in spec:
 #         descriptive = spec["descriptive"]
 #         if not isinstance(descriptive, dict):
 #             errors.append("'descriptive' must be a dictionary")
-# 
+#
 #     return errors
-# 
-# 
+#
+#
 # def load_stats_bundle(bundle_dir: Path) -> Dict[str, Any]:
 #     """Load .stats bundle contents from directory.
-# 
+#
 #     Args:
 #         bundle_dir: Path to the bundle directory.
-# 
+#
 #     Returns:
 #         Dictionary with loaded bundle contents.
 #     """
 #     result = {}
-# 
+#
 #     # Load specification
 #     spec_file = bundle_dir / "stats.json"
 #     if spec_file.exists():
@@ -120,24 +120,24 @@ if __name__ == "__main__":
 #             result["spec"] = json.load(f)
 #     else:
 #         result["spec"] = None
-# 
+#
 #     # Load supplementary data files if present
 #     data_file = bundle_dir / "data.csv"
 #     if data_file.exists():
 #         try:
 #             import pandas as pd
-# 
+#
 #             result["data"] = pd.read_csv(data_file)
 #         except ImportError:
 #             with open(data_file) as f:
 #                 result["data"] = f.read()
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # def save_stats_bundle(data: Dict[str, Any], dir_path: Path) -> None:
 #     """Save .stats bundle contents to directory.
-# 
+#
 #     Args:
 #         data: Bundle data dictionary.
 #         dir_path: Path to the bundle directory.
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 #     spec_file = dir_path / "stats.json"
 #     with open(spec_file, "w") as f:
 #         json.dump(spec, f, indent=2)
-# 
+#
 #     # Save supplementary data if present
 #     if "data" in data:
 #         data_file = dir_path / "data.csv"
@@ -157,14 +157,14 @@ if __name__ == "__main__":
 #         else:
 #             with open(data_file, "w") as f:
 #                 f.write(str(df))
-# 
+#
 #     # Save summary report if present
 #     if "report" in data:
 #         report_file = dir_path / "report.md"
 #         with open(report_file, "w") as f:
 #             f.write(data["report"])
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -3,12 +3,13 @@
 # Time-stamp: "2024-11-03 10:45:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__melt_cols.py
 
-import pytest
+import os
+import sys
+from unittest.mock import Mock, patch
+
 import numpy as np
 import pandas as pd
-from unittest.mock import Mock, patch
-import sys
-import os
+import pytest
 
 # Add the project root to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../src"))
@@ -414,6 +415,7 @@ class TestDocstringExample:
         assert melted.iloc[3]["variable"] == "score_2"
         assert melted.iloc[3]["value"] == 92
 
+
 if __name__ == "__main__":
     import os
 
@@ -428,23 +430,23 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-10-05 23:04:16 (ywatanabe)"
 # # /home/ywatanabe/proj/_scitex_repo_openhands/src/scitex/pd/_melt_cols.py
-# 
-# 
+#
+#
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-10-05 23:03:39 (ywatanabe)"
 # # /home/ywatanabe/proj/_scitex_repo_openhands/src/scitex/pd/_melt_cols.py
-# 
+#
 # from typing import List, Optional
 # import pandas as pd
-# 
-# 
+#
+#
 # def melt_cols(
 #     df: pd.DataFrame, cols: List[str], id_columns: Optional[List[str]] = None
 # ) -> pd.DataFrame:
 #     """
 #     Melt specified columns while preserving links to other data in a DataFrame.
-# 
+#
 #     Example
 #     -------
 #     >>> data = pd.DataFrame({
@@ -462,7 +464,7 @@ if __name__ == "__main__":
 #     3   1    Alice  score_2     92
 #     4   2      Bob  score_2     88
 #     5   3  Charlie  score_2     95
-# 
+#
 #     Parameters
 #     ----------
 #     df : pd.DataFrame
@@ -471,12 +473,12 @@ if __name__ == "__main__":
 #         Columns to be melted
 #     id_columns : Optional[List[str]], default None
 #         Columns to preserve as identifiers. If None, all columns not in 'cols' are used.
-# 
+#
 #     Returns
 #     -------
 #     pd.DataFrame
 #         Melted DataFrame with preserved identifier columns
-# 
+#
 #     Raises
 #     ------
 #     ValueError
@@ -485,13 +487,13 @@ if __name__ == "__main__":
 #     missing_melt = set(cols) - set(df.columns)
 #     if missing_melt:
 #         raise ValueError(f"Columns not found in DataFrame: {missing_melt}")
-# 
+#
 #     if id_columns is None:
 #         id_columns = [col for col in df.columns if col not in cols]
-# 
+#
 #     df_copy = df.reset_index(drop=True)
 #     df_copy["global_index"] = df_copy.index
-# 
+#
 #     # Use a different value_name if "value" is one of the columns being melted
 #     value_name = "value" if "value" not in cols else "melted_value"
 #     melted_df = df_copy[cols + ["global_index"]].melt(

@@ -343,9 +343,9 @@ class TestPropertyTypes:
         for tool in tool_schemas:
             for prop_name, prop_def in tool.inputSchema["properties"].items():
                 if prop_def.get("type") == "array":
-                    assert "items" in prop_def, (
-                        f"{tool.name}.{prop_name} is array but missing items"
-                    )
+                    assert (
+                        "items" in prop_def
+                    ), f"{tool.name}.{prop_name} is array but missing items"
 
 
 if __name__ == "__main__":

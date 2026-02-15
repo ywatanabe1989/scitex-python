@@ -4,9 +4,8 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/tests/custom/test_export_as_csv_all.py
 # ----------------------------------------
 import os
-__FILE__ = (
-    "./tests/custom/test_export_as_csv_all.py"
-)
+
+__FILE__ = "./tests/custom/test_export_as_csv_all.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -218,9 +217,7 @@ def test_hist_csv_export():
     data = np.random.normal(0, 1, 1000)
 
     # Plot with ID for tracking
-    ax.hist(
-        data, bins=30, label="Normal Distribution", id="hist_test", alpha=0.7
-    )
+    ax.hist(data, bins=30, label="Normal Distribution", id="hist_test", alpha=0.7)
 
     # Style the plot
     ax.set_xyt("Value", "Frequency", "Histogram Test")
@@ -248,9 +245,7 @@ def test_boxplot_csv_export():
     ]
 
     # Plot with ID for tracking
-    ax.boxplot(
-        data, labels=["Group A", "Group B", "Group C"], id="boxplot_test"
-    )
+    ax.boxplot(data, labels=["Group A", "Group B", "Group C"], id="boxplot_test")
 
     # Style the plot
     ax.set_xyt("Group", "Value", "Boxplot Test")
@@ -274,9 +269,7 @@ def test_fill_between_csv_export():
     y2 = np.sin(x) + 0.5
 
     # Plot with ID for tracking
-    ax.fill_between(
-        x, y1, y2, label="Fill Region", id="fill_between_test", alpha=0.3
-    )
+    ax.fill_between(x, y1, y2, label="Fill Region", id="fill_between_test", alpha=0.3)
 
     # Style the plot
     ax.set_xyt("X", "Y", "Fill Between Test")
@@ -301,9 +294,7 @@ def test_errorbar_csv_export():
     yerr = np.random.uniform(0.1, 0.3, len(x))
 
     # Plot with ID for tracking
-    ax.errorbar(
-        x, y, yerr=yerr, label="Data with Errors", id="errorbar_test", fmt="o"
-    )
+    ax.errorbar(x, y, yerr=yerr, label="Data with Errors", id="errorbar_test", fmt="o")
 
     # Style the plot
     ax.set_xyt("X", "Y", "Errorbar Test")
@@ -479,9 +470,7 @@ def test_violin_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except (AttributeError, IndexError) as e:
         print(f"Method not available or data format incompatible: {e}")
@@ -678,9 +667,7 @@ def test_plot_mean_ci_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except (AttributeError, TypeError, ValueError) as e:
         print(f"Error with plot_mean_ci: {e}")
@@ -728,9 +715,7 @@ def test_plot_median_iqr_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except (AttributeError, TypeError, ValueError) as e:
         print(f"Error with plot_median_iqr: {e}")
@@ -822,9 +807,7 @@ def test_plot_rectangle_csv_export():
     fig, ax = scitex.plt.subplots()
 
     # Plot a rectangle
-    ax.plot_rectangle(
-        1, 1, 2, 1, facecolor="red", alpha=0.3, id="plot_rectangle_test"
-    )
+    ax.plot_rectangle(1, 1, 2, 1, facecolor="red", alpha=0.3, id="plot_rectangle_test")
 
     # Set plot limits for good visualization
     ax.set_xlim(0, 4)
@@ -885,9 +868,7 @@ def test_plot_joyplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("plot_joyplot method not found, skipping test")
@@ -921,9 +902,7 @@ def test_plot_conf_mat_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("plot_conf_mat method not found, skipping test")
@@ -941,9 +920,7 @@ def test_kde_plot_csv_export():
 
     # Generate data
     np.random.seed(42)  # For reproducibility
-    data = np.concatenate(
-        [np.random.normal(0, 1, 500), np.random.normal(5, 1, 300)]
-    )
+    data = np.concatenate([np.random.normal(0, 1, 500), np.random.normal(5, 1, 300)])
 
     # Plot with ID for tracking
     ax.plot_kde(data, label="Bimodal Distribution", id="kde_test")
@@ -958,9 +935,7 @@ def test_kde_plot_csv_export():
         df = verify_csv_export(fig, save_path)
         # Note: The actual columns have an "ax_00_" prefix added by the AxisWrapper
         kde_x_col = [col for col in df.columns if "kde_test_kde_x" in col]
-        kde_density_col = [
-            col for col in df.columns if "kde_test_kde_density" in col
-        ]
+        kde_density_col = [col for col in df.columns if "kde_test_kde_density" in col]
         assert (
             len(kde_x_col) > 0
         ), f"No column containing 'kde_test_kde_x' found. Columns: {df.columns.tolist()}"
@@ -1063,9 +1038,7 @@ def test_plot_scatter_hist_csv_export():
     y = x + np.random.normal(0, 0.5, 500)
 
     # Plot with ID for tracking
-    ax.plot_scatter_hist(
-        x, y, hist_bins=30, scatter_alpha=0.7, id="scatter_hist_test"
-    )
+    ax.plot_scatter_hist(x, y, hist_bins=30, scatter_alpha=0.7, id="scatter_hist_test")
 
     # Style the plot
     ax.set_xyt("X Values", "Y Values", "Scatter Histogram Test")
@@ -1275,9 +1248,7 @@ def test_sns_boxplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_boxplot method not found, skipping test")
@@ -1309,9 +1280,7 @@ def test_sns_barplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_barplot method not found, skipping test")
@@ -1327,9 +1296,7 @@ def test_sns_violinplot_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.sns_violinplot(
-            x="category", y="value", data=df, id="sns_violinplot_test"
-        )
+        ax.sns_violinplot(x="category", y="value", data=df, id="sns_violinplot_test")
 
         # Style the plot
         ax.set_xyt("Category", "Value", "Seaborn Violinplot Test")
@@ -1345,9 +1312,7 @@ def test_sns_violinplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_violinplot method not found, skipping test")
@@ -1363,9 +1328,7 @@ def test_sns_stripplot_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.sns_stripplot(
-            x="category", y="value", data=df, id="sns_stripplot_test"
-        )
+        ax.sns_stripplot(x="category", y="value", data=df, id="sns_stripplot_test")
 
         # Style the plot
         ax.set_xyt("Category", "Value", "Seaborn Stripplot Test")
@@ -1381,9 +1344,7 @@ def test_sns_stripplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_stripplot method not found, skipping test")
@@ -1399,9 +1360,7 @@ def test_sns_swarmplot_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.sns_swarmplot(
-            x="category", y="value", data=df, id="sns_swarmplot_test"
-        )
+        ax.sns_swarmplot(x="category", y="value", data=df, id="sns_swarmplot_test")
 
         # Style the plot
         ax.set_xyt("Category", "Value", "Seaborn Swarmplot Test")
@@ -1417,9 +1376,7 @@ def test_sns_swarmplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_swarmplot method not found, skipping test")
@@ -1435,9 +1392,7 @@ def test_sns_kdeplot_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.sns_kdeplot(
-            x="value", data=df, hue="category", id="sns_kdeplot_test"
-        )
+        ax.sns_kdeplot(x="value", data=df, hue="category", id="sns_kdeplot_test")
 
         # Style the plot
         ax.set_xyt("Value", "Density", "Seaborn KDE Plot Test")
@@ -1453,9 +1408,7 @@ def test_sns_kdeplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_kdeplot method not found, skipping test")
@@ -1493,9 +1446,7 @@ def test_sns_histplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_histplot method not found, skipping test")
@@ -1529,9 +1480,7 @@ def test_sns_scatterplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_scatterplot method not found, skipping test")
@@ -1561,9 +1510,7 @@ def test_sns_lineplot_csv_export():
 
     # Plot with ID for tracking
     try:
-        ax.sns_lineplot(
-            x="x", y="y", hue="group", data=df, id="sns_lineplot_test"
-        )
+        ax.sns_lineplot(x="x", y="y", hue="group", data=df, id="sns_lineplot_test")
 
         # Style the plot
         ax.set_xyt("X", "Y", "Seaborn Lineplot Test")
@@ -1579,9 +1526,7 @@ def test_sns_lineplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_lineplot method not found, skipping test")
@@ -1616,9 +1561,7 @@ def test_sns_heatmap_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_heatmap method not found, skipping test")
@@ -1654,9 +1597,7 @@ def test_sns_jointplot_csv_export():
             # Some plot types may not support CSV export, which is acceptable behavior
             # Just ensure the image is saved
             scitex.io.save(fig, save_path)
-            assert os.path.exists(
-                save_path
-            ), f"PNG file not created: {save_path}"
+            assert os.path.exists(save_path), f"PNG file not created: {save_path}"
             scitex.plt.close(fig)
     except AttributeError:
         print("sns_jointplot method not found, skipping test")

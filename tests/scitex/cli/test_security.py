@@ -309,6 +309,7 @@ class TestSecurityIntegration:
                         assert result.exit_code == 0
                         assert "Report saved" in result.output
 
+
 if __name__ == "__main__":
     import os
 
@@ -324,11 +325,11 @@ if __name__ == "__main__":
 # """
 # SciTeX CLI - Security Commands
 # """
-# 
+#
 # import sys
 # import click
 # from pathlib import Path
-# 
+#
 # from scitex.security import (
 #     check_github_alerts,
 #     save_alerts_to_file,
@@ -336,13 +337,13 @@ if __name__ == "__main__":
 #     get_latest_alerts_file,
 #     GitHubSecurityError,
 # )
-# 
-# 
+#
+#
 # @click.group()
 # def security():
 #     """
 #     Security utilities - Check GitHub security alerts
-# 
+#
 #     \b
 #     Examples:
 #       scitex security check                    # Check current repo
@@ -351,8 +352,8 @@ if __name__ == "__main__":
 #       scitex security latest                   # Show latest report
 #     """
 #     pass
-# 
-# 
+#
+#
 # @security.command()
 # @click.option(
 #     "--repo", help='Repository in format "owner/repo" (default: current repo)'
@@ -368,21 +369,21 @@ if __name__ == "__main__":
 #     try:
 #         click.echo("Checking GitHub security alerts...")
 #         alerts = check_github_alerts(repo)
-# 
+#
 #         # Count open alerts
 #         total = sum(
 #             len([a for a in alerts[key] if a.get("state") == "open"]) for key in alerts
 #         )
-# 
+#
 #         if save:
 #             output_path = Path(output_dir) if output_dir else None
 #             file_path = save_alerts_to_file(alerts, output_path)
 #             click.echo(f"\nReport saved to: {file_path}")
 #             click.echo(f"Latest symlink: {file_path.parent / 'security-latest.txt'}")
-# 
+#
 #         # Print report
 #         click.echo("\n" + format_alerts_report(alerts))
-# 
+#
 #         # Exit with error code if alerts found
 #         if total > 0:
 #             click.secho(f"\n❌ Found {total} open security alert(s)", fg="red")
@@ -390,12 +391,12 @@ if __name__ == "__main__":
 #         else:
 #             click.secho("\n✓ No security alerts found", fg="green")
 #             sys.exit(0)
-# 
+#
 #     except GitHubSecurityError as e:
 #         click.secho(f"ERROR: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # @security.command()
 # @click.option(
 #     "--dir",
@@ -408,18 +409,18 @@ if __name__ == "__main__":
 #     try:
 #         dir_path = Path(security_dir) if security_dir else None
 #         latest_file = get_latest_alerts_file(dir_path)
-# 
+#
 #         if latest_file:
 #             click.echo(latest_file.read_text())
 #         else:
 #             click.secho("No security alerts files found", fg="yellow")
 #             sys.exit(1)
-# 
+#
 #     except Exception as e:
 #         click.secho(f"ERROR: {e}", fg="red", err=True)
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     security()
 

@@ -45,9 +45,9 @@ class TestGenPathModuleStructure:
             content = f.read().strip()
 
         # File should be empty or contain only minimal content
-        assert len(content) == 0 or content.startswith("#"), (
-            "gen/path.py should be empty or contain only comments"
-        )
+        assert len(content) == 0 or content.startswith(
+            "#"
+        ), "gen/path.py should be empty or contain only comments"
 
     def test_no_path_imports_from_gen(self):
         """Test that no path functions are imported from empty path.py."""
@@ -69,9 +69,9 @@ class TestGenPathModuleStructure:
         ]
 
         for func in path_funcs:
-            assert func not in gen_attrs, (
-                f"Path function '{func}' should not be in gen module"
-            )
+            assert (
+                func not in gen_attrs
+            ), f"Path function '{func}' should not be in gen module"
 
     def test_gen_module_import_mechanism(self):
         """Test that gen's import mechanism handles empty files correctly."""
@@ -177,7 +177,6 @@ class TestGenModuleDynamicImport:
 
         # The gen.__init__.py imports all .py files dynamically
         # It should handle empty files without errors
-
         # Get all attributes from gen
         gen_attrs = [attr for attr in dir(scitex.gen) if not attr.startswith("_")]
 
@@ -253,7 +252,7 @@ class TestModuleDocumentation:
         - Temporary path creation
         - Safe filename generation
         - Path transformation utilities
-        
+
         Note: Path manipulation functions are in scitex.path module.
         """
         assert expected_purpose.strip() != ""
@@ -340,9 +339,9 @@ class TestCompatibility:
         }
 
         # These are OS path functions that shouldn't be directly in gen
-        assert not gen_attrs.intersection(shadowing_names), (
-            "gen module should not shadow os.path functions"
-        )
+        assert not gen_attrs.intersection(
+            shadowing_names
+        ), "gen module should not shadow os.path functions"
 
 
 class TestFutureReadiness:
@@ -355,7 +354,6 @@ class TestFutureReadiness:
         # The gen/__init__.py uses explicit imports rather than dynamic
         # Any new functions added to path.py would need to be explicitly
         # imported in __init__.py to be available through scitex.gen
-
         # Verify the init file exists
         gen_init = Path(scitex.gen.__file__)
         assert gen_init.exists()
@@ -380,6 +378,7 @@ class TestFutureReadiness:
             assert isinstance(prefix, str)
             assert isinstance(description, str)
             # Ready for functions following these naming patterns
+
 
 if __name__ == "__main__":
     import os

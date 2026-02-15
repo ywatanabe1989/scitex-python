@@ -150,7 +150,7 @@ class TestRegisterProfile:
 
     def test_register_profile(self):
         """register_profile should add a custom profile."""
-        from scitex.msword import BaseWordProfile, register_profile, list_profiles
+        from scitex.msword import BaseWordProfile, list_profiles, register_profile
 
         custom = BaseWordProfile(
             name="test-custom-journal",
@@ -164,11 +164,7 @@ class TestRegisterProfile:
 
     def test_register_profile_retrievable(self):
         """Registered profile should be retrievable via get_profile."""
-        from scitex.msword import (
-            BaseWordProfile,
-            register_profile,
-            get_profile,
-        )
+        from scitex.msword import BaseWordProfile, get_profile, register_profile
 
         custom = BaseWordProfile(
             name="test-retrievable-profile",
@@ -180,6 +176,7 @@ class TestRegisterProfile:
         retrieved = get_profile("test-retrievable-profile")
         assert retrieved.name == "test-retrievable-profile"
         assert retrieved.columns == 2
+
 
 if __name__ == "__main__":
     import os
@@ -195,34 +192,34 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: 2025-12-11 15:15:00
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/msword/profiles.py
-# 
+#
 # """
 # Profiles for mapping MS Word styles to SciTeX writer structures.
-# 
+#
 # Each profile corresponds to a journal / conference template, such as:
 # - "generic"
 # - "mdpi-ijerph"
 # - "resna-2025"
 # - "iop-double-anonymous"
-# 
+#
 # The profiles define:
 # - Which Word style names correspond to section headings
 # - How to detect captions for figures and tables
 # - How to handle references, lists, equations, etc.
 # - Layout settings (columns, margins, fonts)
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # from dataclasses import dataclass, field
 # from typing import Dict, List, Optional, Callable
-# 
-# 
+#
+#
 # @dataclass
 # class BaseWordProfile:
 #     """
 #     Base configuration for mapping between DOCX and SciTeX writer documents.
-# 
+#
 #     Attributes
 #     ----------
 #     name : str
@@ -251,7 +248,7 @@ if __name__ == "__main__":
 #     double_anonymous : bool
 #         Whether this profile requires double-anonymous formatting.
 #     """
-# 
+#
 #     name: str
 #     description: str
 #     heading_styles: Dict[int, str] = field(default_factory=dict)
@@ -275,24 +272,24 @@ if __name__ == "__main__":
 #     equation_style: Optional[str] = None
 #     columns: int = 1
 #     double_anonymous: bool = False
-# 
+#
 #     # Post-processing hooks
 #     post_import_hooks: List[Callable] = field(default_factory=list)
 #     pre_export_hooks: List[Callable] = field(default_factory=list)
-# 
-# 
+#
+#
 # # --- Concrete profiles ------------------------------------------------------
-# 
-# 
+#
+#
 # def _generic_profile() -> BaseWordProfile:
 #     """
 #     Generic Word template profile.
-# 
+#
 #     This profile is intentionally conservative and assumes that:
 #     - "Heading 1/2/3" are used for section headings.
 #     - "Caption" is used for figure/table captions.
 #     - "Normal" is the default body text.
-# 
+#
 #     This should work reasonably well for many simple manuscripts.
 #     """
 #     return BaseWordProfile(
@@ -308,12 +305,12 @@ if __name__ == "__main__":
 #         normal_style="Normal",
 #         reference_section_titles=["References", "REFERENCES", "Bibliography"],
 #     )
-# 
-# 
+#
+#
 # def _mdpi_ijerph_profile() -> BaseWordProfile:
 #     """
 #     MDPI IJERPH template profile.
-# 
+#
 #     Based on the MDPI Word template structure:
 #     - Section headings use built-in heading styles.
 #     - References section is titled "References".
@@ -334,12 +331,12 @@ if __name__ == "__main__":
 #         reference_section_titles=["References"],
 #         columns=1,
 #     )
-# 
-# 
+#
+#
 # def _resna_2025_profile() -> BaseWordProfile:
 #     """
 #     RESNA 2025 scientific paper template profile.
-# 
+#
 #     The RESNA template:
 #     - Uses all-caps section headings (INTRODUCTION, METHODS, etc.)
 #     - Strict 4-page layout
@@ -357,12 +354,12 @@ if __name__ == "__main__":
 #         reference_section_titles=["References", "REFERENCES"],
 #         columns=2,
 #     )
-# 
-# 
+#
+#
 # def _iop_double_anonymous_profile() -> BaseWordProfile:
 #     """
 #     IOP double-anonymous Word template profile.
-# 
+#
 #     The IOP template uses custom styles:
 #     - IOPH1, IOPH2, IOPH3 for headings
 #     - IOPTitle for title
@@ -383,12 +380,12 @@ if __name__ == "__main__":
 #         reference_section_titles=["References"],
 #         double_anonymous=True,
 #     )
-# 
-# 
+#
+#
 # def _ieee_profile() -> BaseWordProfile:
 #     """
 #     IEEE conference/journal template profile.
-# 
+#
 #     The IEEE template:
 #     - Two-column format
 #     - Roman numeral section numbering
@@ -407,8 +404,8 @@ if __name__ == "__main__":
 #         reference_section_titles=["References", "REFERENCES"],
 #         columns=2,
 #     )
-# 
-# 
+#
+#
 # def _springer_profile() -> BaseWordProfile:
 #     """
 #     Springer Nature journal template profile.
@@ -426,8 +423,8 @@ if __name__ == "__main__":
 #         reference_section_titles=["References"],
 #         columns=1,
 #     )
-# 
-# 
+#
+#
 # def _elsevier_profile() -> BaseWordProfile:
 #     """
 #     Elsevier journal template profile.
@@ -445,8 +442,8 @@ if __name__ == "__main__":
 #         reference_section_titles=["References"],
 #         columns=1,
 #     )
-# 
-# 
+#
+#
 # # Registry of known profiles
 # _PROFILES: Dict[str, BaseWordProfile] = {
 #     "generic": _generic_profile(),
@@ -460,17 +457,17 @@ if __name__ == "__main__":
 #     "springer": _springer_profile(),
 #     "elsevier": _elsevier_profile(),
 # }
-# 
-# 
+#
+#
 # def list_profiles() -> list[str]:
 #     """
 #     List available MS Word profiles.
-# 
+#
 #     Returns
 #     -------
 #     list[str]
 #         List of profile names (e.g., ["generic", "mdpi-ijerph", ...]).
-# 
+#
 #     Examples
 #     --------
 #     >>> from scitex.msword import list_profiles
@@ -479,27 +476,27 @@ if __name__ == "__main__":
 #     True
 #     """
 #     return sorted(_PROFILES.keys())
-# 
-# 
+#
+#
 # def get_profile(name: str | None) -> BaseWordProfile:
 #     """
 #     Get a Word profile by name.
-# 
+#
 #     Parameters
 #     ----------
 #     name : str | None
 #         Profile name. If None, "generic" is used.
-# 
+#
 #     Returns
 #     -------
 #     BaseWordProfile
 #         The requested profile.
-# 
+#
 #     Raises
 #     ------
 #     KeyError
 #         If the profile name is unknown.
-# 
+#
 #     Examples
 #     --------
 #     >>> from scitex.msword import get_profile
@@ -516,17 +513,17 @@ if __name__ == "__main__":
 #         raise KeyError(
 #             f"Unknown MS Word profile: {name!r}. " f"Available profiles: {available}"
 #         ) from exc
-# 
-# 
+#
+#
 # def register_profile(profile: BaseWordProfile) -> None:
 #     """
 #     Register a custom Word profile.
-# 
+#
 #     Parameters
 #     ----------
 #     profile : BaseWordProfile
 #         The profile to register.
-# 
+#
 #     Examples
 #     --------
 #     >>> from scitex.msword import BaseWordProfile, register_profile
@@ -540,8 +537,8 @@ if __name__ == "__main__":
 #     True
 #     """
 #     _PROFILES[profile.name] = profile
-# 
-# 
+#
+#
 # __all__ = [
 #     "BaseWordProfile",
 #     "list_profiles",

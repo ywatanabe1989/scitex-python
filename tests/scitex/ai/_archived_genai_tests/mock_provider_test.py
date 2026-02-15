@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Mock provider implementation for tests."""
 
-from typing import Any, Dict, List, Generator
+from typing import Any, Dict, Generator, List
+
 from scitex.ai.genai.base_provider import BaseProvider
 
 

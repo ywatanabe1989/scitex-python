@@ -186,64 +186,66 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/utils/_verify_scitex_format.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
+
+
 # Verify SciTeX template format compliance for Python files.
-# 
+#
 # Functionalities:
 #   - Scans Python files in specified directories
 #   - Checks for required components (main, parse_args, run_main, if __name__)
 #   - Checks for optional components (docstrings, sections, verbose params)
 #   - Generates detailed compliance reports
 #   - Provides recommendations for non-compliant files
-# 
+#
 # Dependencies:
 #   - packages:
 #     - pathlib
 #     - dataclasses
 #     - typing
 #     - re
-# 
+#
 # IO:
 #   - input-files:
 #     - Python source files (.py)
 #   - output-files:
 #     - Compliance report (printed to stdout or saved)
 # """
-# 
+#
 # """Imports"""
 # import argparse
 # import re
 # from dataclasses import dataclass
 # from pathlib import Path
 # from typing import Dict
-# 
+#
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # @dataclass
 # class FileInfo:
 #     """Store file information."""
-# 
+#
 #     relative_path: str
 #     content: str
 #     size: int
 #     lines: int
-# 
-# 
+#
+#
 # @dataclass
 # class TemplateCompliance:
 #     """Store compliance check results."""
-# 
+#
 #     has_main: bool = False
 #     has_parse_args: bool = False
 #     has_run_main: bool = False
@@ -254,7 +256,7 @@ if __name__ == "__main__":
 #     has_functions_classes_section: bool = False
 #     uses_scitex_session: bool = False
 #     has_verbose_param: bool = False
-# 
+#
 #     @property
 #     def is_compliant(self) -> bool:
 #         """Check if file is fully compliant."""
@@ -267,7 +269,7 @@ if __name__ == "__main__":
 #                 self.is_run_main_unchanged,
 #             ]
 #         )
-# 
+#
 #     @property
 #     def compliance_score(self) -> float:
 #         """Calculate compliance score (0-1)."""
@@ -284,26 +286,26 @@ if __name__ == "__main__":
 #             self.has_verbose_param,
 #         ]
 #         return sum(checks) / len(checks)
-# 
-# 
+#
+#
 # def scan_python_files(paths: list[Path], base_dir: Path = None) -> Dict[str, FileInfo]:
 #     """Scan Python files from filesystem paths.
-# 
+#
 #     Args:
 #         paths: List of file or directory paths to scan
 #         base_dir: Base directory for relative path calculation
-# 
+#
 #     Returns:
 #         Dictionary mapping relative paths to FileInfo objects
 #     """
 #     files = {}
-# 
+#
 #     if base_dir is None:
 #         base_dir = Path.cwd()
-# 
+#
 #     for path in paths:
 #         path = Path(path).resolve()
-# 
+#
 #         if path.is_file():
 #             # Single file
 #             python_files = [path] if path.suffix == ".py" else []
@@ -313,16 +315,16 @@ if __name__ == "__main__":
 #         else:
 #             logger.warning(f"Path not found: {path}")
 #             continue
-# 
+#
 #         for py_file in python_files:
 #             # Skip template.py, __init__.py, and test files
 #             if any(skip in py_file.name for skip in ["template.py", "__init__.py"]):
 #                 continue
-# 
+#
 #             try:
 #                 content = py_file.read_text(encoding="utf-8")
 #                 relative_path = str(py_file.relative_to(base_dir))
-# 
+#
 #                 files[relative_path] = FileInfo(
 #                     relative_path=relative_path,
 #                     content=content,
@@ -331,51 +333,51 @@ if __name__ == "__main__":
 #                 )
 #             except Exception as e:
 #                 logger.warning(f"Failed to read {py_file}: {e}")
-# 
+#
 #     return files
-# 
-# 
+#
+#
 # def check_compliance(content: str) -> TemplateCompliance:
 #     """Check if content follows template format."""
 #     compliance = TemplateCompliance()
-# 
+#
 #     # Check for main function
 #     compliance.has_main = bool(re.search(r"^def main\(", content, re.MULTILINE))
-# 
+#
 #     # Check for parse_args function
 #     compliance.has_parse_args = bool(
 #         re.search(r"^def parse_args\(", content, re.MULTILINE)
 #     )
-# 
+#
 #     # Check for run_main function
 #     compliance.has_run_main = bool(re.search(r"^def run_main\(", content, re.MULTILINE))
-# 
+#
 #     # Check for main guard
 #     compliance.has_main_guard = bool(re.search(r'if __name__ == "__main__":', content))
-# 
+#
 #     # Check if run_main follows the exact template format
 #     compliance.is_run_main_unchanged = _check_run_main_unchanged(content)
-# 
+#
 #     # Check for module docstring
 #     compliance.has_docstring = bool(re.search(r'"""[\s\S]*?"""', content))
-# 
+#
 #     # Check for section markers
 #     compliance.has_imports_section = bool(re.search(r'"""Imports"""', content))
 #     compliance.has_functions_classes_section = bool(
 #         re.search(r'"""Functions & Classes"""', content)
 #     )
-# 
+#
 #     # Check for scitex session usage
 #     compliance.uses_scitex_session = bool(re.search(r"stx\.session\.start", content))
-# 
+#
 #     # Check for verbose parameter
 #     compliance.has_verbose_param = bool(
 #         re.search(r"verbose\s*[:=]\s*(?:bool|True|False)", content)
 #     )
-# 
+#
 #     return compliance
-# 
-# 
+#
+#
 # def _check_run_main_unchanged(content: str) -> bool:
 #     """Check if run_main function follows the exact template format."""
 #     # Template run_main signature and key components
@@ -391,15 +393,15 @@ if __name__ == "__main__":
 #         r"exit_status = main\(args\)",
 #         r"stx\.session\.close\(",
 #     ]
-# 
+#
 #     # Check all required patterns are present
 #     for pattern in required_patterns:
 #         if not re.search(pattern, content):
 #             return False
-# 
+#
 #     return True
-# 
-# 
+#
+#
 # def generate_report(results: Dict[str, tuple]) -> str:
 #     """Generate compliance report."""
 #     lines = []
@@ -407,7 +409,7 @@ if __name__ == "__main__":
 #     lines.append("TEMPLATE COMPLIANCE REPORT")
 #     lines.append("=" * 80)
 #     lines.append("")
-# 
+#
 #     # Summary statistics
 #     total_files = len(results)
 #     compliant_files = sum(1 for _, c in results.values() if c.is_compliant)
@@ -416,7 +418,7 @@ if __name__ == "__main__":
 #         if total_files > 0
 #         else 0
 #     )
-# 
+#
 #     lines.append(f"Total Python files analyzed: {total_files}")
 #     if total_files > 0:
 #         lines.append(
@@ -426,21 +428,21 @@ if __name__ == "__main__":
 #     else:
 #         lines.append("No files to analyze")
 #     lines.append("")
-# 
+#
 #     # Detailed results
 #     lines.append("=" * 80)
 #     lines.append("DETAILED RESULTS (sorted by compliance score)")
 #     lines.append("=" * 80)
 #     lines.append("")
-# 
+#
 #     # Sort by compliance score (lowest first)
 #     sorted_results = sorted(
 #         results.items(), key=lambda x: (x[1][1].compliance_score, x[0])
 #     )
-# 
+#
 #     for filepath, (file_info, compliance) in sorted_results:
 #         score = compliance.compliance_score
-# 
+#
 #         # Status indicator
 #         if compliance.is_compliant:
 #             status = "✓ COMPLIANT"
@@ -448,10 +450,10 @@ if __name__ == "__main__":
 #             status = "⚠ PARTIAL"
 #         else:
 #             status = "✗ NON-COMPLIANT"
-# 
+#
 #         lines.append(f"{status} [{score:.0%}] {filepath}")
 #         lines.append(f"  Lines: {file_info.lines}, Size: {file_info.size} bytes")
-# 
+#
 #         # Show missing components
 #         if not compliance.is_compliant:
 #             missing = []
@@ -465,10 +467,10 @@ if __name__ == "__main__":
 #                 missing.append("if __name__ == '__main__'")
 #             if not compliance.is_run_main_unchanged:
 #                 missing.append("run_main() template format")
-# 
+#
 #             if missing:
 #                 lines.append(f"  ❌ REQUIRED Missing: {', '.join(missing)}")
-# 
+#
 #         # Show optional items
 #         optional_missing = []
 #         if not compliance.has_docstring:
@@ -481,18 +483,18 @@ if __name__ == "__main__":
 #             optional_missing.append("scitex session")
 #         if not compliance.has_verbose_param:
 #             optional_missing.append("verbose parameter")
-# 
+#
 #         if optional_missing:
 #             lines.append(f"  ⚠️  OPTIONAL Missing: {', '.join(optional_missing)}")
-# 
+#
 #         lines.append("")
-# 
+#
 #     # Component breakdown
 #     lines.append("=" * 80)
 #     lines.append("COMPONENT BREAKDOWN")
 #     lines.append("=" * 80)
 #     lines.append("")
-# 
+#
 #     components = [
 #         (
 #             "✓ main() function",
@@ -535,27 +537,27 @@ if __name__ == "__main__":
 #             sum(1 for _, c in results.values() if c.has_verbose_param),
 #         ),
 #     ]
-# 
+#
 #     for component, count in components:
 #         percentage = count / total_files * 100 if total_files > 0 else 0
 #         marker = "REQUIRED" if component.startswith("✓") else "OPTIONAL"
 #         lines.append(
 #             f"[{marker}] {component:.<45} {count}/{total_files} ({percentage:.1f}%)"
 #         )
-# 
+#
 #     # Recommendations
 #     lines.append("")
 #     lines.append("=" * 80)
 #     lines.append("RECOMMENDATIONS")
 #     lines.append("=" * 80)
 #     lines.append("")
-# 
+#
 #     non_compliant = [
 #         (path, compliance)
 #         for path, (_, compliance) in results.items()
 #         if not compliance.is_compliant
 #     ]
-# 
+#
 #     if non_compliant:
 #         lines.append(
 #             f"Found {len(non_compliant)} non-compliant files that need updates:"
@@ -579,10 +581,10 @@ if __name__ == "__main__":
 #             lines.append("")
 #     else:
 #         lines.append("✓ All files are compliant! Great job!")
-# 
+#
 #     return "\n".join(lines)
-# 
-# 
+#
+#
 # def main(args):
 #     """Verify SciTeX template format compliance."""
 #     # Determine paths to scan
@@ -602,35 +604,35 @@ if __name__ == "__main__":
 #         # Default to current directory
 #         paths = [Path.cwd()]
 #         base_dir = Path(args.base_dir).resolve() if args.base_dir else Path.cwd()
-# 
+#
 #     logger.info(f"Scanning paths: {[str(p) for p in paths]}")
 #     logger.info(f"Base directory: {base_dir}")
-# 
+#
 #     # Scan Python files
 #     files = scan_python_files(paths, base_dir)
 #     logger.info(f"Found {len(files)} Python files")
-# 
+#
 #     if not files:
 #         logger.warning("No Python files found to analyze")
 #         return 1
-# 
+#
 #     # Check compliance for each file
 #     results = {}
 #     for path, file_info in files.items():
 #         compliance = check_compliance(file_info.content)
 #         results[path] = (file_info, compliance)
-# 
+#
 #     # Generate report
 #     report = generate_report(results)
 #     logger.info("\n" + report)
-# 
+#
 #     # Save report if output path specified
 #     if args.output:
 #         output_path = Path(args.output)
 #         output_path.parent.mkdir(parents=True, exist_ok=True)
 #         output_path.write_text(report)
 #         logger.success(f"Report saved to: {output_path}")
-# 
+#
 #     # Return exit status based on compliance
 #     compliant_count = sum(1 for _, c in results.values() if c.is_compliant)
 #     if compliant_count == len(results):
@@ -639,8 +641,8 @@ if __name__ == "__main__":
 #     else:
 #         logger.warning(f"{len(results) - compliant_count} files need attention")
 #         return 0  # Still return 0 to avoid breaking pipelines
-# 
-# 
+#
+#
 # def parse_args() -> argparse.Namespace:
 #     """Parse command line arguments."""
 #     parser = argparse.ArgumentParser(
@@ -650,16 +652,16 @@ if __name__ == "__main__":
 # Examples:
 #   # Check current directory
 #   python -m scitex.utils._verify_scitex_format
-# 
+#
 #   # Check specific directory
 #   python -m scitex.utils._verify_scitex_format src/scitex/browser
-# 
+#
 #   # Check multiple paths
 #   python -m scitex.utils._verify_scitex_format src/scitex/browser src/scitex/io
-# 
+#
 #   # Check specific file
 #   python -m scitex.utils._verify_scitex_format src/scitex/browser/automation/CookieHandler.py
-# 
+#
 #   # Save report to file
 #   python -m scitex.utils._verify_scitex_format src/scitex/browser -o report.txt
 #         """,
@@ -684,38 +686,38 @@ if __name__ == "__main__":
 #         help="Output file path for report (default: print to stdout)",
 #     )
 #     args = parser.parse_args()
-# 
+#
 #     # Resolve paths BEFORE scitex session changes working directory
 #     original_cwd = Path.cwd()
 #     if args.paths:
 #         args.paths = [str((original_cwd / p).resolve()) for p in args.paths]
 #     else:
 #         args.paths = [str(original_cwd)]
-# 
+#
 #     if args.base_dir:
 #         args.base_dir = str((original_cwd / args.base_dir).resolve())
 #     else:
 #         # Use the original cwd as base
 #         args.base_dir = str(original_cwd)
-# 
+#
 #     if args.output:
 #         args.output = str((original_cwd / args.output).resolve())
-# 
+#
 #     return args
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     global CONFIG, CC, sys, plt, rng
-# 
+#
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     import scitex as stx
-# 
+#
 #     args = parse_args()
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys,
 #         plt,
@@ -725,9 +727,9 @@ if __name__ == "__main__":
 #         verbose=False,
 #         agg=True,
 #     )
-# 
+#
 #     exit_status = main(args)
-# 
+#
 #     stx.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -735,13 +737,13 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # python -m scitex.utils._verify_scitex_format
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

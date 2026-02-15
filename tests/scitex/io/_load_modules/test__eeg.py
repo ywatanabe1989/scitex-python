@@ -467,6 +467,7 @@ class TestLoadEegData:
         with pytest.raises(ValueError, match="No associated files found for .eeg file"):
             _load_eeg_data("standalone.eeg")
 
+
 if __name__ == "__main__":
     import os
 
@@ -480,44 +481,44 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Time-stamp: "2024-11-14 07:56:27 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/io/_load_modules/_eeg.py
-# 
+#
 # import os
 # import warnings
 # from typing import Any
-# 
+#
 # try:
 #     import mne
-# 
+#
 #     MNE_AVAILABLE = True
 # except ImportError:
 #     MNE_AVAILABLE = False
 #     mne = None
-# 
-# 
+#
+#
 # def _load_eeg_data(lpath: str, **kwargs) -> Any:
 #     """
 #     Load EEG data based on file extension and associated files using MNE-Python.
-# 
+#
 #     This function supports various EEG file formats including BrainVision, EDF, BDF, GDF, CNT, EGI, and SET.
 #     It also handles special cases for .eeg files (BrainVision and Nihon Koden).
-# 
+#
 #     Parameters:
 #     -----------
 #     lpath : str
 #         The path to the EEG file to be loaded.
 #     **kwargs : dict
 #         Additional keyword arguments to be passed to the specific MNE loading function.
-# 
+#
 #     Returns:
 #     --------
 #     raw : mne.io.Raw
 #         The loaded raw EEG data.
-# 
+#
 #     Raises:
 #     -------
 #     ValueError
 #         If the file extension is not supported.
-# 
+#
 #     Notes:
 #     ------
 #     This function uses MNE-Python to load the EEG data. It automatically detects the file format
@@ -527,10 +528,10 @@ if __name__ == "__main__":
 #         raise ImportError(
 #             "MNE-Python is not installed. Please install with: pip install mne"
 #         )
-# 
+#
 #     # Get the file extension
 #     extension = lpath.split(".")[-1]
-# 
+#
 #     allowed_extensions = [
 #         "vhdr",
 #         "vmrk",
@@ -542,18 +543,18 @@ if __name__ == "__main__":
 #         "eeg",
 #         "set",
 #     ]
-# 
+#
 #     if extension not in allowed_extensions:
 #         raise ValueError(
 #             f"File must have one of these extensions: {', '.join(allowed_extensions)}"
 #         )
-# 
+#
 #     # Remove preload from kwargs if present - we always use preload=True
 #     kwargs.pop("preload", None)
-# 
+#
 #     with warnings.catch_warnings():
 #         warnings.simplefilter("ignore", RuntimeWarning)
-# 
+#
 #         # Load the data based on the file extension
 #         if extension in ["vhdr", "vmrk"]:
 #             # Load BrainVision data
@@ -584,7 +585,7 @@ if __name__ == "__main__":
 #                 os.path.isfile(lpath.replace(".eeg", ext))
 #                 for ext in [".21e", ".pnt", ".log"]
 #             )
-# 
+#
 #             # Brain Vision
 #             if is_BrainVision:
 #                 lpath_v = lpath.replace(".eeg", ".vhdr")
@@ -597,10 +598,10 @@ if __name__ == "__main__":
 #                 raise ValueError("No associated files found for .eeg file")
 #         else:
 #             raise ValueError(f"Unsupported file extension: {extension}")
-# 
+#
 #         return raw
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

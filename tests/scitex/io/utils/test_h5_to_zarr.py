@@ -16,13 +16,13 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/utils/h5_to_zarr.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/io/utils/h5_to_zarr.py"
-# 
+#
 # """
 # 1. Functionality:
 #    - Migrates HDF5 files to Zarr format
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 # 4. Prerequisites:
 #    - h5py, zarr, numpy
 # """
-# 
+#
 # """Imports"""
 # import h5py
 # import zarr
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 # from pathlib import Path
 # from typing import Optional, Union, Dict, Any, List, Tuple
 # from tqdm import tqdm
-# 
+#
 # from scitex import logging
 # from scitex.logging import (
 #     IOError as SciTeXIOError,
@@ -57,49 +57,49 @@ if __name__ == "__main__":
 #     warn_data_loss,
 #     warn_performance,
 # )
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # def _get_zarr_compressor(
 #     compressor: Optional[Union[str, Any]] = "zstd",
 # ) -> Optional[Any]:
 #     """Get Zarr compressor object from string name."""
 #     if compressor is None:
 #         return None
-# 
+#
 #     if not isinstance(compressor, str):
 #         return compressor
-# 
+#
 #     from numcodecs import Zstd, LZ4, GZip, Blosc
-# 
+#
 #     compressor_map = {
 #         "zstd": Zstd(level=3),
 #         "lz4": LZ4(acceleration=1),
 #         "gzip": GZip(level=5),
 #         "blosc": Blosc(cname="zstd", clevel=3, shuffle=Blosc.BITSHUFFLE),
 #     }
-# 
+#
 #     return compressor_map.get(compressor.lower(), Zstd(level=3))
-# 
-# 
+#
+#
 # def _infer_chunks(
 #     shape: Tuple[int, ...], dtype: np.dtype, target_chunk_mb: float = 10.0
 # ) -> Tuple[int, ...]:
 #     """Infer reasonable chunk sizes based on array shape and dtype."""
 #     if len(shape) == 0:  # Scalar
 #         return None
-# 
+#
 #     # Calculate bytes per element
 #     bytes_per_element = dtype.itemsize
-# 
+#
 #     # Target chunk size in elements
 #     target_elements = (target_chunk_mb * 1024 * 1024) / bytes_per_element
-# 
+#
 #     # Calculate chunk shape
 #     chunks = []
 #     remaining_elements = target_elements
-# 
+#
 #     for dim_size in shape:
 #         if remaining_elements <= 1:
 #             chunks.append(1)
@@ -107,10 +107,10 @@ if __name__ == "__main__":
 #             chunk_dim = min(dim_size, int(remaining_elements))
 #             chunks.append(chunk_dim)
 #             remaining_elements = remaining_elements / chunk_dim
-# 
+#
 #     return tuple(chunks)
-# 
-# 
+#
+#
 # def _copy_h5_attributes(
 #     h5_obj: Union[h5py.Group, h5py.Dataset], zarr_obj: Union[zarr.Group, zarr.Array]
 # ) -> None:
@@ -125,12 +125,12 @@ if __name__ == "__main__":
 #                 value = [v.decode("utf-8", errors="replace") for v in value]
 #             elif isinstance(value, (np.integer, np.floating)):
 #                 value = value.item()  # Convert to Python type
-# 
+#
 #             zarr_obj.attrs[key] = value
 #         except Exception as e:
 #             logger.warning(f"Could not copy attribute '{key}': {e}")
-# 
-# 
+#
+#
 # def _migrate_dataset(
 #     h5_dataset: h5py.Dataset,
 #     zarr_parent: zarr.Group,
@@ -148,11 +148,11 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         logger.warning(f"Skipping corrupted dataset '{name}': {e}")
 #         return None
-# 
+#
 #     # Get dataset info
 #     shape = h5_dataset.shape
 #     dtype = h5_dataset.dtype
-# 
+#
 #     # Handle chunking
 #     if chunks is True:
 #         # Auto-infer chunks
@@ -161,7 +161,7 @@ if __name__ == "__main__":
 #         dataset_chunks = None
 #     else:
 #         dataset_chunks = chunks
-# 
+#
 #     # Handle special dtypes
 #     if dtype.kind == "O":  # Object dtype
 #         warn_data_loss(
@@ -185,7 +185,7 @@ if __name__ == "__main__":
 #                 else:
 #                     # Complex object scalar - pickle
 #                     import pickle
-# 
+#
 #                     pickled_data = pickle.dumps(value)
 #                     zarr_array = zarr_parent.create_dataset(
 #                         name,
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 #                 else:
 #                     # Complex object - pickle
 #                     import pickle
-# 
+#
 #                     pickled_data = pickle.dumps(h5_dataset[:])
 #                     zarr_array = zarr_parent.create_dataset(
 #                         name,
@@ -241,12 +241,12 @@ if __name__ == "__main__":
 #         if show_progress and shape and np.prod(shape) > 1e6:
 #             # Large array - show progress
 #             print(f"  Migrating large dataset '{name}' {shape} {dtype}...")
-# 
+#
 #         # Create Zarr array
 #         zarr_array = zarr_parent.create_dataset(
 #             name, shape=shape, dtype=dtype, chunks=dataset_chunks, compressor=compressor
 #         )
-# 
+#
 #         # Copy data
 #         try:
 #             if shape:  # Non-scalar
@@ -259,13 +259,13 @@ if __name__ == "__main__":
 #                 f"Error copying data for dataset '{name}': {e}. Leaving empty."
 #             )
 #             # The array structure is created but data might be zeros/empty
-# 
+#
 #     # Copy attributes
 #     _copy_h5_attributes(h5_dataset, zarr_array)
-# 
+#
 #     return zarr_array
-# 
-# 
+#
+#
 # def _migrate_group(
 #     h5_group: h5py.Group,
 #     zarr_parent: zarr.Group,
@@ -277,21 +277,21 @@ if __name__ == "__main__":
 #     """Recursively migrate HDF5 group to Zarr."""
 #     # Copy group attributes
 #     _copy_h5_attributes(h5_group, zarr_parent)
-# 
+#
 #     # Iterate through group items
 #     try:
 #         keys = list(h5_group.keys())
 #     except Exception as e:
 #         logger.warning(f"Cannot access group keys: {e}")
 #         return
-# 
+#
 #     for key in keys:
 #         try:
 #             item = h5_group[key]
 #         except Exception as e:
 #             logger.warning(f"Cannot access item '{key}': {e}")
 #             continue
-# 
+#
 #         if isinstance(item, h5py.Dataset):
 #             # Migrate dataset
 #             result = _migrate_dataset(
@@ -299,21 +299,21 @@ if __name__ == "__main__":
 #             )
 #             if result is None:
 #                 print(f"  Warning: Skipped corrupted dataset '{key}'")
-# 
+#
 #         elif isinstance(item, h5py.Group):
 #             # Create subgroup and migrate recursively
 #             if show_progress and _level < 2:
 #                 print(f"{'  ' * _level}Migrating group '{key}'...")
-# 
+#
 #             zarr_subgroup = zarr_parent.create_group(key)
 #             _migrate_group(
 #                 item, zarr_subgroup, compressor, chunks, show_progress, _level + 1
 #             )
-# 
+#
 #         else:
 #             logger.warning(f"Unknown HDF5 object type for '{key}': {type(item)}")
-# 
-# 
+#
+#
 # def migrate_h5_to_zarr(
 #     h5_path: Union[str, Path],
 #     zarr_path: Optional[Union[str, Path]] = None,
@@ -325,7 +325,7 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Migrate HDF5 file to Zarr format.
-# 
+#
 #     Parameters
 #     ----------
 #     h5_path : str or Path
@@ -342,12 +342,12 @@ if __name__ == "__main__":
 #         Whether to show migration progress
 #     validate : bool, optional
 #         Whether to validate the migration by comparing shapes
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Path to created Zarr store
-# 
+#
 #     Raises
 #     ------
 #     PathNotFoundError
@@ -356,15 +356,15 @@ if __name__ == "__main__":
 #         If input is not a valid HDF5 file
 #     SciTeXIOError
 #         If migration fails
-# 
+#
 #     Examples
 #     --------
 #     >>> # Basic migration
 #     >>> migrate_h5_to_zarr("data.h5")
-# 
+#
 #     >>> # Custom output and compression
 #     >>> migrate_h5_to_zarr("data.h5", "output.zarr", compressor="lz4")
-# 
+#
 #     >>> # Specific chunking
 #     >>> migrate_h5_to_zarr("large_data.h5", chunks=(100, 100, 10))
 #     """
@@ -377,7 +377,7 @@ if __name__ == "__main__":
 #         # For absolute paths, just check existence
 #         if not h5_path.exists():
 #             raise PathNotFoundError(str(h5_path))
-# 
+#
 #     # Determine output path
 #     if zarr_path is None:
 #         zarr_path = h5_path.with_suffix(".zarr")
@@ -386,49 +386,49 @@ if __name__ == "__main__":
 #         # Allow absolute paths if explicitly provided
 #         if not zarr_path.is_absolute():
 #             check_path(str(zarr_path))
-# 
+#
 #     # Check if output exists
 #     if zarr_path.exists() and not overwrite:
 #         raise SciTeXIOError(
 #             f"Zarr store already exists: {zarr_path}",
 #             suggestion="Use overwrite=True to replace existing store",
 #         )
-# 
+#
 #     # Get compressor
 #     compressor_obj = _get_zarr_compressor(compressor)
-# 
+#
 #     if show_progress:
 #         print(f"Migrating HDF5 to Zarr:")
 #         print(f"  Source: {h5_path}")
 #         print(f"  Target: {zarr_path}")
 #         print(f"  Compressor: {compressor}")
-# 
+#
 #     try:
 #         # Open HDF5 file
 #         with h5py.File(str(h5_path), "r") as h5_file:
 #             # Create or open Zarr store
 #             if zarr_path.exists() and overwrite:
 #                 import shutil
-# 
+#
 #                 shutil.rmtree(zarr_path)
-# 
+#
 #             zarr_store = zarr.open(str(zarr_path), mode="w")
-# 
+#
 #             # Migrate root attributes
 #             _copy_h5_attributes(h5_file, zarr_store)
-# 
+#
 #             # Migrate all groups and datasets
 #             _migrate_group(h5_file, zarr_store, compressor_obj, chunks, show_progress)
-# 
+#
 #             if show_progress:
 #                 print("Migration complete!")
-# 
+#
 #             # Validation
 #             if validate:
 #                 if show_progress:
 #                     print("Validating migration...")
 #                 _validate_migration(h5_file, zarr_store, show_progress)
-# 
+#
 #     except OSError as e:
 #         if "Unable to open file" in str(e) or "bad symbol table" in str(e):
 #             # File is corrupted
@@ -446,15 +446,15 @@ if __name__ == "__main__":
 #             context={"h5_path": str(h5_path), "zarr_path": str(zarr_path)},
 #             suggestion="Check file permissions and disk space",
 #         )
-# 
+#
 #     return str(zarr_path)
-# 
-# 
+#
+#
 # def _validate_migration(
 #     h5_file: h5py.File, zarr_store: zarr.Group, show_progress: bool = False
 # ) -> None:
 #     """Validate that migration preserved data structure."""
-# 
+#
 #     def validate_item(h5_item, zarr_item, path=""):
 #         if isinstance(h5_item, h5py.Dataset) and isinstance(zarr_item, zarr.Array):
 #             # Compare shapes
@@ -470,12 +470,12 @@ if __name__ == "__main__":
 #                         f"Dtype mismatch at {path}: "
 #                         f"HDF5={h5_item.dtype}, Zarr={zarr_item.dtype}"
 #                     )
-# 
+#
 #         elif isinstance(h5_item, h5py.Group) and isinstance(zarr_item, zarr.Group):
 #             # Compare keys
 #             h5_keys = set(h5_item.keys())
 #             zarr_keys = set(zarr_item.keys())
-# 
+#
 #             if h5_keys != zarr_keys:
 #                 raise SciTeXIOError(
 #                     f"Key mismatch at {path}",
@@ -484,17 +484,17 @@ if __name__ == "__main__":
 #                         "zarr_only": zarr_keys - h5_keys,
 #                     },
 #                 )
-# 
+#
 #             # Validate recursively
 #             for key in h5_keys:
 #                 validate_item(h5_item[key], zarr_item[key], f"{path}/{key}")
-# 
+#
 #     validate_item(h5_file, zarr_store)
-# 
+#
 #     if show_progress:
 #         print("  Validation passed ✓")
-# 
-# 
+#
+#
 # def migrate_h5_to_zarr_batch(
 #     h5_paths: List[Union[str, Path]],
 #     output_dir: Optional[Union[str, Path]] = None,
@@ -506,7 +506,7 @@ if __name__ == "__main__":
 # ) -> List[str]:
 #     """
 #     Migrate multiple HDF5 files to Zarr format.
-# 
+#
 #     Parameters
 #     ----------
 #     h5_paths : list of str or Path
@@ -523,19 +523,19 @@ if __name__ == "__main__":
 #         Whether to process files in parallel
 #     n_workers : int, optional
 #         Number of parallel workers (defaults to CPU count)
-# 
+#
 #     Returns
 #     -------
 #     list of str
 #         Paths to created Zarr stores
-# 
+#
 #     Examples
 #     --------
 #     >>> # Migrate all HDF5 files in directory
 #     >>> import glob
 #     >>> h5_files = glob.glob("data/*.h5")
 #     >>> zarr_paths = migrate_h5_to_zarr_batch(h5_files)
-# 
+#
 #     >>> # Parallel migration to specific directory
 #     >>> zarr_paths = migrate_h5_to_zarr_batch(
 #     ...     h5_files,
@@ -544,7 +544,7 @@ if __name__ == "__main__":
 #     ... )
 #     """
 #     h5_paths = [Path(p) for p in h5_paths]
-# 
+#
 #     # Determine output paths
 #     zarr_paths = []
 #     for h5_path in h5_paths:
@@ -555,21 +555,21 @@ if __name__ == "__main__":
 #             output_dir_path.mkdir(parents=True, exist_ok=True)
 #             zarr_path = output_dir_path / h5_path.with_suffix(".zarr").name
 #         zarr_paths.append(zarr_path)
-# 
+#
 #     print(f"Migrating {len(h5_paths)} HDF5 files to Zarr format...")
-# 
+#
 #     if parallel and len(h5_paths) > 1:
 #         # Parallel processing
 #         from concurrent.futures import ProcessPoolExecutor, as_completed
-# 
+#
 #         if n_workers is None:
 #             n_workers = min(os.cpu_count() or 4, len(h5_paths))
-# 
+#
 #         print(f"Using {n_workers} parallel workers...")
-# 
+#
 #         # Define a module-level function to avoid pickling issues
 #         import functools
-# 
+#
 #         migrate_func = functools.partial(
 #             migrate_h5_to_zarr,
 #             compressor=compressor,
@@ -578,13 +578,13 @@ if __name__ == "__main__":
 #             show_progress=False,
 #             validate=True,
 #         )
-# 
+#
 #         with ProcessPoolExecutor(max_workers=n_workers) as executor:
 #             futures = {
 #                 executor.submit(migrate_func, h5_path, zarr_path): i
 #                 for i, (h5_path, zarr_path) in enumerate(zip(h5_paths, zarr_paths))
 #             }
-# 
+#
 #             results = []
 #             with tqdm(total=len(h5_paths), desc="Migrating") as pbar:
 #                 for future in as_completed(futures):
@@ -597,11 +597,11 @@ if __name__ == "__main__":
 #                         print(f"\nError migrating {h5_paths[idx]}: {e}")
 #                         results.append((idx, None))
 #                         pbar.update(1)
-# 
+#
 #             # Sort results by original order
 #             results.sort(key=lambda x: x[0])
 #             migrated_paths = [r[1] for r in results if r[1] is not None]
-# 
+#
 #     else:
 #         # Sequential processing
 #         migrated_paths = []
@@ -621,17 +621,17 @@ if __name__ == "__main__":
 #                 migrated_paths.append(result)
 #             except Exception as e:
 #                 print(f"\nError migrating {h5_path}: {e}")
-# 
+#
 #     print(f"\nSuccessfully migrated {len(migrated_paths)}/{len(h5_paths)} files")
-# 
+#
 #     return migrated_paths
-# 
-# 
+#
+#
 # # Example usage in docstring
 # if __name__ == "__main__":
 #     # Example 1: Basic migration
 #     # migrate_h5_to_zarr("data.h5")
-# 
+#
 #     # Example 2: Custom settings
 #     # migrate_h5_to_zarr(
 #     #     "large_data.h5",
@@ -639,12 +639,12 @@ if __name__ == "__main__":
 #     #     compressor="blosc",
 #     #     chunks=(100, 100, 10)
 #     # )
-# 
+#
 #     # Example 3: Batch migration
 #     # import glob
 #     # h5_files = glob.glob("*.h5")
 #     # migrate_h5_to_zarr_batch(h5_files, parallel=True)
-# 
+#
 #     pass
 
 # --------------------------------------------------------------------------------

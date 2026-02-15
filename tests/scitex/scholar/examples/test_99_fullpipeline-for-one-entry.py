@@ -17,49 +17,49 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Functionalities:
 # - Demonstrates complete Scholar workflow for single paper processing
 # - Shows end-to-end pipeline from search to PDF download
 # - Integrates all Scholar components in sequence
 # - Tests full automated academic paper acquisition workflow
-# 
+#
 # Dependencies:
 # - scripts:
 #   - None
 # - packages:
 #   - scitex, asyncio, pathlib
-# 
+#
 # Input:
 # - Paper title for search query
 # - Browser and caching configuration
-# 
+#
 # Output:
 # - Downloaded PDF files in specified directory
 # - Console output showing pipeline progress
 # - Comprehensive metadata and URL information
 # """
-# 
+#
 # """Imports"""
 # import argparse
 # import asyncio
 # from pathlib import Path
 # from pprint import pprint
-# 
+#
 # import scitex as stx
-# 
+#
 # """Warnings"""
-# 
+#
 # """Parameters"""
-# 
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # async def run_full_pipeline(
 #     title: str,
 #     use_cache: bool = False,
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 #     output_dir: str = "/tmp/scholar_pipeline",
 # ) -> list:
 #     """Run complete Scholar pipeline for a single paper.
-# 
+#
 #     Parameters
 #     ----------
 #     title : str
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 #         Chrome profile to use
 #     output_dir : str, default="/tmp/scholar_pipeline"
 #         Directory to save downloaded PDFs
-# 
+#
 #     Returns
 #     -------
 #     list
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 #         ScholarPDFDownloader,
 #         ScholarURLFinder,
 #     )
-# 
+#
 #     print(
 #         f"🌐 Initializing browser ({browser_mode} mode, profile: {chrome_profile})..."
 #     )
@@ -107,77 +107,77 @@ if __name__ == "__main__":
 #         browser,
 #         context,
 #     ) = await browser_manager.get_authenticated_browser_and_context_async()
-# 
+#
 #     print("🔧 Initializing Scholar components...")
 #     engine = ScholarEngine()
 #     url_finder = ScholarURLFinder(context, use_cache=use_cache)
 #     pdf_downloader = ScholarPDFDownloader(context, use_cache=use_cache)
-# 
+#
 #     print("=" * 50)
 #     print("🔍 1. Searching for metadata...")
 #     print("=" * 50)
 #     print(f"📝 Query title: {title}")
-# 
+#
 #     metadata = await engine.search_async(title=title)
 #     doi = metadata.get("id", {}).get("doi")
-# 
+#
 #     if not doi:
 #         print("❌ No DOI found for the paper")
 #         return []
-# 
+#
 #     print(f"🆔 Found DOI: {doi}")
-# 
+#
 #     print("=" * 50)
 #     print("🔗 2. Finding URLs...")
 #     print("=" * 50)
-# 
+#
 #     urls = await url_finder.find_urls(doi=doi)
 #     print("📊 URL Finding Results:")
 #     pprint(urls)
-# 
+#
 #     if not urls.get("urls_pdf"):
 #         print("❌ No PDF URLs found")
 #         return []
-# 
+#
 #     print("=" * 50)
 #     print("📥 3. Downloading PDFs...")
 #     print("=" * 50)
-# 
+#
 #     # Ensure output directory exists
 #     output_path = Path(output_dir)
 #     output_path.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     urls_pdf = [url_info["url"] for url_info in urls["urls_pdf"]]
 #     print(f"📄 Found {len(urls_pdf)} PDF URLs to download")
-# 
+#
 #     downloaded_paths = []
 #     for i_pdf_url, pdf_url in enumerate(urls_pdf):
 #         output_file = output_path / f"paper_{i_pdf_url:02d}.pdf"
-# 
+#
 #         print(f"📥 Downloading PDF {i_pdf_url + 1}/{len(urls_pdf)}: {pdf_url}")
-# 
+#
 #         saved_path = await pdf_downloader.download_from_url(pdf_url, output_file)
-# 
+#
 #         if saved_path:
 #             downloaded_paths.append(saved_path)
 #             print(f"✅ Downloaded: {saved_path}")
 #         else:
 #             print(f"❌ Failed to download: {pdf_url}")
-# 
+#
 #     print(
 #         f"\n📊 Download Summary: {len(downloaded_paths)}/{len(urls_pdf)} PDFs downloaded"
 #     )
 #     return downloaded_paths
-# 
-# 
+#
+#
 # async def main_async(args) -> list:
 #     """Main async function to run the full pipeline.
-# 
+#
 #     Parameters
 #     ----------
 #     args : argparse.Namespace
 #         Command line arguments
-# 
+#
 #     Returns
 #     -------
 #     list
@@ -185,7 +185,7 @@ if __name__ == "__main__":
 #     """
 #     print("🚀 Scholar Full Pipeline Demonstration")
 #     print("=" * 40)
-# 
+#
 #     results = await run_full_pipeline(
 #         title=args.title,
 #         use_cache=args.use_cache,
@@ -193,24 +193,24 @@ if __name__ == "__main__":
 #         chrome_profile=args.chrome_profile,
 #         output_dir=args.output_dir,
 #     )
-# 
+#
 #     if results:
 #         print("✅ Full pipeline completed successfully")
 #         print(f"📁 Downloaded files: {results}")
 #     else:
 #         print("❌ No files were downloaded")
-# 
+#
 #     return results
-# 
-# 
+#
+#
 # def main(args) -> int:
 #     """Main function wrapper for asyncio execution.
-# 
+#
 #     Parameters
 #     ----------
 #     args : argparse.Namespace
 #         Command line arguments
-# 
+#
 #     Returns
 #     -------
 #     int
@@ -222,8 +222,8 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         print(f"❌ Error: {e}")
 #         return 1
-# 
-# 
+#
+#
 # def parse_args() -> argparse.Namespace:
 #     """Parse command line arguments."""
 #     parser = argparse.ArgumentParser(
@@ -267,18 +267,18 @@ if __name__ == "__main__":
 #     args = parser.parse_args()
 #     stx.str.printc(args, c="yellow")
 #     return args
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     global CONFIG, CC, sys, plt
-# 
+#
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     args = parse_args()
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = stx.session.start(
 #         sys,
 #         plt,
@@ -287,9 +287,9 @@ if __name__ == "__main__":
 #         verbose=False,
 #         agg=True,
 #     )
-# 
+#
 #     exit_status = main(args)
-# 
+#
 #     stx.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -297,11 +297,11 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

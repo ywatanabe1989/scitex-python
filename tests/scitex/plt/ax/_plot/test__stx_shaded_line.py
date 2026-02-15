@@ -14,19 +14,19 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-01 13:15:00 (ywatanabe)"
 # # File: ./src/scitex/plt/ax/_plot/_plot_shaded_line.py
-# 
+#
 # """Line plots with shaded uncertainty regions (e.g., confidence intervals)."""
-# 
+#
 # from typing import Any, List, Optional, Tuple, Union
-# 
+#
 # import numpy as np
 # import pandas as pd
 # from matplotlib.axes import Axes
-# 
+#
 # from scitex.types import ColorLike
 # from ....plt.utils import assert_valid_axis
-# 
-# 
+#
+#
 # def _plot_single_shaded_line(
 #     axis: Union[Axes, "AxisWrapper"],
 #     xx: np.ndarray,
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 #     **kwargs: Any,
 # ) -> Tuple[Union[Axes, "AxisWrapper"], pd.DataFrame]:
 #     """Plot a single line with shaded area between y_lower and y_upper bounds.
-# 
+#
 #     Parameters
 #     ----------
 #     axis : matplotlib.axes.Axes or AxisWrapper
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 #         Transparency for shaded region.
 #     **kwargs : dict
 #         Additional keyword arguments passed to plot().
-# 
+#
 #     Returns
 #     -------
 #     axis : matplotlib.axes.Axes or AxisWrapper
@@ -71,18 +71,18 @@ if __name__ == "__main__":
 #     assert len(xx) == len(y_middle) == len(y_lower) == len(y_upper), (
 #         "All arrays must have the same length"
 #     )
-# 
+#
 #     label = kwargs.pop("label", None)
 #     axis.plot(xx, y_middle, color=color, alpha=alpha, label=label, **kwargs)
 #     kwargs["linewidth"] = 0
 #     kwargs["edgecolor"] = "none"  # Remove edge line
 #     axis.fill_between(xx, y_lower, y_upper, alpha=alpha, color=color, **kwargs)
-# 
+#
 #     return axis, pd.DataFrame(
 #         {"x": xx, "y_lower": y_lower, "y_middle": y_middle, "y_upper": y_upper}
 #     )
-# 
-# 
+#
+#
 # def _plot_shaded_line(
 #     axis: Union[Axes, "AxisWrapper"],
 #     xs: List[np.ndarray],
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 #     **kwargs: Any,
 # ) -> Tuple[Union[Axes, "AxisWrapper"], List[pd.DataFrame]]:
 #     """Plot multiple lines with shaded areas between ys_lower and ys_upper bounds.
-# 
+#
 #     Parameters
 #     ----------
 #     axis : matplotlib.axes.Axes or AxisWrapper
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 #         Color(s) for lines and fills.
 #     **kwargs : dict
 #         Additional keyword arguments passed to plot().
-# 
+#
 #     Returns
 #     -------
 #     axis : matplotlib.axes.Axes or AxisWrapper
@@ -124,18 +124,18 @@ if __name__ == "__main__":
 #     assert len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper), (
 #         "All input lists must have the same length"
 #     )
-# 
+#
 #     results = []
 #     colors = color
 #     color_list = colors
-# 
+#
 #     if colors is not None:
 #         if not isinstance(colors, list):
 #             color_list = [colors] * len(xs)
 #         else:
 #             assert len(colors) == len(xs), "Number of colors must match number of lines"
 #             color_list = colors
-# 
+#
 #         for idx, (xx, y_lower, y_middle, y_upper) in enumerate(
 #             zip(xs, ys_lower, ys_middle, ys_upper)
 #         ):
@@ -151,10 +151,10 @@ if __name__ == "__main__":
 #                 axis, xx, y_lower, y_middle, y_upper, **kwargs
 #             )
 #             results.append(result_df)
-# 
+#
 #     return axis, results
-# 
-# 
+#
+#
 # def stx_shaded_line(
 #     axis: Union[Axes, "AxisWrapper"],
 #     xs: Union[np.ndarray, List[np.ndarray]],
@@ -165,10 +165,10 @@ if __name__ == "__main__":
 #     **kwargs: Any,
 # ) -> Tuple[Union[Axes, "AxisWrapper"], Union[pd.DataFrame, List[pd.DataFrame]]]:
 #     """Plot line(s) with shaded uncertainty regions.
-# 
+#
 #     Automatically handles both single and multiple line cases. Useful for
 #     plotting mean/median with confidence intervals or standard deviation bands.
-# 
+#
 #     Parameters
 #     ----------
 #     axis : matplotlib.axes.Axes or AxisWrapper
@@ -185,7 +185,7 @@ if __name__ == "__main__":
 #         Color(s) for lines and shaded regions.
 #     **kwargs : dict
 #         Additional keyword arguments passed to plot().
-# 
+#
 #     Returns
 #     -------
 #     axis : matplotlib.axes.Axes or AxisWrapper
@@ -193,7 +193,7 @@ if __name__ == "__main__":
 #     data : pd.DataFrame or list of pd.DataFrame
 #         DataFrame(s) containing plot data with columns:
 #         x, y_lower, y_middle, y_upper.
-# 
+#
 #     Examples
 #     --------
 #     >>> import numpy as np
@@ -213,12 +213,12 @@ if __name__ == "__main__":
 #         and isinstance(ys_middle, list)
 #         and isinstance(ys_upper, list)
 #     )
-# 
+#
 #     if is_single:
 #         assert len(xs) == len(ys_lower) == len(ys_middle) == len(ys_upper), (
 #             "All arrays must have the same length for single line plot"
 #         )
-# 
+#
 #         return _plot_single_shaded_line(
 #             axis, xs, ys_lower, ys_middle, ys_upper, color=color, **kwargs
 #         )
@@ -226,8 +226,8 @@ if __name__ == "__main__":
 #         return _plot_shaded_line(
 #             axis, xs, ys_lower, ys_middle, ys_upper, color=color, **kwargs
 #         )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

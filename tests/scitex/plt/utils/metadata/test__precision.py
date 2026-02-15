@@ -13,19 +13,19 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: scitex/plt/utils/metadata/_precision.py
-# 
+#
 # """
 # Numeric precision utilities for metadata rounding.
-# 
+#
 # This module provides utilities to round numeric values in metadata dictionaries
 # with appropriate precision based on the type of measurement (mm, inch, px, etc.).
-# 
+#
 # This module has been refactored: the implementation is now split across multiple
 # specialized modules. This file serves as a backward compatibility layer.
 # """
-# 
+#
 # from typing import Dict, List, Union
-# 
+#
 # # Import from specialized modules
 # from ._precision_config import PRECISION, FixedFloat, _round_value, _round_list
 # from ._precision_sections import (
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 #     _round_geometry_dict,
 #     _round_trace,  # Backward compatibility alias
 # )
-# 
+#
 # __all__ = [
 #     "PRECISION",
 #     "FixedFloat",
@@ -60,12 +60,12 @@ if __name__ == "__main__":
 #     "_round_artist",
 #     "_round_trace",  # Backward compatibility
 # ]
-# 
-# 
+#
+#
 # def _round_dict(d: dict, precision_map: dict = None) -> dict:
 #     """
 #     Round all float values in a dict based on key-specific precision.
-# 
+#
 #     Parameters
 #     ----------
 #     d : dict
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 #     """
 #     if precision_map is None:
 #         precision_map = {}
-# 
+#
 #     result = {}
 #     for key, value in d.items():
 #         # Determine precision based on key name
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 #             prec = PRECISION["linewidth"]
 #         else:
 #             prec = precision_map.get(key, 3)  # Default 3 decimals
-# 
+#
 #         if isinstance(value, dict):
 #             result[key] = _round_dict(value, precision_map)
 #         elif isinstance(value, list):
@@ -101,14 +101,14 @@ if __name__ == "__main__":
 #             result[key] = _round_value(value, prec)
 #         else:
 #             result[key] = value
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # def _round_metadata(metadata: dict) -> dict:
 #     """
 #     Apply appropriate precision rounding to all numeric values in metadata.
-# 
+#
 #     Precision rules:
 #     - mm values: 2 decimal places (0.01mm = 10 microns)
 #     - inch values: 3 decimal places
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 #     - px values: integers (no decimals)
 #     """
 #     result = {}
-# 
+#
 #     for key, value in metadata.items():
 #         if key in ("scitex_schema", "scitex_schema_version", "figure_uuid"):
 #             # String fields - no rounding
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 #             result[key] = value
 #         else:
 #             result[key] = value
-# 
+#
 #     return result
 
 # --------------------------------------------------------------------------------

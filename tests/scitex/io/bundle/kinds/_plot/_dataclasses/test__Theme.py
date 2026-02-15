@@ -13,20 +13,20 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-21
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fts/_fig/_dataclasses/_Theme.py
-# 
+#
 # """Theme - Visual aesthetics for FTS bundles."""
-# 
+#
 # import json
 # from dataclasses import dataclass, field
 # from typing import Any, Dict, List, Optional
-# 
+#
 # THEME_VERSION = "1.0.0"
-# 
-# 
+#
+#
 # @dataclass
 # class Colors:
 #     """Color palette configuration."""
-# 
+#
 #     palette: List[str] = field(
 #         default_factory=lambda: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
 #     )
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 #     text: str = "#000000"
 #     axis: str = "#333333"
 #     grid: str = "#e0e0e0"
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "palette": self.palette,
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 #         if self.secondary:
 #             result["secondary"] = self.secondary
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "Colors":
 #         # Return if already a Colors instance
@@ -67,18 +67,18 @@ if __name__ == "__main__":
 #             axis=data.get("axis", "#333333"),
 #             grid=data.get("grid", "#e0e0e0"),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class Typography:
 #     """Typography configuration."""
-# 
+#
 #     family: str = "sans-serif"
 #     size_pt: float = 8.0
 #     title_size_pt: float = 10.0
 #     label_size_pt: float = 8.0
 #     tick_size_pt: float = 7.0
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "family": self.family,
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 #             "label_size_pt": self.label_size_pt,
 #             "tick_size_pt": self.tick_size_pt,
 #         }
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "Typography":
 #         # Return if already a Typography instance
@@ -102,18 +102,18 @@ if __name__ == "__main__":
 #             label_size_pt=data.get("label_size_pt", data.get("label_size", 8.0)),
 #             tick_size_pt=data.get("tick_size_pt", data.get("tick_size", 7.0)),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class Lines:
 #     """Line style configuration."""
-# 
+#
 #     width_pt: float = 1.0
 #     style: str = "solid"  # solid, dashed, dotted, dashdot
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {"width_pt": self.width_pt, "style": self.style}
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "Lines":
 #         if isinstance(data, cls):
@@ -124,18 +124,18 @@ if __name__ == "__main__":
 #             width_pt=data.get("width_pt", 1.0),
 #             style=data.get("style", "solid"),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class Markers:
 #     """Marker style configuration."""
-# 
+#
 #     size_pt: float = 4.0
 #     symbol: str = "circle"  # circle, square, triangle, cross, diamond
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {"size_pt": self.size_pt, "symbol": self.symbol}
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "Markers":
 #         if isinstance(data, cls):
@@ -146,18 +146,18 @@ if __name__ == "__main__":
 #             size_pt=data.get("size_pt", 4.0),
 #             symbol=data.get("symbol", "circle"),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class Grid:
 #     """Grid line configuration."""
-# 
+#
 #     show: bool = True
 #     major_width_pt: float = 0.5
 #     minor_width_pt: float = 0.25
 #     major_alpha: float = 0.3
 #     minor_alpha: float = 0.1
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "show": self.show,
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 #             "major_alpha": self.major_alpha,
 #             "minor_alpha": self.minor_alpha,
 #         }
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "Grid":
 #         if isinstance(data, cls):
@@ -182,18 +182,18 @@ if __name__ == "__main__":
 #             major_alpha=data.get("major_alpha", 0.3),
 #             minor_alpha=data.get("minor_alpha", 0.1),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class TraceTheme:
 #     """Per-trace theme overrides."""
-# 
+#
 #     trace_id: str
 #     color: Optional[str] = None
 #     line_width_pt: Optional[float] = None
 #     marker_size_pt: Optional[float] = None
 #     alpha: Optional[float] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"trace_id": self.trace_id}
 #         if self.color:
@@ -205,7 +205,7 @@ if __name__ == "__main__":
 #         if self.alpha is not None:
 #             result["alpha"] = self.alpha
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "TraceTheme":
 #         if isinstance(data, cls):
@@ -219,18 +219,18 @@ if __name__ == "__main__":
 #             marker_size_pt=data.get("marker_size_pt"),
 #             alpha=data.get("alpha"),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class FigureTitle:
 #     """Figure title configuration for publications."""
-# 
+#
 #     text: str = ""
 #     prefix: str = "Figure"
 #     number: Optional[int] = None
 #     fontsize: Optional[float] = None
 #     fontweight: str = "bold"
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"text": self.text, "prefix": self.prefix, "fontweight": self.fontweight}
 #         if self.number is not None:
@@ -238,7 +238,7 @@ if __name__ == "__main__":
 #         if self.fontsize is not None:
 #             result["fontsize"] = self.fontsize
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "FigureTitle":
 #         if isinstance(data, cls):
@@ -252,18 +252,18 @@ if __name__ == "__main__":
 #             fontsize=data.get("fontsize"),
 #             fontweight=data.get("fontweight", "bold"),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class PanelDescription:
 #     """Single panel description for captions."""
-# 
+#
 #     label: str
 #     description: str
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {"label": self.label, "description": self.description}
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "PanelDescription":
 #         if isinstance(data, cls):
@@ -274,21 +274,21 @@ if __name__ == "__main__":
 #             label=data.get("label", ""),
 #             description=data.get("description", ""),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class Caption:
 #     """Figure caption for publications."""
-# 
+#
 #     text: str = ""
 #     panels: List[PanelDescription] = field(default_factory=list)
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"text": self.text}
 #         if self.panels:
 #             result["panels"] = [p.to_dict() for p in self.panels]
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "Caption":
 #         if isinstance(data, cls):
@@ -297,19 +297,19 @@ if __name__ == "__main__":
 #             return cls()
 #         panels = [PanelDescription.from_dict(p) for p in data.get("panels", [])]
 #         return cls(text=data.get("text", ""), panels=panels)
-# 
-# 
+#
+#
 # @dataclass
 # class PanelLabels:
 #     """Panel label styling (A, B, C, etc.)."""
-# 
+#
 #     style: str = "uppercase"  # uppercase, lowercase, numeric
 #     fontsize: float = 12.0
 #     fontweight: str = "bold"
 #     position: str = "top-left"  # top-left, top-right, bottom-left, bottom-right
 #     offset_x: float = 0.02
 #     offset_y: float = 0.98
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         return {
 #             "style": self.style,
@@ -319,7 +319,7 @@ if __name__ == "__main__":
 #             "offset_x": self.offset_x,
 #             "offset_y": self.offset_y,
 #         }
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Any) -> "PanelLabels":
 #         if isinstance(data, cls):
@@ -334,41 +334,41 @@ if __name__ == "__main__":
 #             offset_x=data.get("offset_x", 0.02),
 #             offset_y=data.get("offset_y", 0.98),
 #         )
-# 
-# 
+#
+#
 # @dataclass
 # class Theme:
 #     """Complete theme specification for an FTS bundle.
-# 
+#
 #     Stored in canonical/theme.json.
 #     """
-# 
+#
 #     # Core mode
 #     mode: str = "light"  # "light" | "dark"
-# 
+#
 #     # Styling components
 #     colors: Colors = field(default_factory=Colors)
 #     typography: Typography = field(default_factory=Typography)
 #     lines: Lines = field(default_factory=Lines)
 #     markers: Markers = field(default_factory=Markers)
 #     grid: Grid = field(default_factory=Grid)
-# 
+#
 #     # Per-trace overrides
 #     traces: List[TraceTheme] = field(default_factory=list)
-# 
+#
 #     # Publication metadata
 #     preset: Optional[str] = None  # nature, science, cell, ieee, acs, minimal, presentation
 #     figure_title: Optional[FigureTitle] = None
 #     caption: Optional[Caption] = None
 #     panel_labels: Optional[PanelLabels] = None
-# 
+#
 #     # Alias for typography (for convenience)
 #     fonts: Optional[Typography] = None
-# 
+#
 #     # Schema metadata
 #     schema_name: str = "fts.theme"
 #     schema_version: str = THEME_VERSION
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {
 #             "mode": self.mode,
@@ -389,10 +389,10 @@ if __name__ == "__main__":
 #         if self.panel_labels:
 #             result["panel_labels"] = self.panel_labels.to_dict()
 #         return result
-# 
+#
 #     def to_json(self, indent: int = 2) -> str:
 #         return json.dumps(self.to_dict(), indent=indent)
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "Theme":
 #         # Handle fonts as alias for typography
@@ -400,22 +400,22 @@ if __name__ == "__main__":
 #         fonts_data = data.get("fonts")
 #         if fonts_data and not typography_data:
 #             typography_data = fonts_data
-# 
+#
 #         # Parse figure_title
 #         figure_title = None
 #         if "figure_title" in data and data["figure_title"]:
 #             figure_title = FigureTitle.from_dict(data["figure_title"])
-# 
+#
 #         # Parse caption
 #         caption = None
 #         if "caption" in data and data["caption"]:
 #             caption = Caption.from_dict(data["caption"])
-# 
+#
 #         # Parse panel_labels
 #         panel_labels = None
 #         if "panel_labels" in data and data["panel_labels"]:
 #             panel_labels = PanelLabels.from_dict(data["panel_labels"])
-# 
+#
 #         return cls(
 #             mode=data.get("mode", "light"),
 #             colors=Colors.from_dict(data.get("colors", {})),
@@ -429,12 +429,12 @@ if __name__ == "__main__":
 #             caption=caption,
 #             panel_labels=panel_labels,
 #         )
-# 
+#
 #     @classmethod
 #     def from_json(cls, json_str: str) -> "Theme":
 #         return cls.from_dict(json.loads(json_str))
-# 
-# 
+#
+#
 # __all__ = [
 #     "THEME_VERSION",
 #     "Colors",
@@ -449,7 +449,7 @@ if __name__ == "__main__":
 #     "PanelLabels",
 #     "Theme",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -3,17 +3,10 @@
 """Tests for custom log levels."""
 
 import logging
+
 import pytest
 
-from scitex.logging._levels import (
-    SUCCESS,
-    FAIL,
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR,
-    CRITICAL,
-)
+from scitex.logging._levels import CRITICAL, DEBUG, ERROR, FAIL, INFO, SUCCESS, WARNING
 
 
 class TestLogLevels:
@@ -33,19 +26,19 @@ class TestLogLevels:
 
     def test_success_level_name(self):
         """Test SUCCESS level has correct name."""
-        assert logging.getLevelName(SUCCESS) == 'SUCC'
+        assert logging.getLevelName(SUCCESS) == "SUCC"
 
     def test_fail_level_name(self):
         """Test FAIL level has correct name."""
-        assert logging.getLevelName(FAIL) == 'FAIL'
+        assert logging.getLevelName(FAIL) == "FAIL"
 
     def test_standard_level_names(self):
         """Test standard levels have 4-character names."""
-        assert logging.getLevelName(DEBUG) == 'DEBU'
-        assert logging.getLevelName(INFO) == 'INFO'
-        assert logging.getLevelName(WARNING) == 'WARN'
-        assert logging.getLevelName(ERROR) == 'ERRO'
-        assert logging.getLevelName(CRITICAL) == 'CRIT'
+        assert logging.getLevelName(DEBUG) == "DEBU"
+        assert logging.getLevelName(INFO) == "INFO"
+        assert logging.getLevelName(WARNING) == "WARN"
+        assert logging.getLevelName(ERROR) == "ERRO"
+        assert logging.getLevelName(CRITICAL) == "CRIT"
 
     def test_standard_level_values(self):
         """Test standard levels maintain correct values."""
@@ -58,6 +51,7 @@ class TestLogLevels:
     def test_level_ordering(self):
         """Test all levels are properly ordered."""
         assert DEBUG < INFO < WARNING < SUCCESS < FAIL < ERROR < CRITICAL
+
 
 if __name__ == "__main__":
     import os
@@ -72,13 +66,13 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # """Custom log levels for SciTeX."""
-# 
+#
 # import logging
-# 
+#
 # # Custom log levels for success/fail
 # SUCCESS = 31  # Between WARNING (30) and ERROR (40)
 # FAIL = 35  # Between WARNING (30) and ERROR (40)
-# 
+#
 # # Add custom levels to logging module with 4-character abbreviations
 # logging.addLevelName(SUCCESS, "SUCC")
 # logging.addLevelName(FAIL, "FAIL")
@@ -87,14 +81,14 @@ if __name__ == "__main__":
 # logging.addLevelName(logging.WARNING, "WARN")
 # logging.addLevelName(logging.ERROR, "ERRO")
 # logging.addLevelName(logging.CRITICAL, "CRIT")
-# 
+#
 # # Standard levels for convenience
 # DEBUG = logging.DEBUG
 # INFO = logging.INFO
 # WARNING = logging.WARNING
 # ERROR = logging.ERROR
 # CRITICAL = logging.CRITICAL
-# 
+#
 # __all__ = ["SUCCESS", "FAIL", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 # --------------------------------------------------------------------------------

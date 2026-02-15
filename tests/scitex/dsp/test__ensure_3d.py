@@ -8,6 +8,7 @@ Test module for scitex.dsp.ensure_3d function.
 """
 
 import pytest
+
 torch = pytest.importorskip("torch")
 import numpy as np
 
@@ -202,6 +203,7 @@ class TestEnsure3D:
         assert result.shape == (1, 1, 5)
         assert np.array_equal(result[0, 0], x_list)
 
+
 if __name__ == "__main__":
     import os
 
@@ -216,10 +218,10 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-05 01:03:47 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/dsp/_ensure_3d.py
-# 
+#
 # from scitex.decorators import signal_fn
-# 
-# 
+#
+#
 # @signal_fn
 # def ensure_3d(x):
 #     if x.ndim == 1:  # assumes (seq_len,)
@@ -227,8 +229,8 @@ if __name__ == "__main__":
 #     elif x.ndim == 2:  # assumes (batch_siize, seq_len)
 #         x = x.unsqueeze(1)
 #     return x
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

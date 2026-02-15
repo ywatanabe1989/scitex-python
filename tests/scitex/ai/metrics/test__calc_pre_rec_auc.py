@@ -14,16 +14,16 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-02 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ml/metrics/_calc_pre_rec_auc.py
-# 
+#
 # """Calculate Precision-Recall AUC."""
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # from typing import Any, Dict, List, Optional
 # import numpy as np
 # from sklearn.metrics import average_precision_score, precision_recall_curve
-# 
-# 
+#
+#
 # def calc_pre_rec_auc(
 #     y_true: np.ndarray,
 #     y_proba: np.ndarray,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 # ) -> Dict[str, Any]:
 #     """
 #     Calculate Precision-Recall AUC with robust handling.
-# 
+#
 #     Parameters
 #     ----------
 #     y_true : np.ndarray
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 #         Fold number for tracking
 #     return_curve : bool
 #         Whether to return PR curve data
-# 
+#
 #     Returns
 #     -------
 #     Dict[str, Any]
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 #             else:
 #                 label_map = {label: idx for idx, label in enumerate(unique_labels)}
 #                 y_true_norm = np.array([label_map[y] for y in y_true])
-# 
+#
 #         # Handle binary vs multiclass
 #         if y_proba.ndim == 2 and y_proba.shape[1] == 2:
 #             # Binary with 2 columns
@@ -81,21 +81,21 @@ if __name__ == "__main__":
 #         elif y_proba.ndim == 2 and y_proba.shape[1] > 2:
 #             # Multiclass
 #             from sklearn.preprocessing import label_binarize
-# 
+#
 #             n_classes = y_proba.shape[1]
 #             y_true_bin = label_binarize(y_true_norm, classes=range(n_classes))
 #             auc_score = average_precision_score(y_true_bin, y_proba, average="weighted")
 #         else:
 #             # 1D array
 #             auc_score = average_precision_score(y_true_norm, y_proba)
-# 
+#
 #         result = {
 #             "metric": "pr_auc",
 #             "value": float(auc_score),
 #             "fold": fold,
 #             "labels": label_names,
 #         }
-# 
+#
 #         if (
 #             return_curve
 #             and y_proba.ndim <= 2
@@ -114,7 +114,7 @@ if __name__ == "__main__":
 #                 }
 #             except:
 #                 pass
-# 
+#
 #         return result
 #     except Exception as e:
 #         return {
@@ -123,8 +123,8 @@ if __name__ == "__main__":
 #             "fold": fold,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

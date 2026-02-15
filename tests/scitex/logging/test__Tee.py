@@ -224,6 +224,7 @@ class TestTeeFunction:
             stdout_tee.close()
             stderr_tee.close()
 
+
 if __name__ == "__main__":
     import os
 
@@ -241,13 +242,13 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/logging/_Tee.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/gen/_tee.py"
-# 
+#
 # """
 # Functionality:
 #     * Redirects and logs standard output and error streams
@@ -263,26 +264,26 @@ if __name__ == "__main__":
 #     * Python 3.6+
 #     * scitex package for path handling and colored printing
 # """
-# 
+#
 # """Imports"""
 # import os as _os
 # import re
 # import sys
 # from typing import Any, TextIO
-# 
+#
 # from scitex.str._clean_path import clean_path
 # from scitex.str._printc import printc
-# 
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # def _get_logger():
 #     """Get logger lazily to avoid circular import during module initialization."""
 #     from scitex import logging
-# 
+#
 #     return logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class Tee:
 #     def __init__(self, stream: TextIO, log_path: str, verbose=True) -> None:
 #         self.verbose = verbose
@@ -299,7 +300,7 @@ if __name__ == "__main__":
 #             printc(f"Failed to open log file {log_path}: {e}", c="red")
 #             self._log_file = None
 #         self._is_stderr = stream is sys.stderr
-# 
+#
 #     def write(self, data: Any) -> None:
 #         self._stream.write(data)
 #         if self._log_file is not None:
@@ -312,22 +313,22 @@ if __name__ == "__main__":
 #             else:
 #                 self._log_file.write(data)
 #                 self._log_file.flush()  # Ensure immediate write
-# 
+#
 #     def flush(self) -> None:
 #         self._stream.flush()
 #         if self._log_file is not None:
 #             self._log_file.flush()
-# 
+#
 #     def isatty(self) -> bool:
 #         return self._stream.isatty()
-# 
+#
 #     def fileno(self) -> int:
 #         return self._stream.fileno()
-# 
+#
 #     @property
 #     def buffer(self):
 #         return self._stream.buffer
-# 
+#
 #     def close(self):
 #         """Explicitly close the log file."""
 #         if hasattr(self, "_log_file") and self._log_file is not None:
@@ -341,7 +342,7 @@ if __name__ == "__main__":
 #                 self._log_file = None  # Prevent double-close
 #             except Exception:
 #                 pass
-# 
+#
 #     def __del__(self):
 #         # Only attempt cleanup if Python is not shutting down
 #         # This prevents "Exception ignored" errors during interpreter shutdown
@@ -353,18 +354,18 @@ if __name__ == "__main__":
 #             except Exception:
 #                 # Silently ignore exceptions during cleanup
 #                 pass
-# 
-# 
+#
+#
 # def tee(sys, sdir=None, verbose=True):
 #     """Redirects stdout and stderr to both console and log files.
-# 
+#
 #     Example
 #     -------
 #     >>> import sys
 #     >>> sys.stdout, sys.stderr = tee(sys)
 #     >>> print("abc")  # stdout
 #     >>> print(1 / 0)  # stderr
-# 
+#
 #     Parameters
 #     ----------
 #     sys_module : module
@@ -373,14 +374,14 @@ if __name__ == "__main__":
 #         Directory for log files
 #     verbose : bool, default=True
 #         Whether to print log file locations
-# 
+#
 #     Returns
 #     -------
 #     tuple[Any, Any]
 #         Wrapped stdout and stderr objects
 #     """
 #     import inspect
-# 
+#
 #     ####################
 #     ## Determine sdir
 #     ## DO NOT MODIFY THIS
@@ -390,32 +391,32 @@ if __name__ == "__main__":
 #         if "ipython" in THIS_FILE:
 #             THIS_FILE = f"/tmp/{_os.getenv('USER')}.py"
 #         sdir = clean_path(_os.path.splitext(THIS_FILE)[0] + "_out")
-# 
+#
 #     sdir = _os.path.join(sdir, "logs/")
 #     _os.makedirs(sdir, exist_ok=True)
-# 
+#
 #     spath_stdout = sdir + "stdout.log"
 #     spath_stderr = sdir + "stderr.log"
 #     sys_stdout = Tee(sys.stdout, spath_stdout)
 #     sys_stderr = Tee(sys.stderr, spath_stderr)
-# 
+#
 #     if verbose:
 #         message = f"Standard output/error are being logged at:\n\t{spath_stdout}\n\t{spath_stderr}"
 #         logger = _get_logger()
 #         logger.info(message)
 #         # printc(message)
-# 
+#
 #     return sys_stdout, sys_stderr
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     # Argument Parser
 #     import matplotlib.pyplot as plt
-# 
+#
 #     import scitex
-# 
+#
 #     main = tee
-# 
+#
 #     # import argparse
 #     # parser = argparse.ArgumentParser(description='')
 #     # parser.add_argument('--var', '-v', type=int, default=1, help='')
@@ -427,7 +428,7 @@ if __name__ == "__main__":
 #     )
 #     main(sys, CONFIG["SDIR"])
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

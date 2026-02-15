@@ -13,27 +13,27 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/plt/io/_bundle.py
-# 
+#
 # """
 # SciTeX .plot Bundle I/O - Plot-specific bundle operations.
-# 
+#
 # Handles:
 #     - Plot specification validation
 #     - CSV data loading/saving
 #     - Hitmap PNG/SVG generation and storage
 #     - Bundle overview image generation
 # """
-# 
+#
 # import json
 # import shutil
 # import warnings
 # from pathlib import Path
 # from typing import Any, Dict, List
-# 
+#
 # import numpy as np
-# 
+#
 # from scitex.plt.styles import get_preview_dpi
-# 
+#
 # __all__ = [
 #     "validate_plot_spec",
 #     "load_plot_bundle",
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 #     "generate_bundle_overview",
 #     "PLOT_SCHEMA_SPEC",
 # ]
-# 
+#
 # # Schema specification for .plot bundles
 # PLOT_SCHEMA_SPEC = {
 #     "name": "scitex.plt.plot",
@@ -56,45 +56,45 @@ if __name__ == "__main__":
 #         "stats",
 #     ],
 # }
-# 
-# 
+#
+#
 # def validate_plot_spec(spec: Dict[str, Any]) -> List[str]:
 #     """Validate .plot-specific fields.
-# 
+#
 #     Args:
 #         spec: The specification dictionary to validate.
-# 
+#
 #     Returns:
 #         List of validation error messages (empty if valid).
 #     """
 #     errors = []
-# 
+#
 #     if "axes" in spec:
 #         axes = spec["axes"]
 #         if not isinstance(axes, (dict, list)):
 #             errors.append("'axes' must be a dictionary or list")
-# 
+#
 #     return errors
-# 
-# 
+#
+#
 # def load_plot_bundle(bundle_dir: Path) -> Dict[str, Any]:
 #     """Load .plot bundle contents from directory.
-# 
+#
 #     Args:
 #         bundle_dir: Path to the bundle directory.
-# 
+#
 #     Returns:
 #         Dictionary with loaded bundle contents.
 #     """
 #     result = {}
-# 
+#
 #     # Find the spec file (could be plot.json or {basename}.json)
 #     spec_file = None
 #     for f in bundle_dir.glob("*.json"):
 #         if not f.name.startswith("."):  # Skip hidden files
 #             spec_file = f
 #             break
-# 
+#
 #     if spec_file and spec_file.exists():
 #         with open(spec_file) as f:
 #             result["spec"] = json.load(f)
@@ -103,30 +103,30 @@ if __name__ == "__main__":
 #     else:
 #         result["spec"] = None
 #         result["basename"] = "plot"  # Default
-# 
+#
 #     # Find and load CSV data (could be plot.csv or {basename}.csv)
 #     csv_file = None
 #     for f in bundle_dir.glob("*.csv"):
 #         if not f.name.startswith("."):  # Skip hidden files
 #             csv_file = f
 #             break
-# 
+#
 #     if csv_file and csv_file.exists():
 #         try:
 #             import pandas as pd
-# 
+#
 #             result["data"] = pd.read_csv(csv_file)
 #         except ImportError:
 #             # Fallback to basic CSV reading
 #             with open(csv_file) as f:
 #                 result["data"] = f.read()
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # def save_plot_bundle(data: Dict[str, Any], dir_path: Path) -> None:
 #     """Save .plot bundle contents to directory.
-# 
+#
 #     Args:
 #         data: Bundle data dictionary containing:
 #             - spec: JSON specification
@@ -138,13 +138,13 @@ if __name__ == "__main__":
 #     """
 #     # Get basename from data, fallback to "plot" for backward compatibility
 #     basename = data.get("basename", "plot")
-# 
+#
 #     # Save specification
 #     spec = data.get("spec", {})
 #     spec_file = dir_path / f"{basename}.json"
 #     with open(spec_file, "w") as f:
 #         json.dump(spec, f, indent=2)
-# 
+#
 #     # Save CSV data
 #     if "data" in data:
 #         csv_file = dir_path / f"{basename}.csv"
@@ -154,69 +154,69 @@ if __name__ == "__main__":
 #         else:
 #             with open(csv_file, "w") as f:
 #                 f.write(str(df))
-# 
+#
 #     # Save exports (PNG, SVG, PDF)
 #     _save_exports(data, dir_path, spec, basename)
-# 
+#
 #     # Save hitmaps
 #     _save_hitmaps(data, dir_path, basename)
-# 
+#
 #     # Generate overview
 #     try:
 #         generate_bundle_overview(dir_path, spec, data, basename)
 #     except Exception as e:
 #         import logging
-# 
+#
 #         logging.getLogger("scitex").debug(f"Could not generate overview: {e}")
-# 
-# 
+#
+#
 # def _save_exports(
 #     data: Dict[str, Any], dir_path: Path, spec: Dict, basename: str = "plot"
 # ) -> None:
 #     """Save export files (PNG, SVG, PDF) with embedded metadata."""
-# 
+#
 #     for fmt in ["png", "svg", "pdf"]:
 #         if fmt not in data:
 #             continue
-# 
+#
 #         out_file = dir_path / f"{basename}.{fmt}"
 #         export_data = data[fmt]
-# 
+#
 #         if isinstance(export_data, bytes):
 #             with open(out_file, "wb") as f:
 #                 f.write(export_data)
 #         elif isinstance(export_data, (str, Path)) and Path(export_data).exists():
 #             shutil.copy(export_data, out_file)
-# 
+#
 #         # Embed metadata into PNG and PDF files
 #         if out_file.exists() and spec:
 #             try:
 #                 _embed_metadata_in_export(out_file, spec, fmt)
 #             except Exception as e:
 #                 import logging
-# 
+#
 #                 logging.getLogger("scitex").debug(
 #                     f"Could not embed metadata in {out_file}: {e}"
 #                 )
-# 
-# 
+#
+#
 # def _embed_metadata_in_export(file_path: Path, spec: Dict[str, Any], fmt: str) -> None:
 #     """Embed bundle spec metadata into exported image files."""
 #     from scitex.io._metadata import embed_metadata
-# 
+#
 #     embed_data = {
 #         "scitex_bundle": True,
 #         "schema": spec.get("schema", {}),
 #     }
-# 
+#
 #     for key in ["plot_type", "backend", "size", "axes", "figure", "panels"]:
 #         if key in spec:
 #             embed_data[key] = spec[key]
-# 
+#
 #     if fmt in ("png", "svg", "pdf"):
 #         embed_metadata(str(file_path), embed_data)
-# 
-# 
+#
+#
 # def _save_hitmaps(data: Dict[str, Any], dir_path: Path, basename: str = "plot") -> None:
 #     """Save hitmap PNG and SVG files."""
 #     # Save hitmap PNG
@@ -228,7 +228,7 @@ if __name__ == "__main__":
 #                 f.write(hitmap_data)
 #         elif isinstance(hitmap_data, (str, Path)) and Path(hitmap_data).exists():
 #             shutil.copy(hitmap_data, hitmap_file)
-# 
+#
 #     # Save hitmap SVG
 #     if "hitmap_svg" in data:
 #         hitmap_svg_file = dir_path / f"{basename}_hitmap.svg"
@@ -240,18 +240,18 @@ if __name__ == "__main__":
 #             isinstance(hitmap_svg_data, (str, Path)) and Path(hitmap_svg_data).exists()
 #         ):
 #             shutil.copy(hitmap_svg_data, hitmap_svg_file)
-# 
-# 
+#
+#
 # def generate_bundle_overview(
 #     dir_path: Path, spec: Dict, data: Dict, basename: str = "plot"
 # ) -> None:
 #     """Generate overview image showing bundle contents visually.
-# 
+#
 #     Creates a comprehensive overview image with:
 #     - CSV statistics (columns, rows, dtypes)
 #     - JSON structure as tree
 #     - Figures grid (PNG, hitmap, diff overlay)
-# 
+#
 #     Parameters
 #     ----------
 #     dir_path : Path
@@ -266,7 +266,7 @@ if __name__ == "__main__":
 #     import matplotlib.gridspec as gridspec
 #     import matplotlib.pyplot as plt
 #     from PIL import Image
-# 
+#
 #     # Create figure with custom layout
 #     fig = plt.figure(figsize=(16, 10), facecolor="white")
 #     gs = gridspec.GridSpec(
@@ -280,16 +280,16 @@ if __name__ == "__main__":
 #         top=0.92,
 #         bottom=0.05,
 #     )
-# 
+#
 #     # Title
 #     bundle_name = dir_path.name
 #     fig.suptitle(f"Bundle Overview: {bundle_name}", fontsize=16, fontweight="bold")
-# 
+#
 #     # === Panel 1: CSV Statistics ===
 #     ax_csv = fig.add_subplot(gs[0, 0])
 #     ax_csv.set_title("CSV Data", fontweight="bold", fontsize=11)
 #     ax_csv.axis("off")
-# 
+#
 #     csv_text = []
 #     if "data" in data and hasattr(data["data"], "columns"):
 #         df = data["data"]
@@ -304,7 +304,7 @@ if __name__ == "__main__":
 #             csv_text.append(f"  ... +{len(df.columns) - 10} more")
 #     else:
 #         csv_text.append("No CSV data")
-# 
+#
 #     ax_csv.text(
 #         0.05,
 #         0.95,
@@ -315,12 +315,12 @@ if __name__ == "__main__":
 #         fontfamily="monospace",
 #         bbox=dict(boxstyle="round", facecolor="#f0f0f0", alpha=0.8),
 #     )
-# 
+#
 #     # === Panel 2: JSON Tree ===
 #     ax_json = fig.add_subplot(gs[0, 1])
 #     ax_json.set_title("JSON Structure", fontweight="bold", fontsize=11)
 #     ax_json.axis("off")
-# 
+#
 #     json_lines = _json_to_tree(spec, max_depth=4, max_keys=8, max_lines=25)
 #     ax_json.text(
 #         0.02,
@@ -332,7 +332,7 @@ if __name__ == "__main__":
 #         fontfamily="monospace",
 #         bbox=dict(boxstyle="round", facecolor="#f0f0f0", alpha=0.8),
 #     )
-# 
+#
 #     # === Panel 3: PNG Image ===
 #     ax_png = fig.add_subplot(gs[0, 2])
 #     ax_png.set_title(f"{basename}.png", fontweight="bold", fontsize=11)
@@ -342,7 +342,7 @@ if __name__ == "__main__":
 #         ax_png.imshow(png_img)
 #         ax_png.set_xlabel(f"{png_img.size[0]}×{png_img.size[1]}", fontsize=9)
 #     ax_png.axis("off")
-# 
+#
 #     # === Panel 4: Hitmap PNG ===
 #     ax_hitmap = fig.add_subplot(gs[0, 3])
 #     ax_hitmap.set_title(f"{basename}_hitmap.png", fontweight="bold", fontsize=11)
@@ -352,7 +352,7 @@ if __name__ == "__main__":
 #         ax_hitmap.imshow(hitmap_img)
 #         ax_hitmap.set_xlabel(f"{hitmap_img.size[0]}×{hitmap_img.size[1]}", fontsize=9)
 #     ax_hitmap.axis("off")
-# 
+#
 #     # === Panel 5: SVG info ===
 #     ax_svg = fig.add_subplot(gs[1, 0])
 #     ax_svg.set_title(f"{basename}.svg", fontweight="bold", fontsize=11)
@@ -370,7 +370,7 @@ if __name__ == "__main__":
 #             bbox=dict(boxstyle="round", facecolor="#e0e0ff"),
 #         )
 #     ax_svg.axis("off")
-# 
+#
 #     # === Panel 6: Hitmap SVG ===
 #     ax_hitmap_svg = fig.add_subplot(gs[1, 1])
 #     ax_hitmap_svg.set_title(f"{basename}_hitmap.svg", fontweight="bold", fontsize=11)
@@ -388,14 +388,14 @@ if __name__ == "__main__":
 #             bbox=dict(boxstyle="round", facecolor="#ffe0e0"),
 #         )
 #     ax_hitmap_svg.axis("off")
-# 
+#
 #     # === Panel 7: PNG vs Hitmap Diff ===
 #     ax_diff = fig.add_subplot(gs[1, 2])
 #     ax_diff.set_title("PNG vs Hitmap (Overlay)", fontweight="bold", fontsize=11)
 #     if png_path.exists() and hitmap_path.exists():
 #         png_arr = np.array(Image.open(png_path).convert("RGB"))
 #         hitmap_arr = np.array(Image.open(hitmap_path).convert("RGB"))
-# 
+#
 #         if png_arr.shape == hitmap_arr.shape:
 #             overlay = np.zeros_like(png_arr)
 #             overlay[:, :, 0] = hitmap_arr[:, :, 0]
@@ -415,12 +415,12 @@ if __name__ == "__main__":
 #                 color="red",
 #             )
 #     ax_diff.axis("off")
-# 
+#
 #     # === Panel 8: Alignment Validation ===
 #     ax_valid = fig.add_subplot(gs[1, 3])
 #     ax_valid.set_title("Alignment Check", fontweight="bold", fontsize=11)
 #     ax_valid.axis("off")
-# 
+#
 #     validation_text = _generate_alignment_validation(png_path, hitmap_path)
 #     color = (
 #         "green"
@@ -429,7 +429,7 @@ if __name__ == "__main__":
 #         )
 #         else "red"
 #     )
-# 
+#
 #     ax_valid.text(
 #         0.05,
 #         0.95,
@@ -444,7 +444,7 @@ if __name__ == "__main__":
 #             alpha=0.8,
 #         ),
 #     )
-# 
+#
 #     # Save overview
 #     overview_path = dir_path / f"{basename}_overview.png"
 #     with warnings.catch_warnings():
@@ -453,8 +453,8 @@ if __name__ == "__main__":
 #             overview_path, dpi=get_preview_dpi(), bbox_inches="tight", facecolor="white"
 #         )
 #     plt.close(fig)
-# 
-# 
+#
+#
 # def _json_to_tree(
 #     obj, prefix="", max_depth=4, depth=0, max_keys=6, max_lines=30
 # ) -> List[str]:
@@ -462,14 +462,14 @@ if __name__ == "__main__":
 #     lines = []
 #     if depth >= max_depth:
 #         return []
-# 
+#
 #     if isinstance(obj, dict):
 #         items = list(obj.items())[:max_keys]
 #         for i, (k, v) in enumerate(items):
 #             is_last = i == len(items) - 1 and len(obj) <= max_keys
 #             branch = "└─ " if is_last else "├─ "
 #             next_prefix = prefix + ("   " if is_last else "│  ")
-# 
+#
 #             if isinstance(v, dict):
 #                 if depth < max_depth - 1 and v:
 #                     lines.append(prefix + branch + f"{k}:")
@@ -487,23 +487,23 @@ if __name__ == "__main__":
 #                 if len(val_str) > 25:
 #                     val_str = val_str[:22] + "..."
 #                 lines.append(prefix + branch + f"{k}: {val_str}")
-# 
+#
 #         if len(obj) > max_keys:
 #             lines.append(prefix + f"   ... +{len(obj) - max_keys} more")
-# 
+#
 #     return lines[:max_lines]
-# 
-# 
+#
+#
 # def _generate_alignment_validation(png_path: Path, hitmap_path: Path) -> List[str]:
 #     """Generate alignment validation text."""
 #     from PIL import Image
-# 
+#
 #     validation_text = []
-# 
+#
 #     if png_path.exists() and hitmap_path.exists():
 #         png_img = Image.open(png_path)
 #         hitmap_img = Image.open(hitmap_path)
-# 
+#
 #         # Size check
 #         size_match = png_img.size == hitmap_img.size
 #         validation_text.append(
@@ -511,11 +511,11 @@ if __name__ == "__main__":
 #             if size_match
 #             else f"✗ Size mismatch: PNG={png_img.size}, Hitmap={hitmap_img.size}"
 #         )
-# 
+#
 #         # Content bounds check
 #         png_arr = np.array(png_img.convert("RGB"))
 #         hitmap_arr = np.array(hitmap_img.convert("RGB"))
-# 
+#
 #         def find_bounds(arr):
 #             white = np.array([255, 255, 255])
 #             mask = np.any(np.abs(arr.astype(int) - white) > 20, axis=2)
@@ -526,26 +526,26 @@ if __name__ == "__main__":
 #                 x_min, x_max = np.where(cols)[0][[0, -1]]
 #                 return (int(x_min), int(y_min), int(x_max), int(y_max))
 #             return (0, 0, arr.shape[1], arr.shape[0])
-# 
+#
 #         png_bounds = find_bounds(png_arr)
 #         hitmap_bounds = find_bounds(hitmap_arr)
-# 
+#
 #         bounds_match = png_bounds == hitmap_bounds
 #         validation_text.append(
 #             "✓ Content aligned"
 #             if bounds_match
 #             else f"✗ Content offset: {hitmap_bounds[0] - png_bounds[0]}, {hitmap_bounds[1] - png_bounds[1]}"
 #         )
-# 
+#
 #         validation_text.append("")
 #         validation_text.append(f"PNG bounds: {png_bounds}")
 #         validation_text.append(f"Hitmap bounds: {hitmap_bounds}")
 #     else:
 #         validation_text.append("Files not found")
-# 
+#
 #     return validation_text
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

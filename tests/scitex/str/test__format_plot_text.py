@@ -591,6 +591,7 @@ class TestEdgeCases:
         except Exception as e:
             pytest.fail(f"Function should handle malformed input gracefully: {e}")
 
+
 if __name__ == "__main__":
     import os
 
@@ -604,7 +605,7 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Time-stamp: "2025-06-04 11:08:00 (ywatanabe)"
 # # File: ./src/scitex/str/_format_plot_text.py
-# 
+#
 # """
 # Functionality:
 #     Format text for scientific plots with proper capitalization and unit handling
@@ -616,28 +617,28 @@ if __name__ == "__main__":
 # Prerequisites:
 #     matplotlib, _latex_fallback module (for LaTeX fallback)
 # """
-# 
+#
 # import re
 # from typing import Optional, Tuple
-# 
+#
 # try:
 #     from ._latex_fallback import latex_fallback_decorator, safe_latex_render
-# 
+#
 #     FALLBACK_AVAILABLE = True
 # except ImportError:
 #     FALLBACK_AVAILABLE = False
-# 
+#
 #     # Define dummy decorator if fallback not available
 #     def latex_fallback_decorator(fallback_strategy="auto", preserve_math=True):
 #         def decorator(func):
 #             return func
-# 
+#
 #         return decorator
-# 
+#
 #     def safe_latex_render(text, fallback_strategy="auto", preserve_math=True):
 #         return text
-# 
-# 
+#
+#
 # @latex_fallback_decorator(fallback_strategy="auto", preserve_math=True)
 # def format_plot_text(
 #     text: str,
@@ -650,7 +651,7 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Format text for scientific plots with proper conventions and LaTeX fallback.
-# 
+#
 #     Parameters
 #     ----------
 #     text : str
@@ -667,29 +668,29 @@ if __name__ == "__main__":
 #         Whether to enable LaTeX fallback mechanisms, by default True
 #     replace_underscores : bool, optional
 #         Whether to replace underscores with spaces, by default True
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Formatted text ready for matplotlib with automatic LaTeX fallback
-# 
+#
 #     Examples
 #     --------
 #     >>> format_plot_text("time (s)")
 #     'Time (s)'
-# 
+#
 #     >>> format_plot_text("voltage [V]", unit_style="brackets")
 #     'Voltage [V]'
-# 
+#
 #     >>> format_plot_text("frequency in Hz", unit_style="auto")
 #     'Frequency (Hz)'
-# 
+#
 #     >>> format_plot_text("signal_power_db")
 #     'Signal Power Db'
-# 
+#
 #     >>> format_plot_text(r"$\alpha$ decay")  # Falls back if LaTeX fails
 #     'α decay'
-# 
+#
 #     Notes
 #     -----
 #     If LaTeX rendering fails, this function automatically falls back to
@@ -697,11 +698,11 @@ if __name__ == "__main__":
 #     """
 #     if not text or not isinstance(text, str):
 #         return text
-# 
+#
 #     # Handle LaTeX math sections (preserve them)
 #     latex_sections = []
 #     text_working = text
-# 
+#
 #     if latex_math:
 #         # Extract and preserve LaTeX math
 #         # Use ||| delimiters to avoid being processed by _replace_underscores
@@ -711,22 +712,22 @@ if __name__ == "__main__":
 #             placeholder = f"|||LATEX{i}|||"
 #             latex_sections.append(match)
 #             text_working = text_working.replace(match, placeholder, 1)
-# 
+#
 #     # Replace underscores with spaces (before unit formatting)
 #     if replace_underscores:
 #         text_working = _replace_underscores(text_working)
-# 
+#
 #     # Format units
 #     text_working = _format_units(text_working, unit_style)
-# 
+#
 #     # Capitalize first letter (excluding LaTeX)
 #     if capitalize:
 #         text_working = _capitalize_text(text_working)
-# 
+#
 #     # Handle scientific notation
 #     if scientific_notation:
 #         text_working = _format_scientific_notation(text_working)
-# 
+#
 #     # Restore LaTeX sections with fallback handling
 #     for i, latex_section in enumerate(latex_sections):
 #         placeholder = f"|||LATEX{i}|||"
@@ -736,10 +737,10 @@ if __name__ == "__main__":
 #             text_working = text_working.replace(placeholder, safe_latex)
 #         else:
 #             text_working = text_working.replace(placeholder, latex_section)
-# 
+#
 #     return text_working
-# 
-# 
+#
+#
 # @latex_fallback_decorator(fallback_strategy="auto", preserve_math=True)
 # def format_axis_label(
 #     label: str,
@@ -752,7 +753,7 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Format axis labels with proper unit handling.
-# 
+#
 #     Parameters
 #     ----------
 #     label : str
@@ -769,23 +770,23 @@ if __name__ == "__main__":
 #         Whether to enable LaTeX fallback mechanisms, by default True
 #     replace_underscores : bool, optional
 #         Whether to replace underscores with spaces, by default True
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Formatted axis label with automatic LaTeX fallback
-# 
+#
 #     Examples
 #     --------
 #     >>> format_axis_label("time", "s")
 #     'Time (s)'
-# 
+#
 #     >>> format_axis_label("voltage", "V", unit_style="brackets")
 #     'Voltage [V]'
-# 
+#
 #     >>> format_axis_label("temperature", "°C")
 #     'Temperature (°C)'
-# 
+#
 #     >>> format_axis_label("signal_power", "dB")
 #     'Signal Power (dB)'
 #     """
@@ -796,7 +797,7 @@ if __name__ == "__main__":
 #             full_text = f"{label} ({unit})"
 #     else:
 #         full_text = label
-# 
+#
 #     return format_plot_text(
 #         full_text,
 #         capitalize,
@@ -806,8 +807,8 @@ if __name__ == "__main__":
 #         enable_fallback=enable_fallback,
 #         replace_underscores=replace_underscores,
 #     )
-# 
-# 
+#
+#
 # @latex_fallback_decorator(fallback_strategy="auto", preserve_math=True)
 # def format_title(
 #     title: str,
@@ -819,7 +820,7 @@ if __name__ == "__main__":
 # ) -> str:
 #     """
 #     Format plot titles with proper conventions.
-# 
+#
 #     Parameters
 #     ----------
 #     title : str
@@ -834,20 +835,20 @@ if __name__ == "__main__":
 #         Whether to enable LaTeX fallback mechanisms, by default True
 #     replace_underscores : bool, optional
 #         Whether to replace underscores with spaces, by default True
-# 
+#
 #     Returns
 #     -------
 #     str
 #         Formatted title with automatic LaTeX fallback
-# 
+#
 #     Examples
 #     --------
 #     >>> format_title("neural spike analysis")
 #     'Neural Spike Analysis'
-# 
+#
 #     >>> format_title("data analysis", "preliminary results")
 #     'Data Analysis\\nPreliminary Results'
-# 
+#
 #     >>> format_title("signal_processing_results")
 #     'Signal Processing Results'
 #     """
@@ -858,7 +859,7 @@ if __name__ == "__main__":
 #         enable_fallback=enable_fallback,
 #         replace_underscores=replace_underscores,
 #     )
-# 
+#
 #     if subtitle:
 #         formatted_subtitle = format_plot_text(
 #             subtitle,
@@ -868,16 +869,16 @@ if __name__ == "__main__":
 #             replace_underscores=replace_underscores,
 #         )
 #         return f"{formatted_title}\\n{formatted_subtitle}"
-# 
+#
 #     return formatted_title
-# 
-# 
+#
+#
 # def check_unit_consistency(
 #     x_unit: Optional[str] = None, y_unit: Optional[str] = None, operation: str = "none"
 # ) -> Tuple[bool, str]:
 #     """
 #     Check unit consistency for mathematical operations.
-# 
+#
 #     Parameters
 #     ----------
 #     x_unit : Optional[str], optional
@@ -886,42 +887,42 @@ if __name__ == "__main__":
 #         Y-axis unit, by default None
 #     operation : str, optional
 #         Mathematical operation: "add", "subtract", "multiply", "divide", "none", by default "none"
-# 
+#
 #     Returns
 #     -------
 #     Tuple[bool, str]
 #         (is_consistent, expected_result_unit)
-# 
+#
 #     Examples
 #     --------
 #     >>> check_unit_consistency("m", "s", "divide")
 #     (True, 'm/s')
-# 
+#
 #     >>> check_unit_consistency("m", "m", "add")
 #     (True, 'm')
-# 
+#
 #     >>> check_unit_consistency("m", "kg", "add")
 #     (False, 'Units incompatible for addition')
 #     """
 #     if not x_unit or not y_unit:
 #         return True, x_unit or y_unit or ""
-# 
+#
 #     # Normalize units
 #     x_norm = _normalize_unit(x_unit)
 #     y_norm = _normalize_unit(y_unit)
-# 
+#
 #     if operation in ["add", "subtract"]:
 #         if x_norm == y_norm:
 #             return True, x_unit
 #         else:
 #             return False, f"Units incompatible for {operation}"
-# 
+#
 #     elif operation == "multiply":
 #         if x_norm == "1" or y_norm == "1":  # dimensionless
 #             return True, x_unit if x_norm != "1" else y_unit
 #         else:
 #             return True, f"{x_unit}·{y_unit}"
-# 
+#
 #     elif operation == "divide":
 #         if y_norm == "1":  # dividing by dimensionless
 #             return True, x_unit
@@ -929,10 +930,10 @@ if __name__ == "__main__":
 #             return True, "1"  # dimensionless
 #         else:
 #             return True, f"{x_unit}/{y_unit}"
-# 
+#
 #     return True, ""
-# 
-# 
+#
+#
 # def _format_units(text: str, unit_style: str) -> str:
 #     """Format units in text according to specified style."""
 #     if unit_style == "auto":
@@ -943,7 +944,7 @@ if __name__ == "__main__":
 #             r"\s+\[([^\]]+)\]",  # [unit]
 #             r"\s+\(([^)]+)\)",  # (unit)
 #         ]
-# 
+#
 #         for pattern in unit_patterns:
 #             match = re.search(pattern, text)
 #             if match:
@@ -951,25 +952,25 @@ if __name__ == "__main__":
 #                 # Replace with standardized format
 #                 text = re.sub(pattern, f" ({unit})", text)
 #                 break
-# 
+#
 #     elif unit_style == "brackets":
 #         # Convert parentheses to brackets
 #         text = re.sub(r"\s*\(([^)]+)\)", r" [\1]", text)
-# 
+#
 #     # Clean up multiple spaces
 #     text = re.sub(r"\s+", " ", text).strip()
-# 
+#
 #     return text
-# 
-# 
+#
+#
 # def _capitalize_text(text: str) -> str:
 #     """Capitalize the first letter of text, preserving units in parentheses/brackets."""
 #     if not text:
 #         return text
-# 
+#
 #     # Preserve content in parentheses and brackets
 #     preserved_sections = []
-# 
+#
 #     # Find and preserve parentheses content
 #     paren_pattern = r"(\([^)]+\))"
 #     paren_matches = re.findall(paren_pattern, text)
@@ -977,7 +978,7 @@ if __name__ == "__main__":
 #         placeholder = f"__PAREN_{i}__"
 #         preserved_sections.append((placeholder, match))
 #         text = text.replace(match, placeholder, 1)
-# 
+#
 #     # Find and preserve bracket content
 #     bracket_pattern = r"(\[[^\]]+\])"
 #     bracket_matches = re.findall(bracket_pattern, text)
@@ -985,7 +986,7 @@ if __name__ == "__main__":
 #         placeholder = f"__BRACKET_{i}__"
 #         preserved_sections.append((placeholder, match))
 #         text = text.replace(match, placeholder, 1)
-# 
+#
 #     # Capitalize the first alphabetic character
 #     capitalized = False
 #     result = []
@@ -995,35 +996,35 @@ if __name__ == "__main__":
 #             capitalized = True
 #         else:
 #             result.append(char)
-# 
+#
 #     text = "".join(result)
-# 
+#
 #     # Restore preserved sections
 #     for placeholder, original in preserved_sections:
 #         text = text.replace(placeholder, original)
-# 
+#
 #     return text
-# 
-# 
+#
+#
 # def _format_scientific_notation(text: str) -> str:
 #     """Format scientific notation in text."""
 #     # Convert patterns like "1e-3" to "1×10⁻³" or LaTeX equivalent
 #     sci_pattern = r"(\d+\.?\d*)[eE]([-+]?\d+)"
-# 
+#
 #     def replace_sci(match):
 #         base = match.group(1)
 #         exp = match.group(2)
 #         # Use LaTeX format
 #         return f"{base}×10^{{{exp}}}"
-# 
+#
 #     return re.sub(sci_pattern, replace_sci, text)
-# 
-# 
+#
+#
 # def _replace_underscores(text: str) -> str:
 #     """Replace underscores with spaces and apply proper word capitalization."""
 #     # First, preserve content in parentheses and brackets
 #     preserved_sections = []
-# 
+#
 #     # Preserve parentheses content
 #     paren_pattern = r"(\([^)]+\))"
 #     paren_matches = re.findall(paren_pattern, text)
@@ -1031,7 +1032,7 @@ if __name__ == "__main__":
 #         placeholder = f"|||PAREN{i}|||"
 #         preserved_sections.append((placeholder, match))
 #         text = text.replace(match, placeholder, 1)
-# 
+#
 #     # Preserve bracket content
 #     bracket_pattern = r"(\[[^\]]+\])"
 #     bracket_matches = re.findall(bracket_pattern, text)
@@ -1039,13 +1040,13 @@ if __name__ == "__main__":
 #         placeholder = f"|||BRACKET{i}|||"
 #         preserved_sections.append((placeholder, match))
 #         text = text.replace(match, placeholder, 1)
-# 
+#
 #     # Replace underscores with spaces
 #     text_with_spaces = text.replace("_", " ")
-# 
+#
 #     # Split by spaces for word processing
 #     words = text_with_spaces.split(" ")
-# 
+#
 #     # Common units that should preserve their case
 #     common_units = {
 #         "Hz",
@@ -1089,7 +1090,7 @@ if __name__ == "__main__":
 #         "mol",
 #         "M",
 #     }
-# 
+#
 #     # Process each word
 #     formatted_words = []
 #     for word in words:
@@ -1109,22 +1110,22 @@ if __name__ == "__main__":
 #             formatted_words.append(
 #                 word[0].upper() + word[1:].lower() if len(word) > 1 else word.upper()
 #             )
-# 
+#
 #     # Join with spaces
 #     result = " ".join(formatted_words)
-# 
+#
 #     # Restore preserved sections
 #     for placeholder, original in preserved_sections:
 #         result = result.replace(placeholder, original)
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # def _normalize_unit(unit: str) -> str:
 #     """Normalize unit string for comparison."""
 #     # Remove brackets/parentheses and normalize
 #     normalized = re.sub(r"[\[\]()]", "", unit).strip().lower()
-# 
+#
 #     # Handle common equivalent units
 #     equivalents = {
 #         "sec": "s",
@@ -1147,26 +1148,26 @@ if __name__ == "__main__":
 #         "unitless": "1",
 #         "": "1",
 #     }
-# 
+#
 #     return equivalents.get(normalized, normalized)
-# 
-# 
+#
+#
 # # Convenient aliases and shortcuts
 # def axis_label(label: str, unit: str = None, **kwargs) -> str:
 #     """Convenient alias for format_axis_label."""
 #     return format_axis_label(label, unit, **kwargs)
-# 
-# 
+#
+#
 # def title(text: str, **kwargs) -> str:
 #     """Convenient alias for format_title."""
 #     return format_title(text, **kwargs)
-# 
-# 
+#
+#
 # def scientific_text(text: str, **kwargs) -> str:
 #     """Convenient alias for format_plot_text with scientific defaults."""
 #     return format_plot_text(text, **kwargs)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

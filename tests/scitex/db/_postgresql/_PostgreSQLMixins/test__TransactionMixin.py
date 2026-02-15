@@ -7,9 +7,12 @@
 """Tests for scitex.db._PostgreSQLMixins._TransactionMixin module."""
 
 import pytest
+
 pytest.importorskip("psycopg2")
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
+
 import psycopg2
+
 from scitex.db._postgresql._PostgreSQLMixins import _TransactionMixin
 
 
@@ -51,7 +54,9 @@ class TestTransactionMixin:
     def test_disable_foreign_keys(self, mixin):
         """Test disabling foreign keys via session replication role."""
         mixin.disable_foreign_keys()
-        mixin.execute.assert_called_once_with("SET session_replication_role = 'replica'")
+        mixin.execute.assert_called_once_with(
+            "SET session_replication_role = 'replica'"
+        )
 
     def test_writable_property_getter_true(self, mixin):
         """Test getting writable property when database is writable."""
@@ -94,14 +99,14 @@ class TestTransactionMixin:
     def test_check_writable_when_writable(self, mixin):
         """Test _check_writable when database is writable."""
         # Mock writable property to return True
-        with patch.object(mixin, 'writable', True):
+        with patch.object(mixin, "writable", True):
             # Should not raise an exception
             mixin._check_writable()
 
     def test_check_writable_when_readonly(self, mixin):
         """Test _check_writable when database is read-only."""
         # Mock writable property to return False
-        with patch.object(mixin, 'writable', False):
+        with patch.object(mixin, "writable", False):
             with pytest.raises(ValueError, match="Database is in read-only mode"):
                 mixin._check_writable()
 
@@ -112,26 +117,28 @@ class TestTransactionMixin:
             "READ UNCOMMITTED",
             "READ COMMITTED",
             "REPEATABLE READ",
-            "SERIALIZABLE"
+            "SERIALIZABLE",
         ]
-        
+
         for level in isolation_levels:
             mixin.execute.reset_mock()
             # Simulate setting isolation level
             mixin.execute(f"SET TRANSACTION ISOLATION LEVEL {level}")
-            mixin.execute.assert_called_once_with(f"SET TRANSACTION ISOLATION LEVEL {level}")
+            mixin.execute.assert_called_once_with(
+                f"SET TRANSACTION ISOLATION LEVEL {level}"
+            )
 
     def test_savepoint_operations(self, mixin):
         """Test PostgreSQL savepoint operations."""
         # Create savepoint
         mixin.execute("SAVEPOINT test_savepoint")
         mixin.execute.assert_called_with("SAVEPOINT test_savepoint")
-        
+
         # Release savepoint
         mixin.execute.reset_mock()
         mixin.execute("RELEASE SAVEPOINT test_savepoint")
         mixin.execute.assert_called_with("RELEASE SAVEPOINT test_savepoint")
-        
+
         # Rollback to savepoint
         mixin.execute.reset_mock()
         mixin.execute("ROLLBACK TO SAVEPOINT test_savepoint")
@@ -142,7 +149,7 @@ class TestTransactionMixin:
         # Test transaction chaining
         mixin.execute("COMMIT AND CHAIN")
         mixin.execute.assert_called_with("COMMIT AND CHAIN")
-        
+
         mixin.execute.reset_mock()
         mixin.execute("ROLLBACK AND CHAIN")
         mixin.execute.assert_called_with("ROLLBACK AND CHAIN")
@@ -152,12 +159,12 @@ class TestTransactionMixin:
         # Prepare transaction
         mixin.execute("PREPARE TRANSACTION 'test_transaction'")
         mixin.execute.assert_called_with("PREPARE TRANSACTION 'test_transaction'")
-        
+
         # Commit prepared
         mixin.execute.reset_mock()
         mixin.execute("COMMIT PREPARED 'test_transaction'")
         mixin.execute.assert_called_with("COMMIT PREPARED 'test_transaction'")
-        
+
         # Rollback prepared
         mixin.execute.reset_mock()
         mixin.execute("ROLLBACK PREPARED 'test_transaction'")
@@ -168,12 +175,12 @@ class TestTransactionMixin:
         # Session-level advisory lock
         mixin.execute("SELECT pg_advisory_lock(12345)")
         mixin.execute.assert_called_with("SELECT pg_advisory_lock(12345)")
-        
+
         # Transaction-level advisory lock
         mixin.execute.reset_mock()
         mixin.execute("SELECT pg_advisory_xact_lock(12345)")
         mixin.execute.assert_called_with("SELECT pg_advisory_xact_lock(12345)")
-        
+
         # Release advisory lock
         mixin.execute.reset_mock()
         mixin.execute("SELECT pg_advisory_unlock(12345)")
@@ -182,9 +189,11 @@ class TestTransactionMixin:
     def test_transaction_status_check(self, mixin):
         """Test checking PostgreSQL transaction status."""
         # Mock transaction status
-        mixin.cursor.fetchone.return_value = ['IDLE']
+        mixin.cursor.fetchone.return_value = ["IDLE"]
         mixin.cursor.execute("SELECT current_setting('transaction_status')")
-        mixin.cursor.execute.assert_called_with("SELECT current_setting('transaction_status')")
+        mixin.cursor.execute.assert_called_with(
+            "SELECT current_setting('transaction_status')"
+        )
 
     def test_deferrable_transactions(self, mixin):
         """Test PostgreSQL deferrable transaction mode."""
@@ -194,11 +203,13 @@ class TestTransactionMixin:
     def test_session_characteristics(self, mixin):
         """Test setting session characteristics."""
         # Set default transaction isolation
-        mixin.execute("SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE")
+        mixin.execute(
+            "SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE"
+        )
         mixin.execute.assert_called_with(
             "SET SESSION CHARACTERISTICS AS TRANSACTION ISOLATION LEVEL SERIALIZABLE"
         )
-        
+
         # Set default transaction mode
         mixin.execute.reset_mock()
         mixin.execute("SET SESSION CHARACTERISTICS AS TRANSACTION READ ONLY")
@@ -209,6 +220,7 @@ class TestTransactionMixin:
     def test_inheritance_from_base_mixin(self):
         """Test that TransactionMixin properly inherits from BaseTransactionMixin."""
         from scitex.db._BaseMixins import _BaseTransactionMixin
+
         assert issubclass(_TransactionMixin, _BaseTransactionMixin)
 
     def test_error_handling_consistency(self, mixin):
@@ -219,13 +231,14 @@ class TestTransactionMixin:
             psycopg2.OperationalError("Connection lost"),
             psycopg2.ProgrammingError("Invalid SQL"),
             psycopg2.DataError("Invalid data"),
-            psycopg2.NotSupportedError("Feature not supported")
+            psycopg2.NotSupportedError("Feature not supported"),
         ]
-        
+
         for error in error_types:
             mixin.execute.side_effect = error
             with pytest.raises(type(error)):
                 mixin.execute("ANY COMMAND")
+
 
 if __name__ == "__main__":
     import os
@@ -241,31 +254,31 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-02-27 22:15:42 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_dev/src/scitex/db/_PostgreSQLMixins/_TransactionMixin.py
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_TransactionMixin.py"
-# 
+#
 # import psycopg2
 # from ..._BaseMixins._BaseTransactionMixin import _BaseTransactionMixin
-# 
-# 
+#
+#
 # class _TransactionMixin(_BaseTransactionMixin):
 #     def begin(self) -> None:
 #         self.execute("BEGIN TRANSACTION")
-# 
+#
 #     def commit(self) -> None:
 #         self.conn.commit()
-# 
+#
 #     def rollback(self) -> None:
 #         self.conn.rollback()
-# 
+#
 #     def enable_foreign_keys(self) -> None:
 #         # In PostgreSQL, foreign key constraints are always enabled
 #         pass
-# 
+#
 #     def disable_foreign_keys(self) -> None:
 #         # Warning: This is session-level and should be used carefully
 #         self.execute("SET session_replication_role = 'replica'")
-# 
+#
 #     @property
 #     def writable(self) -> bool:
 #         try:
@@ -275,7 +288,7 @@ if __name__ == "__main__":
 #             return self.cursor.fetchone()[0]
 #         except psycopg2.Error:
 #             return True
-# 
+#
 #     @writable.setter
 #     def writable(self, state: bool) -> None:
 #         try:
@@ -285,12 +298,12 @@ if __name__ == "__main__":
 #                 self.execute("SET TRANSACTION READ ONLY")
 #         except psycopg2.Error as err:
 #             raise ValueError(f"Failed to set writable state: {err}")
-# 
+#
 #     def _check_writable(self) -> None:
 #         if not self.writable:
 #             raise ValueError("Database is in read-only mode")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

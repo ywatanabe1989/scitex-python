@@ -27,7 +27,6 @@ import pandas as pd
 import pytest
 from hypothesis import strategies as st
 
-
 # ----------------------------------------
 # Configuration
 # ----------------------------------------

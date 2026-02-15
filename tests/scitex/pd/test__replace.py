@@ -3,12 +3,13 @@
 # Time-stamp: "2024-11-03 11:30:00 (ywatanabe)"
 # File: ./tests/scitex/pd/test__replace.py
 
-import pytest
+import os
+import sys
+from unittest.mock import Mock, patch
+
 import numpy as np
 import pandas as pd
-from unittest.mock import Mock, patch
-import sys
-import os
+import pytest
 
 # Add the project root to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../../src"))
@@ -378,6 +379,7 @@ class TestLargeDatasets:
             assert 555 in result["B"].values
             assert 5 not in result["B"].values
 
+
 if __name__ == "__main__":
     import os
 
@@ -392,25 +394,25 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-08-29 23:08:35 (ywatanabe)"
 # # ./src/scitex/pd/_replace.py
-# 
-# 
+#
+#
 # def replace(dataframe, old_value, new_value=None, regex=False, cols=None):
 #     """
 #     Replace values in a DataFrame.
-# 
+#
 #     Example
 #     -------
 #     import pandas as pd
 #     df = pd.DataFrame({'A': ['abc-123', 'def-456'], 'B': ['ghi-789', 'jkl-012']})
-# 
+#
 #     # Replace single value
 #     df_replaced = replace(df, 'abc', 'xyz')
-# 
+#
 #     # Replace with dictionary
 #     replace_dict = {'-': '_', '1': 'one'}
 #     df_replaced = replace(df, replace_dict, cols=['A'])
 #     print(df_replaced)
-# 
+#
 #     Parameters
 #     ----------
 #     dataframe : pandas.DataFrame
@@ -424,14 +426,14 @@ if __name__ == "__main__":
 #         If True, treat replacement keys as regular expressions. Default is False.
 #     cols : list of str, optional
 #         List of column names to apply replacements. If None, apply to all columns.
-# 
+#
 #     Returns
 #     -------
 #     pandas.DataFrame
 #         DataFrame with specified replacements applied.
 #     """
 #     dataframe = dataframe.copy()
-# 
+#
 #     # Handle different input formats
 #     if isinstance(old_value, dict):
 #         replace_dict = old_value
@@ -439,7 +441,7 @@ if __name__ == "__main__":
 #         if new_value is None:
 #             raise ValueError("new_value must be provided when old_value is not a dict")
 #         replace_dict = {old_value: new_value}
-# 
+#
 #     # Apply replacements to all columns if cols not specified
 #     if cols is None:
 #         # Use pandas replace method for all columns

@@ -13,24 +13,24 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2026-01-13 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/ui/_backends/_email.py
-# 
+#
 # """Email notification backend."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import asyncio
 # import os
 # from datetime import datetime
 # from typing import Optional
-# 
+#
 # from ._types import BaseNotifyBackend, NotifyLevel, NotifyResult
-# 
-# 
+#
+#
 # class EmailBackend(BaseNotifyBackend):
 #     """Email notification via scitex.utils._email."""
-# 
+#
 #     name = "email"
-# 
+#
 #     def __init__(
 #         self,
 #         recipient: Optional[str] = None,
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 #     ):
 #         self.recipient = recipient or os.getenv("SCITEX_NOTIFY_EMAIL_TO")
 #         self.sender = sender or os.getenv("SCITEX_NOTIFY_EMAIL_FROM")
-# 
+#
 #     def is_available(self) -> bool:
 #         return bool(
 #             os.getenv("SCITEX_SCHOLAR_EMAIL_NOREPLY")  # New name
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 #             or os.getenv("SCITEX_SCHOLAR_FROM_EMAIL_PASSWORD")  # Deprecated
 #             or os.getenv("SCITEX_EMAIL_PASSWORD")  # Fallback
 #         )
-# 
+#
 #     async def send(
 #         self,
 #         message: str,
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 #     ) -> NotifyResult:
 #         try:
 #             from scitex.utils._notify import notify as email_notify
-# 
+#
 #             loop = asyncio.get_event_loop()
 #             await loop.run_in_executor(
 #                 None,
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 #                     recipient_email=kwargs.get("recipient", self.recipient),
 #                 ),
 #             )
-# 
+#
 #             return NotifyResult(
 #                 success=True,
 #                 backend=self.name,
@@ -85,8 +85,8 @@ if __name__ == "__main__":
 #                 timestamp=datetime.now().isoformat(),
 #                 error=str(e),
 #             )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -8,6 +8,7 @@ transformations.
 
 import numpy as np
 import pytest
+
 torch = pytest.importorskip("torch")
 from torch.utils.data import DataLoader
 
@@ -32,7 +33,7 @@ class TestDefaultDataset:
         X = np.random.rand(n, 19, 1000)
         T = np.random.randint(0, 4, size=(n, 1))
         S = np.random.randint(0, 999, size=(n, 1))
-        
+
         ds = DefaultDataset([X, T, S])
         assert len(ds) == n
         assert len(ds.arrs_list) == 3
@@ -41,12 +42,12 @@ class TestDefaultDataset:
         """Test __getitem__ with single array."""
         X = np.random.rand(10, 5)
         ds = DefaultDataset([X])
-        
+
         # Get first item
         item = ds[0]
         assert len(item) == 1
         assert np.array_equal(item[0], X[0])
-        
+
         # Get last item
         item = ds[9]
         assert np.array_equal(item[0], X[9])
@@ -57,9 +58,9 @@ class TestDefaultDataset:
         X = np.random.rand(n, 10)
         T = np.random.randint(0, 4, size=(n,))
         S = np.random.randint(0, 999, size=(n,))
-        
+
         ds = DefaultDataset([X, T, S])
-        
+
         # Check first item
         item = ds[0]
         assert len(item) == 3
@@ -69,14 +70,15 @@ class TestDefaultDataset:
 
     def test_transform_application(self):
         """Test that transform is applied only to first array."""
+
         def double_transform(x):
             return x * 2
-        
+
         X = np.ones((10, 5))
         T = np.ones((10,))
-        
+
         ds = DefaultDataset([X, T], transform=double_transform)
-        
+
         item = ds[0]
         # First array should be transformed
         assert np.allclose(item[0], 2.0)
@@ -85,19 +87,20 @@ class TestDefaultDataset:
 
     def test_transform_preserves_dtype(self):
         """Test that transform preserves original dtype."""
+
         def add_noise(x):
             return x + np.random.randn(*x.shape) * 0.01
-        
+
         X = np.ones((10, 5), dtype=np.float32)
         ds = DefaultDataset([X], transform=add_noise)
-        
+
         item = ds[0]
         assert item[0].dtype == np.float32
 
     def test_zero_length_arrays_assertion(self):
         """Test that arrays with zero length raise assertion error."""
         X = np.array([])  # Empty array
-        
+
         with pytest.raises(AssertionError):
             DefaultDataset([X])
 
@@ -106,10 +109,10 @@ class TestDefaultDataset:
         X = np.random.rand(10, 5).astype(np.float32)
         T = np.random.randint(0, 4, size=(10,)).astype(np.int64)
         S = np.random.rand(10).astype(np.float64)
-        
+
         ds = DefaultDataset([X, T, S])
         item = ds[0]
-        
+
         assert item[0].dtype == np.float32
         assert item[1].dtype == np.int64
         assert item[2].dtype == np.float64
@@ -121,13 +124,13 @@ class TestDefaultDataset:
 
     def test_mismatched_lengths_not_validated(self):
         """Test that arrays with different lengths are not validated at init.
-        
+
         Note: The current implementation doesn't validate that all arrays
         have the same length, which could be a potential bug.
         """
         X = np.random.rand(10, 5)
         T = np.random.rand(8)  # Different length
-        
+
         # This actually doesn't raise an error in current implementation
         ds = DefaultDataset([X, T])
         assert len(ds) == 10  # Uses length of first array
@@ -137,10 +140,10 @@ class TestDefaultDataset:
         n = 100
         X = np.random.rand(n, 10)
         T = np.random.randint(0, 4, size=(n,))
-        
+
         ds = DefaultDataset([X, T])
         loader = DataLoader(ds, batch_size=16, shuffle=True)
-        
+
         # Check that we can iterate through loader
         batch_count = 0
         for batch in loader:
@@ -148,7 +151,7 @@ class TestDefaultDataset:
             assert len(batch) == 2  # X and T
             assert batch[0].shape[0] <= 16  # Batch size
             assert batch[1].shape[0] <= 16
-        
+
         # Should have correct number of batches
         expected_batches = (n + 15) // 16  # Ceiling division
         assert batch_count == expected_batches
@@ -157,15 +160,15 @@ class TestDefaultDataset:
         """Test indexing boundary conditions."""
         X = np.random.rand(10, 5)
         ds = DefaultDataset([X])
-        
+
         # Valid indices
         assert ds[0] is not None
         assert ds[9] is not None
-        
+
         # Invalid indices should raise IndexError
         with pytest.raises(IndexError):
             ds[10]
-        
+
         with pytest.raises(IndexError):
             ds[-11]
 
@@ -173,24 +176,25 @@ class TestDefaultDataset:
         """Test negative indexing support."""
         X = np.random.rand(10, 5)
         ds = DefaultDataset([X])
-        
+
         # Negative indexing should work
         last_item = ds[-1]
         assert np.array_equal(last_item[0], X[-1])
-        
+
         first_item = ds[-10]
         assert np.array_equal(first_item[0], X[0])
 
     def test_complex_transform(self):
         """Test with more complex transform function."""
+
         def normalize_transform(x):
             mean = x.mean()
             std = x.std()
             return (x - mean) / (std + 1e-8)
-        
+
         X = np.random.rand(20, 10) * 100 + 50
         ds = DefaultDataset([X], transform=normalize_transform)
-        
+
         item = ds[0]
         transformed = normalize_transform(X[0].astype(np.float64)).astype(X.dtype)
         assert np.allclose(item[0], transformed)
@@ -203,9 +207,9 @@ class TestDefaultDataset:
         X_2d = np.random.rand(50, 100)
         # 1D array (e.g., labels)
         T_1d = np.random.randint(0, 4, size=(50,))
-        
+
         ds = DefaultDataset([X_3d, X_2d, T_1d])
-        
+
         item = ds[0]
         assert item[0].shape == (19, 1000)
         assert item[1].shape == (100,)
@@ -219,13 +223,13 @@ class TestDefaultDataset:
         T = np.random.randint(0, 4, size=(n, 1))
         S = np.random.randint(0, 999, size=(n, 1))
         Sr = np.random.randint(0, 4, size=(n, 1))
-        
+
         arrs_list = [X, T, S, Sr]
         transform = None
         ds = DefaultDataset(arrs_list, transform=transform)
-        
+
         assert len(ds) == 1024
-        
+
         # Check that items are retrieved correctly
         item = ds[0]
         assert len(item) == 4
@@ -233,6 +237,7 @@ class TestDefaultDataset:
         assert item[1].shape == (1,)
         assert item[2].shape == (1,)
         assert item[3].shape == (1,)
+
 
 if __name__ == "__main__":
     import os
@@ -245,15 +250,15 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/utils/_default_dataset.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# 
+#
 # from torch.utils.data import Dataset
 # import numpy as np
-# 
-# 
+#
+#
 # class DefaultDataset(Dataset):
 #     """
 #     Apply transform for the first element of arrs_list
-# 
+#
 #     Example:
 #         n = 1024
 #         n_chs = 19
@@ -261,28 +266,28 @@ if __name__ == "__main__":
 #         T = np.random.randint(0, 4, size=(n, 1))
 #         S = np.random.randint(0, 999, size=(n, 1))
 #         Sr = np.random.randint(0, 4, size=(n, 1))
-# 
+#
 #         arrs_list = [X, T, S, Sr]
 #         transform = None
 #         ds = _DefaultDataset(arrs_list, transform=transform)
 #         len(ds) # 1024
 #     """
-# 
+#
 #     def __init__(self, arrs_list, transform=None):
 #         self.arrs_list = arrs_list
 #         self.arrs = arrs_list  # alias
-# 
+#
 #         assert np.all([len(arr) for arr in arrs_list])
-# 
+#
 #         self.length = len(arrs_list[0])
 #         self.transform = transform
-# 
+#
 #     def __len__(self):
 #         return self.length
-# 
+#
 #     def __getitem__(self, idx):
 #         arrs_list_idx = [arr[idx] for arr in self.arrs_list]
-# 
+#
 #         # Here, you might want to transform, or apply DA on X as a numpy array
 #         if self.transform:
 #             dtype_orig = arrs_list_idx[0].dtype

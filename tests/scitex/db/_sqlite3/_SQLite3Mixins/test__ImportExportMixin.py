@@ -14,19 +14,19 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-25 01:36:18 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/db/_SQLite3Mixins/_ImportExportMixin.py
-# 
+#
 # THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_SQLite3Mixins/_ImportExportMixin.py"
-# 
+#
 # from typing import List
-# 
+#
 # import pandas as pd
-# 
+#
 # from ..._BaseMixins._BaseImportExportMixin import _BaseImportExportMixin
-# 
-# 
+#
+#
 # class _ImportExportMixin:
 #     """Import/Export functionality"""
-# 
+#
 #     def load_from_csv(
 #         self,
 #         table_name: str,
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 #                 raise FileNotFoundError(f"CSV file not found: {csv_path}")
 #             except Exception as err:
 #                 raise ValueError(f"Failed to import from CSV: {err}")
-# 
+#
 #     def save_to_csv(
 #         self,
 #         table_name: str,
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 #                 offset=0,
 #             )
 #             df.to_csv(output_path, index=False, mode="w")
-# 
+#
 #             offset = batch_size
 #             while len(df) == batch_size:
 #                 df = self.get_rows(
@@ -85,8 +85,8 @@ if __name__ == "__main__":
 #             raise PermissionError(f"Cannot write to: {output_path}")
 #         except Exception as err:
 #             raise ValueError(f"Failed to export to CSV: {err}")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

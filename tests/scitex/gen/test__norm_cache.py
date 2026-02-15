@@ -14,40 +14,40 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2025-07-25 05:15:00"
 # # File: _norm_cache.py
-# 
+#
 # """
 # Cached normalization functions for improved performance on repeated operations.
 # """
-# 
+#
 # import torch
 # import numpy as np
 # import weakref
 # from functools import lru_cache
 # from typing import Union, Tuple, Optional
 # import hashlib
-# 
+#
 # from scitex.decorators import torch_fn
-# 
-# 
+#
+#
 # # Cache for normalized data
 # _norm_cache = weakref.WeakValueDictionary()
 # _cache_metadata = {}
 # _cache_config = {"enabled": True, "max_size": 64, "verbose": False}
-# 
-# 
+#
+#
 # def _get_array_key(
 #     x: Union[np.ndarray, torch.Tensor], axis: Optional[int] = None
 # ) -> str:
 #     """
 #     Generate a unique key for an array based on its content and parameters.
-# 
+#
 #     Parameters
 #     ----------
 #     x : array-like
 #         Input array
 #     axis : int, optional
 #         Axis parameter
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -71,28 +71,28 @@ if __name__ == "__main__":
 #         else:
 #             sample = x.flatten()
 #         props += f"_{np.sum(sample):.6f}_{np.std(sample):.6f}"
-# 
+#
 #     return hashlib.md5(props.encode()).hexdigest()
-# 
-# 
+#
+#
 # def _check_cache(
 #     key: str, x: Union[np.ndarray, torch.Tensor]
 # ) -> Optional[Union[np.ndarray, torch.Tensor]]:
 #     """Check if cached result exists and is valid."""
 #     if not _cache_config["enabled"]:
 #         return None
-# 
+#
 #     if key in _cache_metadata:
 #         # Verify array hasn't changed by checking a few properties
 #         cached_info = _cache_metadata[key]
-# 
+#
 #         if isinstance(x, torch.Tensor):
 #             current_sum = x.sum().item()
 #             current_mean = x.mean().item()
 #         else:
 #             current_sum = np.sum(x)
 #             current_mean = np.mean(x)
-# 
+#
 #         # Check if values match (within floating point tolerance)
 #         if (
 #             abs(cached_info["sum"] - current_sum) < 1e-10
@@ -103,10 +103,10 @@ if __name__ == "__main__":
 #                 if _cache_config["verbose"]:
 #                     print(f"[Norm Cache HIT] {cached_info['op']}")
 #                 return _norm_cache[key]
-# 
+#
 #     return None
-# 
-# 
+#
+#
 # def _store_cache(
 #     key: str,
 #     x: Union[np.ndarray, torch.Tensor],
@@ -116,7 +116,7 @@ if __name__ == "__main__":
 #     """Store result in cache."""
 #     if not _cache_config["enabled"]:
 #         return
-# 
+#
 #     # Store metadata
 #     if isinstance(x, torch.Tensor):
 #         _cache_metadata[key] = {
@@ -132,14 +132,14 @@ if __name__ == "__main__":
 #             "shape": x.shape,
 #             "op": op,
 #         }
-# 
+#
 #     # Try to store in weak reference cache
 #     try:
 #         _norm_cache[key] = result
 #     except TypeError:
 #         # Some types can't be weakly referenced
 #         pass
-# 
+#
 #     # Implement size limit
 #     if len(_cache_metadata) > _cache_config["max_size"]:
 #         # Remove oldest entries
@@ -147,25 +147,25 @@ if __name__ == "__main__":
 #         del _cache_metadata[oldest]
 #         if oldest in _norm_cache:
 #             del _norm_cache[oldest]
-# 
-# 
+#
+#
 # # Cached version of to_z
 # @torch_fn
 # def to_z_cached(x, axis=-1, dim=None, device="cuda"):
 #     """
 #     Cached version of z-score normalization.
-# 
+#
 #     Caches results for repeated normalizations of the same data.
 #     """
 #     # Generate cache key
 #     dimension = dim if dim is not None else axis
 #     cache_key = _get_array_key(x, dimension) + "_z"
-# 
+#
 #     # Check cache
 #     cached = _check_cache(cache_key, x)
 #     if cached is not None:
 #         return cached
-# 
+#
 #     # Compute normalization
 #     if isinstance(x, torch.Tensor):
 #         result = (x - x.mean(dim=dimension, keepdim=True)) / x.std(
@@ -175,30 +175,30 @@ if __name__ == "__main__":
 #         result = (x - np.mean(x, axis=dimension, keepdims=True)) / np.std(
 #             x, axis=dimension, keepdims=True
 #         )
-# 
+#
 #     # Store in cache
 #     _store_cache(cache_key, x, result, "z-score")
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # # Cached version of to_01
 # @torch_fn
 # def to_01_cached(x, axis=-1, dim=None, device="cuda"):
 #     """
 #     Cached version of min-max normalization.
-# 
+#
 #     Caches results for repeated normalizations of the same data.
 #     """
 #     # Generate cache key
 #     dimension = dim if dim is not None else axis
 #     cache_key = _get_array_key(x, dimension) + "_01"
-# 
+#
 #     # Check cache
 #     cached = _check_cache(cache_key, x)
 #     if cached is not None:
 #         return cached
-# 
+#
 #     # Compute normalization
 #     if isinstance(x, torch.Tensor):
 #         if dimension is None:
@@ -216,13 +216,13 @@ if __name__ == "__main__":
 #             x_min = np.min(x, axis=dimension, keepdims=True)
 #             x_max = np.max(x, axis=dimension, keepdims=True)
 #         result = (x - x_min) / (x_max - x_min + 1e-8)
-# 
+#
 #     # Store in cache
 #     _store_cache(cache_key, x, result, "min-max")
-# 
+#
 #     return result
-# 
-# 
+#
+#
 # def configure_norm_cache(
 #     enabled: Optional[bool] = None,
 #     max_size: Optional[int] = None,
@@ -230,7 +230,7 @@ if __name__ == "__main__":
 # ) -> None:
 #     """
 #     Configure normalization cache settings.
-# 
+#
 #     Parameters
 #     ----------
 #     enabled : bool, optional
@@ -246,14 +246,14 @@ if __name__ == "__main__":
 #         _cache_config["max_size"] = max_size
 #     if verbose is not None:
 #         _cache_config["verbose"] = verbose
-# 
-# 
+#
+#
 # def clear_norm_cache() -> None:
 #     """Clear all cached normalization results."""
 #     _norm_cache.clear()
 #     _cache_metadata.clear()
-# 
-# 
+#
+#
 # def get_norm_cache_info() -> dict:
 #     """Get information about the normalization cache."""
 #     return {
@@ -262,34 +262,34 @@ if __name__ == "__main__":
 #         "current_size": len(_cache_metadata),
 #         "operations": [v["op"] for v in _cache_metadata.values()],
 #     }
-# 
-# 
+#
+#
 # # Monkey patch the original functions if enabled
 # def patch_normalization_functions():
 #     """Replace original normalization functions with cached versions."""
 #     import scitex.gen._norm as norm_module
-# 
+#
 #     # Store originals
 #     norm_module.to_z_original = norm_module.to_z
 #     norm_module.to_01_original = norm_module.to_01
-# 
+#
 #     # Replace with cached versions
 #     norm_module.to_z = to_z_cached
 #     norm_module.to_01 = to_01_cached
-# 
+#
 #     # Also patch in the gen module namespace
 #     try:
 #         import scitex.gen as gen_module
-# 
+#
 #         gen_module.to_z = to_z_cached
 #         gen_module.to_01 = to_01_cached
 #     except:
 #         pass
-# 
-# 
+#
+#
 # # Auto-patch if enabled
 # import os
-# 
+#
 # if os.getenv("SCITEX_CACHE_NORM", "true").lower() == "true":
 #     patch_normalization_functions()
 

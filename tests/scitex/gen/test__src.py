@@ -6,10 +6,12 @@
 """Test suite for scitex.gen._src module."""
 
 import pytest
+
 pytest.importorskip("torch")
-from unittest.mock import patch, MagicMock, call
-import subprocess
 import inspect
+import subprocess
+from unittest.mock import MagicMock, call, patch
+
 from scitex.gen import src
 
 
@@ -305,6 +307,7 @@ def test_main():
     """Main function for running tests."""
     pytest.main([__file__, "-xvs"])
 
+
 if __name__ == "__main__":
     import os
 
@@ -321,17 +324,17 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/SciTeX-Code/src/scitex/gen/_src.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # #!./env/bin/python3
-# 
+#
 # import inspect
 # import subprocess
-# 
-# 
+#
+#
 # def src(obj):
 #     """
 #     Returns the source code of a given object using `less`.
@@ -344,15 +347,15 @@ if __name__ == "__main__":
 #         and not inspect.ismethod(obj)
 #     ):
 #         obj = obj.__class__
-# 
+#
 #     try:
 #         # Attempt to retrieve the source code
 #         source_code = inspect.getsource(obj)
-# 
+#
 #         # Assuming scitex.gen.less is a placeholder for displaying text with `less`
 #         # This part of the code is commented out as it seems to be a placeholder
 #         # scitex.gen.less(source_code)
-# 
+#
 #         # Open a subprocess to use `less` for displaying the source code
 #         process = subprocess.Popen(["less"], stdin=subprocess.PIPE, encoding="utf8")
 #         process.communicate(input=source_code)
@@ -367,8 +370,8 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         # Handle any other unexpected errors
 #         print(f"Error: {e}")
-# 
-# 
+#
+#
 # # def src(obj):
 # #     """
 # #     Returns the source code of a given object using `less`.
@@ -381,12 +384,12 @@ if __name__ == "__main__":
 # #         and not inspect.ismethod(obj)
 # #     ):
 # #         obj = obj.__class__
-# 
+#
 # #     try:
 # #         # Attempt to retrieve the source code
 # #         source_code = inspect.getsource(obj)
 # #         scitex.gen.less(source_code)
-# 
+#
 # #         # # Open a subprocess to use `less` for displaying the source code
 # #         # process = subprocess.Popen(
 # #         #     ["less"], stdin=subprocess.PIPE, encoding="utf8"
@@ -400,28 +403,28 @@ if __name__ == "__main__":
 # #     except Exception as e:
 # #         # Handle any other unexpected errors
 # #         print(f"Error: {e}")
-# 
+#
 # # (YOUR AWESOME CODE)
-# 
+#
 # if __name__ == "__main__":
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     # Start
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False
 #     )
 #     import sys
-# 
+#
 #     # (YOUR AWESOME CODE)
 #     # Close
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
-# 
+#
 # """
 # /ssh:ywatanabe@444:/home/ywatanabe/proj/entrance/scitex/gen/_def.py
 # """
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

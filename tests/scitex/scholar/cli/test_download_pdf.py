@@ -17,30 +17,30 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """Command-line interface for paywalled PDF downloads.
-# 
+#
 # Usage:
 #     python -m scitex.scholar.download bibtex <file.bib> [--project NAME]
 #     python -m scitex.scholar.download paper --doi <DOI> [--title TITLE]
 #     python -m scitex.scholar.download paper --url <URL>
 #     python -m scitex.scholar.download info
 # """
-# 
+#
 # import argparse
 # import sys
-# 
+#
 # from scitex import logging
 # from scitex.scholar.core import Paper
 # from scitex.scholar.pdf_download.ScholarPDFDownloader import ScholarPDFDownloader
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # def create_parser():
 #     """Create argument parser for download_pdf command."""
 #     parser = argparse.ArgumentParser(
@@ -49,19 +49,19 @@ if __name__ == "__main__":
 #         epilog="""Examples:
 # # Download PDFs from BibTeX file
 # python -m scitex.scholar download bibtex pac.bib --project myproject
-# 
+#
 # # Download single paper by DOI
 # python -m scitex.scholar download paper --doi 10.1038/nature12345
-# 
+#
 # # Download single paper by URL
 # python -m scitex.scholar download paper --url https://www.nature.com/articles/nature12345
-# 
+#
 # # Show system info
 # python -m scitex.scholar download info""",
 #     )
-# 
+#
 #     subparsers = parser.add_subparsers(dest="command", help="Command to run")
-# 
+#
 #     # BibTeX command
 #     bibtex_parser = subparsers.add_parser(
 #         "bibtex", help="Download PDFs from BibTeX file"
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 #         default=3,
 #         help="Maximum concurrent downloads (default: 3)",
 #     )
-# 
+#
 #     # Paper command
 #     paper_parser = subparsers.add_parser("paper", help="Download single paper")
 #     paper_group = paper_parser.add_mutually_exclusive_group(required=True)
@@ -90,77 +90,77 @@ if __name__ == "__main__":
 #         default="default",
 #         help="Project name for organization (default: default)",
 #     )
-# 
+#
 #     # Info command
 #     info_parser = subparsers.add_parser("info", help="Show system information")
-# 
+#
 #     return parser
-# 
-# 
+#
+#
 # def main():
 #     """Main entry point for paywalled PDF download CLI."""
 #     parser = create_parser()
-# 
+#
 #     # Parse arguments
 #     args = parser.parse_args()
-# 
+#
 #     if not args.command:
 #         parser.print_help()
 #         return 1
-# 
+#
 #     # Execute command
 #     if args.command == "bibtex":
 #         from pathlib import Path
 #         from scitex.scholar import Scholar
-# 
+#
 #         bibtex_path = Path(args.file)
 #         if not bibtex_path.exists():
 #             print(f"Error: BibTeX file not found: {bibtex_path}")
 #             return 1
-# 
+#
 #         print(f"\n🎯 SciTeX Scholar - PDF Downloader")
 #         print(f"📄 Processing: {bibtex_path}")
 #         print(f"🏢 Project: {args.project}")
 #         print(f"🔐 Using institutional authentication")
-# 
+#
 #         try:
 #             # Use Scholar interface
 #             scholar = Scholar(project=args.project)
-# 
+#
 #             # Set up output directory
 #             output_dir = Path(f"/tmp/scholar_downloads/{args.project}/")
 #             output_dir.mkdir(parents=True, exist_ok=True)
-# 
+#
 #             print(f"\n⬇️  Starting downloads...")
 #             print(f"📁 Output directory: {output_dir}")
-# 
+#
 #             # Download PDFs using Scholar interface - it handles loading and DOI extraction
 #             results = scholar.download_pdfs_from_bibtex(bibtex_path, output_dir)
-# 
+#
 #             print(f"\n✅ Downloaded: {results['downloaded']} PDFs")
 #             print(f"❌ Failed: {results['failed']}")
 #             if results.get("errors"):
 #                 print(f"⚠️  Errors: {results['errors']}")
-# 
+#
 #             return 0
-# 
+#
 #         except Exception as e:
 #             print(f"❌ Error: {e}")
 #             import traceback
-# 
+#
 #             traceback.print_exc()
 #             return 1
-# 
+#
 #     elif args.command == "paper":
 #         import asyncio
-# 
+#
 #         async def download_paper_async(args):
 #             from scitex.scholar import (
 #                 ScholarAuthManager,
 #                 ScholarBrowserManager,
 #                 ScholarConfig,
 #             )
-# 
+#
 #             # Create paper object with Pydantic structure
 #             paper = Paper()
 #             paper.metadata.basic.title = args.title or "Unknown"
@@ -168,13 +168,13 @@ if __name__ == "__main__":
 #                 paper.metadata.set_doi(args.doi)
 #             if args.url:
 #                 paper.metadata.url.publisher = args.url
-# 
+#
 #             print(f"\n🎯 SciTeX Scholar - Paywalled PDF Downloader")
 #             print(f"📄 Paper: {paper.metadata.basic.title}")
 #             print(f"🔗 {'DOI' if args.doi else 'URL'}: {args.doi or args.url}")
 #             print(f"🏢 Project: {args.project}")
 #             print(f"🔐 Using institutional authentication")
-# 
+#
 #             try:
 #                 # Set up browser with authentication
 #                 browser_manager = ScholarBrowserManager(
@@ -187,10 +187,10 @@ if __name__ == "__main__":
 #                     browser,
 #                     context,
 #                 ) = await browser_manager.get_authenticated_browser_and_context_async()
-# 
+#
 #                 # Create downloader with authenticated context
 #                 downloader = ScholarPDFDownloader(context, config=ScholarConfig())
-# 
+#
 #                 # Download based on DOI or URL
 #                 if args.doi:
 #                     saved_paths = await downloader.download_from_doi(
@@ -205,24 +205,24 @@ if __name__ == "__main__":
 #                         output_path=f"/tmp/scholar_downloads/{args.project}/{title[:30]}.pdf",
 #                     )
 #                     success = bool(pdf_path)
-# 
+#
 #                 if success and pdf_path:
 #                     print(f"\n✅ Downloaded successfully: {pdf_path}")
 #                 else:
 #                     print(f"\n❌ Download failed")
-# 
+#
 #                 await browser.close()
 #                 return 0 if success else 1
-# 
+#
 #             except Exception as e:
 #                 print(f"❌ Error: {e}")
 #                 import traceback
-# 
+#
 #                 traceback.print_exc()
 #                 return 1
-# 
+#
 #         return asyncio.run(download_paper_async(args))
-# 
+#
 #     elif args.command == "info":
 #         print(f"\n🎯 SciTeX Scholar - Paywalled PDF Downloader")
 #         print(f"=" * 50)
@@ -238,13 +238,13 @@ if __name__ == "__main__":
 #     else:
 #         parser.print_help()
 #         return 1
-# 
+#
 #     return 0
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     sys.exit(main())
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -17,22 +17,22 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import pickle
 # import zlib
 # from typing import Any as _Any
 # from typing import Dict, List, Optional, Union
-# 
+#
 # import numpy as np
-# 
-# 
+#
+#
 # class _BlobMixin:
 #     """BLOB data handling functionality"""
-# 
+#
 #     def save_blob(
 #         self,
 #         table_name: str,
@@ -43,9 +43,9 @@ if __name__ == "__main__":
 #         metadata: Optional[Dict[str, _Any]] = None,
 #     ) -> None:
 #         """Save any Python object as compressed blob with automatic queueing.
-# 
+#
 #         Perfect for HPC with dynamic parallelism - SQLite handles conflicts.
-# 
+#
 #         Parameters
 #         ----------
 #         table_name : str
@@ -63,13 +63,13 @@ if __name__ == "__main__":
 #         """
 #         import os
 #         import time
-# 
+#
 #         self.ensure_connection()
-# 
+#
 #         # Use database default if compress not explicitly specified
 #         if compress is None:
 #             compress = getattr(self, "compress_by_default", False)
-# 
+#
 #         # Create table if not exists
 #         self.execute(
 #             f"""
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 #             )
 #         """
 #         )
-# 
+#
 #         # Serialize data
 #         if isinstance(data, np.ndarray):
 #             data_bytes = data.tobytes()
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 #         else:
 #             data_bytes = pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
 #             data_type = "pickle"
-# 
+#
 #         # Compress if requested
 #         if compress and len(data_bytes) > 1024:
 #             original_size = len(data_bytes)
@@ -105,10 +105,10 @@ if __name__ == "__main__":
 #             metadata["compressed_size"] = len(data_bytes)
 #         else:
 #             is_compressed = 0
-# 
+#
 #         # Save with automatic queueing (SQLite handles conflicts)
 #         import json
-# 
+#
 #         self.execute(
 #             f"""
 #             INSERT OR REPLACE INTO {table_name}
@@ -127,7 +127,7 @@ if __name__ == "__main__":
 #             ),
 #         )
 #         self.commit()
-# 
+#
 #     # def load_blob(
 #     #     self,
 #     #     table_name: str,
@@ -135,7 +135,7 @@ if __name__ == "__main__":
 #     #     where: Optional[str] = None,
 #     # ) -> Union[_Any, Dict[str, _Any]]:
 #     #     """Load compressed blob data.
-# 
+#
 #     #     Parameters
 #     #     ----------
 #     #     table_name : str
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 #     #         Specific key to load. If None, loads all.
 #     #     where : str, optional
 #     #         SQL WHERE clause
-# 
+#
 #     #     Returns
 #     #     -------
 #     #     Loaded object(s)
@@ -159,16 +159,16 @@ if __name__ == "__main__":
 #     #         """,
 #     #             (key,),
 #     #         ).fetchone()
-# 
+#
 #     #         if result is None:
 #     #             raise KeyError(f"Key '{key}' not found")
-# 
+#
 #     #         data_bytes, is_compressed, data_type = result
-# 
+#
 #     #         # Decompress if needed
 #     #         if is_compressed:
 #     #             data_bytes = zlib.decompress(data_bytes)
-# 
+#
 #     #         # Deserialize
 #     #         if data_type.startswith("ndarray:"):
 #     #             _, dtype_str, shape_str = data_type.split(":", 2)
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 #     #             return arr.reshape(eval(shape_str))
 #     #         else:
 #     #             return pickle.loads(data_bytes)
-# 
+#
 #     #     else:
 #     #         # Load all or filtered
 #     #         query = (
@@ -184,23 +184,23 @@ if __name__ == "__main__":
 #     #         )
 #     #         if where:
 #     #             query += f" WHERE {where}"
-# 
+#
 #     #         results = {}
 #     #         for key, data_bytes, is_compressed, data_type in self.execute(
 #     #             query
 #     #         ):
 #     #             if is_compressed:
 #     #                 data_bytes = zlib.decompress(data_bytes)
-# 
+#
 #     #             if data_type.startswith("ndarray:"):
 #     #                 _, dtype_str, shape_str = data_type.split(":", 2)
 #     #                 arr = np.frombuffer(data_bytes, dtype=np.dtype(dtype_str))
 #     #                 results[key] = arr.reshape(eval(shape_str))
 #     #             else:
 #     #                 results[key] = pickle.loads(data_bytes)
-# 
+#
 #     #         return results
-# 
+#
 #     def load_blob(
 #         self,
 #         table_name: str,
@@ -209,7 +209,7 @@ if __name__ == "__main__":
 #         where: Optional[str] = None,
 #     ) -> Union[_Any, Dict[str, _Any]]:
 #         """Load compressed blob data.
-# 
+#
 #         Parameters
 #         ----------
 #         table_name : str
@@ -220,13 +220,13 @@ if __name__ == "__main__":
 #             Row IDs to load. "all" loads all rows
 #         where : str, optional
 #             SQL WHERE clause
-# 
+#
 #         Returns
 #         -------
 #         Loaded object(s)
 #         """
 #         self.ensure_connection()
-# 
+#
 #         # Handle ids parameter
 #         if ids != "all":
 #             if isinstance(ids, int):
@@ -234,33 +234,33 @@ if __name__ == "__main__":
 #             else:
 #                 id_list = ",".join(map(str, ids))
 #                 id_where = f"id IN ({id_list})"
-# 
+#
 #             if where:
 #                 where = f"({where}) AND ({id_where})"
 #             else:
 #                 where = id_where
-# 
+#
 #         if key:
 #             # Load specific key
 #             query = (
 #                 f"SELECT data, compressed, data_type FROM {table_name} WHERE key = ?"
 #             )
 #             params = (key,)
-# 
+#
 #             if where:
 #                 query += f" AND {where}"
-# 
+#
 #             result = self.execute(query, params).fetchone()
-# 
+#
 #             if result is None:
 #                 raise KeyError(f"Key '{key}' not found")
-# 
+#
 #             data_bytes, is_compressed, data_type = result
-# 
+#
 #             # Decompress if needed
 #             if is_compressed:
 #                 data_bytes = zlib.decompress(data_bytes)
-# 
+#
 #             # Deserialize
 #             if data_type.startswith("ndarray:"):
 #                 _, dtype_str, shape_str = data_type.split(":", 2)
@@ -268,28 +268,28 @@ if __name__ == "__main__":
 #                 return arr.reshape(eval(shape_str))
 #             else:
 #                 return pickle.loads(data_bytes)
-# 
+#
 #         else:
 #             # Load all or filtered
 #             query = f"SELECT key, data, compressed, data_type FROM {table_name}"
 #             if where:
 #                 query += f" WHERE {where}"
-# 
+#
 #             results = {}
 #             for key, data_bytes, is_compressed, data_type in self.execute(query):
 #                 if is_compressed:
 #                     data_bytes = zlib.decompress(data_bytes)
-# 
+#
 #                 if data_type.startswith("ndarray:"):
 #                     _, dtype_str, shape_str = data_type.split(":", 2)
 #                     arr = np.frombuffer(data_bytes, dtype=np.dtype(dtype_str))
 #                     results[key] = arr.reshape(eval(shape_str))
 #                 else:
 #                     results[key] = pickle.loads(data_bytes)
-# 
+#
 #             return results
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

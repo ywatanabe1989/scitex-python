@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+
 pytest.importorskip("git")
 
 from scitex.git._utils import _in_directory
@@ -39,6 +40,7 @@ class TestUtils:
 
             assert Path.cwd() == cwd_original
 
+
 # EOF
 
 if __name__ == "__main__":
@@ -54,16 +56,16 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/git/ops.py
-# 
+#
 # """
 # Git operations utilities.
 # """
-# 
+#
 # import os
 # from contextlib import contextmanager
 # from pathlib import Path
-# 
-# 
+#
+#
 # @contextmanager
 # def _in_directory(path: Path):
 #     cwd_original = Path.cwd()
@@ -72,12 +74,12 @@ if __name__ == "__main__":
 #         yield
 #     finally:
 #         os.chdir(cwd_original)
-# 
-# 
+#
+#
 # __all__ = [
 #     "_in_directory",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -694,7 +694,9 @@ class TestEnvironmentInfo:
             "torch.version.debug", False
         ), patch("torch.cuda.is_available", return_value=True), patch(
             "torch.version.cuda", "11.1"
-        ), patch("torch.version.hip", None):
+        ), patch(
+            "torch.version.hip", None
+        ):
             result = get_env_info()
 
             assert isinstance(result, SystemEnv)
@@ -762,7 +764,9 @@ class TestEnvironmentInfo:
             "torch.version.debug", False
         ), patch("torch.cuda.is_available", return_value=True), patch(
             "torch.version.cuda", None
-        ), patch("torch.version.hip", "4.2.0"), patch(
+        ), patch(
+            "torch.version.hip", "4.2.0"
+        ), patch(
             "torch._C._show_config", return_value="HIP Runtime: 4.2.0\nMIOpen: 2.14.0"
         ):
             result = get_env_info()
@@ -1026,6 +1030,7 @@ class TestConstantsAndFormats:
         """Test TORCH_AVAILABLE constant is boolean."""
         assert isinstance(TORCH_AVAILABLE, bool)
 
+
 if __name__ == "__main__":
     import os
 
@@ -1037,7 +1042,7 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/resource/_utils/_get_env_info.py
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
-# 
+#
 # # This script outputs relevant system environment info
 # # Run it with `python collect_env.py`.
 # import locale
@@ -1046,14 +1051,14 @@ if __name__ == "__main__":
 # import subprocess
 # import sys
 # from collections import namedtuple
-# 
+#
 # try:
 #     import torch
-# 
+#
 #     TORCH_AVAILABLE = True
 # except (ImportError, NameError, AttributeError, OSError):
 #     TORCH_AVAILABLE = False
-# 
+#
 # # System Environment Information
 # SystemEnv = namedtuple(
 #     "SystemEnv",
@@ -1079,8 +1084,8 @@ if __name__ == "__main__":
 #         "miopen_runtime_version",
 #     ],
 # )
-# 
-# 
+#
+#
 # def run(command):
 #     """Returns (return-code, stdout, stderr)"""
 #     p = subprocess.Popen(
@@ -1095,16 +1100,16 @@ if __name__ == "__main__":
 #     output = raw_output.decode(enc)
 #     err = raw_err.decode(enc)
 #     return rc, output.strip(), err.strip()
-# 
-# 
+#
+#
 # def run_and_read_all(run_lambda, command):
 #     """Runs command using run_lambda; reads and returns entire output if rc is 0"""
 #     rc, out, _ = run_lambda(command)
 #     if rc != 0:
 #         return None
 #     return out
-# 
-# 
+#
+#
 # def run_and_parse_first_match(run_lambda, command, regex):
 #     """Runs command using run_lambda, returns the first regex match if it exists"""
 #     rc, out, _ = run_lambda(command)
@@ -1114,8 +1119,8 @@ if __name__ == "__main__":
 #     if match is None:
 #         return None
 #     return match.group(1)
-# 
-# 
+#
+#
 # def get_conda_packages(run_lambda):
 #     if get_platform() == "win32":
 #         system_root = os.environ.get("SYSTEMROOT", "C:\\Windows")
@@ -1130,22 +1135,22 @@ if __name__ == "__main__":
 #     # Comment starting at beginning of line
 #     comment_regex = re.compile(r"^#.*\n")
 #     return re.sub(comment_regex, "", out)
-# 
-# 
+#
+#
 # def get_gcc_version(run_lambda):
 #     return run_and_parse_first_match(run_lambda, "gcc --version", r"gcc (.*)")
-# 
-# 
+#
+#
 # def get_clang_version(run_lambda):
 #     return run_and_parse_first_match(
 #         run_lambda, "clang --version", r"clang version (.*)"
 #     )
-# 
-# 
+#
+#
 # def get_cmake_version(run_lambda):
 #     return run_and_parse_first_match(run_lambda, "cmake --version", r"cmake (.*)")
-# 
-# 
+#
+#
 # def get_nvidia_driver_version(run_lambda):
 #     if get_platform() == "darwin":
 #         cmd = "kextstat | grep -i cuda"
@@ -1154,8 +1159,8 @@ if __name__ == "__main__":
 #         )
 #     smi = get_nvidia_smi()
 #     return run_and_parse_first_match(run_lambda, smi, r"Driver Version: (.*?) ")
-# 
-# 
+#
+#
 # def get_gpu_info(run_lambda):
 #     if get_platform() == "darwin" or (
 #         TORCH_AVAILABLE
@@ -1172,12 +1177,12 @@ if __name__ == "__main__":
 #         return None
 #     # Anonymize GPUs by removing their UUID
 #     return re.sub(uuid_regex, "", out)
-# 
-# 
+#
+#
 # def get_running_cuda_version(run_lambda):
 #     return run_and_parse_first_match(run_lambda, "nvcc --version", r"release .+ V(.*)")
-# 
-# 
+#
+#
 # def get_cudnn_version(run_lambda):
 #     """This will return a list of libcudnn.so; it's hard to tell which one is being used"""
 #     if get_platform() == "win32":
@@ -1213,8 +1218,8 @@ if __name__ == "__main__":
 #         return files[0]
 #     result = "\n".join(files)
 #     return f"Probably one of the following:\n{result}"
-# 
-# 
+#
+#
 # def get_nvidia_smi():
 #     # Note: nvidia-smi is currently available only on Windows and Linux
 #     smi = "nvidia-smi"
@@ -1231,8 +1236,8 @@ if __name__ == "__main__":
 #                 smi = f'"{candidate_smi}"'
 #                 break
 #     return smi
-# 
-# 
+#
+#
 # def get_platform():
 #     if sys.platform.startswith("linux"):
 #         return "linux"
@@ -1244,12 +1249,12 @@ if __name__ == "__main__":
 #         return "darwin"
 #     else:
 #         return sys.platform
-# 
-# 
+#
+#
 # def get_mac_version(run_lambda):
 #     return run_and_parse_first_match(run_lambda, "sw_vers -productVersion", r"(.*)")
-# 
-# 
+#
+#
 # def get_windows_version(run_lambda):
 #     system_root = os.environ.get("SYSTEMROOT", "C:\\Windows")
 #     wmic_cmd = os.path.join(system_root, "System32", "Wbem", "wmic")
@@ -1258,55 +1263,55 @@ if __name__ == "__main__":
 #         run_lambda,
 #         f"{wmic_cmd} os get Caption | {findstr_cmd} /v Caption",
 #     )
-# 
-# 
+#
+#
 # def get_lsb_version(run_lambda):
 #     return run_and_parse_first_match(
 #         run_lambda, "lsb_release -a", r"Description:\t(.*)"
 #     )
-# 
-# 
+#
+#
 # def check_release_file(run_lambda):
 #     return run_and_parse_first_match(
 #         run_lambda, "cat /etc/*-release", r'PRETTY_NAME="(.*)"'
 #     )
-# 
-# 
+#
+#
 # def get_os(run_lambda):
 #     from platform import machine
-# 
+#
 #     platform = get_platform()
-# 
+#
 #     if platform == "win32" or platform == "cygwin":
 #         return get_windows_version(run_lambda)
-# 
+#
 #     if platform == "darwin":
 #         version = get_mac_version(run_lambda)
 #         if version is None:
 #             return None
 #         return f"macOS {version} ({machine()})"
-# 
+#
 #     if platform == "linux":
 #         # Ubuntu/Debian based
 #         desc = get_lsb_version(run_lambda)
 #         if desc is not None:
 #             return f"{desc} ({machine()})"
-# 
+#
 #         # Try reading /etc/*-release
 #         desc = check_release_file(run_lambda)
 #         if desc is not None:
 #             return f"{desc} ({machine()})"
-# 
+#
 #         return f"{platform} ({machine()})"
-# 
+#
 #     # Unknown platform
 #     return platform
-# 
-# 
+#
+#
 # def get_pip_packages(run_lambda):
 #     """Returns `pip list` output. Note: will also find conda-installed pytorch
 #     and numpy packages."""
-# 
+#
 #     # People genly have `pip` as `pip` or `pip3`
 #     def run_with_pip(pip):
 #         if get_platform() == "win32":
@@ -1316,29 +1321,29 @@ if __name__ == "__main__":
 #         else:
 #             grep_cmd = r'grep "torch\|numpy"'
 #         return run_and_read_all(run_lambda, pip + " list --format=freeze | " + grep_cmd)
-# 
+#
 #     # Try to figure out if the user is running pip or pip3.
 #     out2 = run_with_pip("pip")
 #     out3 = run_with_pip("pip3")
-# 
+#
 #     num_pips = len([x for x in [out2, out3] if x is not None])
 #     if num_pips == 0:
 #         return "pip", out2
-# 
+#
 #     if num_pips == 1:
 #         if out2 is not None:
 #             return "pip", out2
 #         return "pip3", out3
-# 
+#
 #     # num_pips is 2. Return pip3 by default b/c that most likely
 #     # is the one associated with Python 3
 #     return "pip3", out3
-# 
-# 
+#
+#
 # def get_env_info():
 #     run_lambda = run
 #     pip_version, pip_list_output = get_pip_packages(run_lambda)
-# 
+#
 #     if TORCH_AVAILABLE:
 #         version_str = torch.__version__
 #         debug_mode_str = str(torch.version.debug)
@@ -1361,7 +1366,7 @@ if __name__ == "__main__":
 #     else:
 #         version_str = debug_mode_str = cuda_available_str = cuda_version_str = "N/A"
 #         hip_compiled_version = hip_runtime_version = miopen_runtime_version = "N/A"
-# 
+#
 #     return SystemEnv(
 #         torch_version=version_str,
 #         is_debug_build=debug_mode_str,
@@ -1383,19 +1388,19 @@ if __name__ == "__main__":
 #         clang_version=get_clang_version(run_lambda),
 #         cmake_version=get_cmake_version(run_lambda),
 #     )
-# 
-# 
+#
+#
 # env_info_fmt = """
 # PyTorch version: {torch_version}
 # Is debug build: {is_debug_build}
 # CUDA used to build PyTorch: {cuda_compiled_version}
 # ROCM used to build PyTorch: {hip_compiled_version}
-# 
+#
 # OS: {os}
 # GCC version: {gcc_version}
 # Clang version: {clang_version}
 # CMake version: {cmake_version}
-# 
+#
 # Python version: {python_version}
 # Is CUDA available: {is_cuda_available}
 # CUDA runtime version: {cuda_runtime_version}
@@ -1404,13 +1409,13 @@ if __name__ == "__main__":
 # cuDNN version: {cudnn_version}
 # HIP runtime version: {hip_runtime_version}
 # MIOpen runtime version: {miopen_runtime_version}
-# 
+#
 # Versions of relevant libraries:
 # {pip_packages}
 # {conda_packages}
 # """.strip()
-# 
-# 
+#
+#
 # def pretty_str(envinfo):
 #     def replace_nones(dct, replacement="Could not collect"):
 #         for key in dct.keys():
@@ -1418,7 +1423,7 @@ if __name__ == "__main__":
 #                 continue
 #             dct[key] = replacement
 #         return dct
-# 
+#
 #     def replace_bools(dct, true="Yes", false="No"):
 #         for key in dct.keys():
 #             if dct[key] is True:
@@ -1426,30 +1431,30 @@ if __name__ == "__main__":
 #             elif dct[key] is False:
 #                 dct[key] = false
 #         return dct
-# 
+#
 #     def prepend(text, tag="[prepend]"):
 #         lines = text.split("\n")
 #         updated_lines = [tag + line for line in lines]
 #         return "\n".join(updated_lines)
-# 
+#
 #     def replace_if_empty(text, replacement="No relevant packages"):
 #         if text is not None and len(text) == 0:
 #             return replacement
 #         return text
-# 
+#
 #     def maybe_start_on_next_line(string):
 #         # If `string` is multiline, prepend a \n to it.
 #         if string is not None and len(string.split("\n")) > 1:
 #             return f"\n{string}\n"
 #         return string
-# 
+#
 #     mutable_dict = envinfo._asdict()
-# 
+#
 #     # If nvidia_gpu_models is multiline, start on the next line
 #     mutable_dict["nvidia_gpu_models"] = maybe_start_on_next_line(
 #         envinfo.nvidia_gpu_models
 #     )
-# 
+#
 #     # If the machine doesn't have CUDA, report some fields as 'No CUDA'
 #     dynamic_cuda_fields = [
 #         "cuda_runtime_version",
@@ -1469,17 +1474,17 @@ if __name__ == "__main__":
 #             mutable_dict[field] = "No CUDA"
 #         if envinfo.cuda_compiled_version is None:
 #             mutable_dict["cuda_compiled_version"] = "None"
-# 
+#
 #     # Replace True with Yes, False with No
 #     mutable_dict = replace_bools(mutable_dict)
-# 
+#
 #     # Replace all None objects with 'Could not collect'
 #     mutable_dict = replace_nones(mutable_dict)
-# 
+#
 #     # If either of these are '', replace with 'No relevant packages'
 #     mutable_dict["pip_packages"] = replace_if_empty(mutable_dict["pip_packages"])
 #     mutable_dict["conda_packages"] = replace_if_empty(mutable_dict["conda_packages"])
-# 
+#
 #     # Tag conda and pip packages with a prefix
 #     # If they were previously None, they'll show up as ie '[conda] Could not collect'
 #     if mutable_dict["pip_packages"]:
@@ -1491,18 +1496,18 @@ if __name__ == "__main__":
 #             mutable_dict["conda_packages"], "[conda] "
 #         )
 #     return env_info_fmt.format(**mutable_dict)
-# 
-# 
+#
+#
 # def get_pretty_env_info():
 #     return pretty_str(get_env_info())
-# 
-# 
+#
+#
 # def main():
 #     print("Collecting environment information...")
 #     output = get_pretty_env_info()
 #     print(output)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     main()
 

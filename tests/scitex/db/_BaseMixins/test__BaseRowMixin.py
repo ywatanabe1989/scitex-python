@@ -11,14 +11,18 @@ including row retrieval and counting.
 """
 
 import pytest
+
 pytest.importorskip("psycopg2")
-import pandas as pd
 from unittest.mock import Mock, patch
+
+import pandas as pd
+
 from scitex.db._BaseMixins import _BaseRowMixin
 
 
 class ConcreteRowMixin(_BaseRowMixin):
     """Concrete implementation for testing."""
+
     pass
 
 
@@ -44,7 +48,7 @@ class TestBaseRowMixin:
                 order_by="created_at DESC",
                 limit=100,
                 offset=50,
-                return_as="dict"
+                return_as="dict",
             )
 
     def test_get_row_count_not_implemented(self):
@@ -60,40 +64,40 @@ class TestBaseRowMixin:
     def test_method_signatures(self):
         """Test that all required methods exist with correct signatures."""
         # Check method existence
-        assert hasattr(self.mixin, 'get_rows')
-        assert hasattr(self.mixin, 'get_row_count')
+        assert hasattr(self.mixin, "get_rows")
+        assert hasattr(self.mixin, "get_row_count")
 
         # Check method signatures
         import inspect
-        
+
         # get_rows signature
         sig = inspect.signature(self.mixin.get_rows)
         params = list(sig.parameters.keys())
-        assert 'table_name' in params
-        assert 'columns' in params
-        assert 'where' in params
-        assert 'order_by' in params
-        assert 'limit' in params
-        assert 'offset' in params
-        assert 'return_as' in params
-        
+        assert "table_name" in params
+        assert "columns" in params
+        assert "where" in params
+        assert "order_by" in params
+        assert "limit" in params
+        assert "offset" in params
+        assert "return_as" in params
+
         # Check defaults
-        assert sig.parameters['columns'].default is None
-        assert sig.parameters['where'].default is None
-        assert sig.parameters['order_by'].default is None
-        assert sig.parameters['limit'].default is None
-        assert sig.parameters['offset'].default is None
-        assert sig.parameters['return_as'].default == "dataframe"
+        assert sig.parameters["columns"].default is None
+        assert sig.parameters["where"].default is None
+        assert sig.parameters["order_by"].default is None
+        assert sig.parameters["limit"].default is None
+        assert sig.parameters["offset"].default is None
+        assert sig.parameters["return_as"].default == "dataframe"
 
         # get_row_count signature
         sig = inspect.signature(self.mixin.get_row_count)
         params = list(sig.parameters.keys())
-        assert 'table_name' in params
-        assert 'where' in params
-        
+        assert "table_name" in params
+        assert "where" in params
+
         # Check defaults
-        assert sig.parameters['table_name'].default is None
-        assert sig.parameters['where'].default is None
+        assert sig.parameters["table_name"].default is None
+        assert sig.parameters["where"].default is None
         # Check return type annotation
         assert sig.return_annotation == int
 
@@ -103,42 +107,65 @@ class TestBaseRowMixin:
 
     def test_mixin_usage_pattern(self):
         """Test that mixin can be properly combined with other classes."""
+
         class DatabaseWithRows(_BaseRowMixin):
             def __init__(self):
                 self.data = {
                     "users": [
-                        {"id": 1, "name": "Alice", "email": "alice@example.com", "active": True},
-                        {"id": 2, "name": "Bob", "email": "bob@example.com", "active": True},
-                        {"id": 3, "name": "Charlie", "email": "charlie@example.com", "active": False},
+                        {
+                            "id": 1,
+                            "name": "Alice",
+                            "email": "alice@example.com",
+                            "active": True,
+                        },
+                        {
+                            "id": 2,
+                            "name": "Bob",
+                            "email": "bob@example.com",
+                            "active": True,
+                        },
+                        {
+                            "id": 3,
+                            "name": "Charlie",
+                            "email": "charlie@example.com",
+                            "active": False,
+                        },
                     ],
                     "products": [
                         {"id": 1, "name": "Widget", "price": 9.99},
                         {"id": 2, "name": "Gadget", "price": 19.99},
-                    ]
+                    ],
                 }
-                
-            def get_rows(self, table_name, columns=None, where=None, 
-                        order_by=None, limit=None, offset=None, 
-                        return_as="dataframe"):
+
+            def get_rows(
+                self,
+                table_name,
+                columns=None,
+                where=None,
+                order_by=None,
+                limit=None,
+                offset=None,
+                return_as="dataframe",
+            ):
                 if table_name not in self.data:
                     raise ValueError(f"Table {table_name} not found")
-                
+
                 rows = self.data[table_name]
-                
+
                 # Simple where clause simulation (just for testing)
                 if where and "active = true" in where.lower():
                     rows = [r for r in rows if r.get("active", True)]
-                
+
                 # Apply offset and limit
                 if offset:
                     rows = rows[offset:]
                 if limit:
                     rows = rows[:limit]
-                
+
                 # Select columns
                 if columns:
                     rows = [{k: r[k] for k in columns if k in r} for r in rows]
-                
+
                 # Return format
                 if return_as == "dataframe":
                     return pd.DataFrame(rows)
@@ -146,47 +173,47 @@ class TestBaseRowMixin:
                     return rows
                 else:
                     return rows
-                    
+
             def get_row_count(self, table_name=None, where=None):
                 if table_name is None:
                     # Count all rows in all tables
                     return sum(len(rows) for rows in self.data.values())
-                
+
                 if table_name not in self.data:
                     return 0
-                
+
                 rows = self.data[table_name]
                 if where and "active = true" in where.lower():
                     rows = [r for r in rows if r.get("active", True)]
-                
+
                 return len(rows)
-                
+
         db = DatabaseWithRows()
-        
+
         # Test get_rows as dataframe
         df = db.get_rows("users")
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 3
         assert list(df.columns) == ["id", "name", "email", "active"]
-        
+
         # Test get_rows with columns
         df = db.get_rows("users", columns=["id", "name"])
         assert list(df.columns) == ["id", "name"]
-        
+
         # Test get_rows with where clause
         df = db.get_rows("users", where="active = true")
         assert len(df) == 2
-        
+
         # Test get_rows with limit and offset
         df = db.get_rows("products", limit=1, offset=1)
         assert len(df) == 1
         assert df.iloc[0]["name"] == "Gadget"
-        
+
         # Test get_rows as dict
         rows = db.get_rows("products", return_as="dict")
         assert isinstance(rows, list)
         assert len(rows) == 2
-        
+
         # Test get_row_count
         assert db.get_row_count("users") == 3
         assert db.get_row_count("users", where="active = true") == 2
@@ -197,15 +224,15 @@ class TestBaseRowMixin:
         # Test with empty table name
         with pytest.raises(NotImplementedError):
             self.mixin.get_rows("")
-            
+
         # Test with empty columns list
         with pytest.raises(NotImplementedError):
             self.mixin.get_rows("table", columns=[])
-            
+
         # Test with invalid return_as
         with pytest.raises(NotImplementedError):
             self.mixin.get_rows("table", return_as="invalid")
-            
+
         # Test with negative limit/offset
         with pytest.raises(NotImplementedError):
             self.mixin.get_rows("table", limit=-1, offset=-1)
@@ -219,7 +246,7 @@ class TestBaseRowMixin:
             ["id", "name", "email"],  # Multiple columns
             ["*"],  # Wildcard (implementation dependent)
         ]
-        
+
         for columns in column_sets:
             with pytest.raises(NotImplementedError):
                 self.mixin.get_rows("users", columns=columns)
@@ -234,7 +261,7 @@ class TestBaseRowMixin:
             "active = true AND role = 'admin'",  # Complex condition
             "id IN (1, 2, 3)",  # IN clause
         ]
-        
+
         for where in where_clauses:
             with pytest.raises(NotImplementedError):
                 self.mixin.get_rows("table", where=where)
@@ -247,7 +274,7 @@ class TestBaseRowMixin:
             "id DESC",  # Simple descending
             "name ASC, created_at DESC",  # Multiple columns
         ]
-        
+
         for order_by in order_by_clauses:
             with pytest.raises(NotImplementedError):
                 self.mixin.get_rows("table", order_by=order_by)
@@ -261,7 +288,7 @@ class TestBaseRowMixin:
             (10, 10),  # Second page
             (100, 500),  # Large offset
         ]
-        
+
         for limit, offset in pagination_tests:
             with pytest.raises(NotImplementedError):
                 self.mixin.get_rows("table", limit=limit, offset=offset)
@@ -275,7 +302,7 @@ class TestBaseRowMixin:
             "json",  # JSON format (if supported)
             "tuple",  # Tuple format (if supported)
         ]
-        
+
         for format in return_formats:
             with pytest.raises(NotImplementedError):
                 self.mixin.get_rows("table", return_as=format)
@@ -303,18 +330,18 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-24 22:21:03 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/db/_Basemodules/_BaseRowMixin.py
-# 
+#
 # THIS_FILE = (
 #     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_Basemodules/_BaseRowMixin.py"
 # )
-# 
-# 
+#
+#
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
-# 
+#
 # from typing import List, Optional
-# 
-# 
+#
+#
 # class _BaseRowMixin:
 #     def get_rows(
 #         self,
@@ -327,11 +354,11 @@ if __name__ == "__main__":
 #         return_as: str = "dataframe",
 #     ):
 #         raise NotImplementedError
-# 
+#
 #     def get_row_count(self, table_name: str = None, where: str = None) -> int:
 #         raise NotImplementedError
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

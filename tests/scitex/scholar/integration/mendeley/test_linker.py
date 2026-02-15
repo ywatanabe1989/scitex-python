@@ -15,22 +15,22 @@ if __name__ == "__main__":
 # """
 # Mendeley linker - Live synchronization with Mendeley.
 # """
-# 
+#
 # from typing import Optional
 # import os
-# 
+#
 # from scitex import logging
 # from ..base import BaseLinker
 # from .importer import MendeleyImporter
 # from .exporter import MendeleyExporter
 # from .mapper import MendeleyMapper
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class MendeleyLinker(BaseLinker):
 #     """Live synchronization with Mendeley."""
-# 
+#
 #     def __init__(
 #         self,
 #         app_id: Optional[str] = None,
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 #         sync_interval: int = 60,
 #     ):
 #         """Initialize Mendeley linker.
-# 
+#
 #         Args:
 #             app_id: Mendeley app ID
 #             app_secret: Mendeley app secret
@@ -55,14 +55,14 @@ if __name__ == "__main__":
 #             "app_secret": app_secret or os.getenv("MENDELEY_APP_SECRET"),
 #             "access_token": access_token or os.getenv("MENDELEY_ACCESS_TOKEN"),
 #         }
-# 
+#
 #         super().__init__(
 #             credentials=credentials,
 #             project=project,
 #             config=config,
 #             sync_interval=sync_interval,
 #         )
-# 
+#
 #     def _create_importer(self) -> MendeleyImporter:
 #         """Create importer instance."""
 #         return MendeleyImporter(
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 #             project=self.project,
 #             config=self.config,
 #         )
-# 
+#
 #     def _create_exporter(self) -> MendeleyExporter:
 #         """Create exporter instance."""
 #         return MendeleyExporter(
@@ -82,12 +82,12 @@ if __name__ == "__main__":
 #             project=self.project,
 #             config=self.config,
 #         )
-# 
+#
 #     def _create_mapper(self) -> MendeleyMapper:
 #         """Create mapper instance."""
 #         return MendeleyMapper(config=self.config)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

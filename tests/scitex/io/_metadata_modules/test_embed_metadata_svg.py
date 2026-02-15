@@ -19,10 +19,10 @@ class TestEmbedMetadataSvg:
     def _create_svg(self, path: str, content: str = None):
         """Create a simple SVG file."""
         if content is None:
-            content = '''<?xml version="1.0" encoding="UTF-8"?>
+            content = """<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
   <circle cx="50" cy="50" r="40" fill="red"/>
-</svg>'''
+</svg>"""
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
@@ -76,10 +76,10 @@ class TestEmbedMetadataSvg:
             svg_path = f.name
 
         try:
-            svg_with_ns = '''<?xml version="1.0"?>
+            svg_with_ns = """<?xml version="1.0"?>
 <svg xmlns:scitex="http://scitex.io/metadata" xmlns="http://www.w3.org/2000/svg">
   <rect width="100" height="100"/>
-</svg>'''
+</svg>"""
             self._create_svg(svg_path, svg_with_ns)
             embed_metadata_svg(svg_path, json.dumps({"test": 1}))
 
@@ -87,7 +87,7 @@ class TestEmbedMetadataSvg:
                 content = f.read()
 
             # Should only have one namespace declaration
-            assert content.count('xmlns:scitex') == 1
+            assert content.count("xmlns:scitex") == 1
         finally:
             os.unlink(svg_path)
 
@@ -103,6 +103,7 @@ class TestEmbedMetadataSvg:
         finally:
             os.unlink(svg_path)
 
+
 if __name__ == "__main__":
     import os
 
@@ -116,26 +117,26 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_metadata_modules/embed_metadata_svg.py
-# 
+#
 # """SVG metadata embedding using <metadata> element."""
-# 
+#
 # import re
-# 
-# 
+#
+#
 # def embed_metadata_svg(image_path: str, metadata_json: str) -> None:
 #     """
 #     Embed metadata into an SVG file using <metadata> element.
-# 
+#
 #     Args:
 #         image_path: Path to the SVG file.
 #         metadata_json: JSON string of metadata to embed.
-# 
+#
 #     Raises:
 #         ValueError: If the SVG file is invalid.
 #     """
 #     with open(image_path, "r", encoding="utf-8") as f:
 #         svg_content = f.read()
-# 
+#
 #     # Remove existing scitex metadata if present
 #     svg_content = re.sub(
 #         r'<metadata[^>]*id="scitex_metadata"[^>]*>.*?</metadata>',
@@ -143,7 +144,7 @@ if __name__ == "__main__":
 #         svg_content,
 #         flags=re.DOTALL,
 #     )
-# 
+#
 #     # Find the opening <svg> tag and insert metadata after it
 #     svg_match = re.search(r"(<svg[^>]*>)", svg_content)
 #     if svg_match:
@@ -159,7 +160,7 @@ if __name__ == "__main__":
 #             + metadata_element
 #             + svg_content[svg_tag_end:]
 #         )
-# 
+#
 #         # Ensure scitex namespace is declared in svg tag if not present
 #         if "xmlns:scitex" not in svg_content:
 #             svg_content = svg_content.replace(
@@ -167,13 +168,13 @@ if __name__ == "__main__":
 #                 '<svg xmlns:scitex="http://scitex.io/metadata"',
 #                 1,
 #             )
-# 
+#
 #         with open(image_path, "w", encoding="utf-8") as f:
 #             f.write(svg_content)
 #     else:
 #         raise ValueError(f"Invalid SVG file: {image_path}")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -13,24 +13,24 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: scitex/plt/utils/metadata/_line_semantic_handling.py
-# 
+#
 # """
 # Semantic handling for special line types (boxplot, violin, stem).
-# 
+#
 # This module provides functions to handle semantic labeling and statistics
 # computation for boxplot, violin, and stem plots.
 # """
-# 
-# 
+#
+#
 # def _compute_boxplot_stats(ax_for_detection):
 #     """
 #     Compute boxplot statistics from axes history.
-# 
+#
 #     Parameters
 #     ----------
 #     ax_for_detection : axes wrapper
 #         Axes wrapper with history
-# 
+#
 #     Returns
 #     -------
 #     tuple
@@ -39,10 +39,10 @@ if __name__ == "__main__":
 #     num_boxes = 0
 #     boxplot_stats = []
 #     boxplot_data = None
-# 
+#
 #     if not hasattr(ax_for_detection, "history"):
 #         return num_boxes, boxplot_stats
-# 
+#
 #     for record in ax_for_detection.history.values():
 #         if isinstance(record, tuple) and len(record) >= 3:
 #             method_name = record[1]
@@ -60,7 +60,7 @@ if __name__ == "__main__":
 #                             num_boxes = 1
 #                             boxplot_data = [data]
 #                 break
-# 
+#
 #     # Compute statistics
 #     if boxplot_data is not None:
 #         import numpy as np
@@ -88,14 +88,14 @@ if __name__ == "__main__":
 #                     })
 #             except (ValueError, TypeError):
 #                 pass
-# 
+#
 #     return num_boxes, boxplot_stats
-# 
-# 
+#
+#
 # def _determine_semantic_type(line, i, plot_type, num_boxes, skip_unlabeled, scitex_id):
 #     """
 #     Determine semantic type and ID for a line.
-# 
+#
 #     Parameters
 #     ----------
 #     line : matplotlib.lines.Line2D
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 #         Whether to skip unlabeled lines
 #     scitex_id : str
 #         Scitex ID attribute
-# 
+#
 #     Returns
 #     -------
 #     tuple
@@ -122,11 +122,11 @@ if __name__ == "__main__":
 #     has_boxplot_stats = False
 #     box_idx = None
 #     should_skip = False
-# 
+#
 #     is_stem = plot_type == "stem"
 #     is_boxplot = plot_type == "boxplot"
 #     is_violin = plot_type == "violin"
-# 
+#
 #     # For stem, always detect semantic type
 #     if is_stem:
 #         marker = line.get_marker()
@@ -145,14 +145,14 @@ if __name__ == "__main__":
 #         else:
 #             semantic_type = "stem_component"
 #             semantic_id = f"stem_{i}"
-# 
+#
 #     if skip_unlabeled and not scitex_id and label.startswith("_"):
 #         # For boxplot, assign semantic roles
 #         if is_boxplot and num_boxes > 0:
 #             total_whiskers = 2 * num_boxes
 #             total_caps = 2 * num_boxes
 #             total_medians = num_boxes
-# 
+#
 #             if i < total_whiskers:
 #                 box_idx = i // 2
 #                 whisker_idx = i % 2
@@ -181,7 +181,7 @@ if __name__ == "__main__":
 #             pass  # Already handled above
 #         else:
 #             should_skip = True
-# 
+#
 #     return semantic_type, semantic_id, has_boxplot_stats, box_idx, should_skip
 
 # --------------------------------------------------------------------------------

@@ -14,9 +14,10 @@ Tests cover:
 """
 
 import pytest
+
 from scitex.stats.auto._rules import (
-    TestRule,
     TEST_RULES,
+    TestRule,
     get_test_rule,
     list_tests_by_family,
 )
@@ -193,7 +194,9 @@ class TestTESTRULESRegistry:
         }
 
         for name, rule in TEST_RULES.items():
-            assert rule.family in valid_families, f"{name} has invalid family: {rule.family}"
+            assert (
+                rule.family in valid_families
+            ), f"{name} has invalid family: {rule.family}"
 
     def test_all_rules_have_descriptions(self):
         """Test that all rules have descriptions."""
@@ -215,7 +218,13 @@ class TestTESTRULESRegistry:
 
     def test_nonparametric_tests_present(self):
         """Test that nonparametric tests are in the registry."""
-        nonparametric_tests = ["brunner_munzel", "mannwhitneyu", "wilcoxon", "kruskal", "friedman"]
+        nonparametric_tests = [
+            "brunner_munzel",
+            "mannwhitneyu",
+            "wilcoxon",
+            "kruskal",
+            "friedman",
+        ]
         for test in nonparametric_tests:
             assert test in TEST_RULES
             assert TEST_RULES[test].family == "nonparametric"
@@ -544,12 +553,15 @@ class TestPriorityOrdering:
     def test_priorities_are_reasonable(self):
         """Test that priorities are in a reasonable range."""
         for name, rule in TEST_RULES.items():
-            assert 0 <= rule.priority <= 150, f"{name} priority {rule.priority} out of range"
+            assert (
+                0 <= rule.priority <= 150
+            ), f"{name} priority {rule.priority} out of range"
 
     def test_brunner_munzel_highest_priority_for_two_groups(self):
         """Test that Brunner-Munzel has highest priority among 2-group tests."""
         two_group_tests = {
-            name: rule for name, rule in TEST_RULES.items()
+            name: rule
+            for name, rule in TEST_RULES.items()
             if rule.min_groups == 2 and rule.max_groups == 2
         }
 
@@ -575,6 +587,7 @@ class TestPriorityOrdering:
         # t-test is slightly higher than Mann-Whitney (90 vs 85)
         assert ttest_ind_priority > mannwhitneyu_priority
 
+
 if __name__ == "__main__":
     import os
 
@@ -589,27 +602,27 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-10 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/stats/auto/_rules.py
-# 
+#
 # """
 # Test Rules - Applicability rules for statistical tests.
-# 
+#
 # This module defines TestRule dataclass and the TEST_RULES registry that
 # maps test names to their applicability conditions. Used by check_applicable()
 # to determine which tests can be applied to a given StatContext.
-# 
+#
 # The priority field is used for test recommendation - higher priority tests
 # are recommended first when multiple tests are applicable.
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # from dataclasses import dataclass, field
 # from typing import Dict, Literal, Optional, Set
-# 
+#
 # # =============================================================================
 # # Type Aliases
 # # =============================================================================
-# 
+#
 # TestFamily = Literal[
 #     "parametric",
 #     "nonparametric",
@@ -620,22 +633,22 @@ if __name__ == "__main__":
 #     "posthoc",
 #     "other",
 # ]
-# 
-# 
+#
+#
 # # =============================================================================
 # # TestRule
 # # =============================================================================
-# 
-# 
+#
+#
 # @dataclass
 # class TestRule:
 #     """
 #     Applicability rule for a specific statistical test.
-# 
+#
 #     Each TestRule defines the conditions under which a test is applicable.
 #     The check_applicable() function uses these rules to filter tests
 #     for a given StatContext.
-# 
+#
 #     Parameters
 #     ----------
 #     name : str
@@ -681,7 +694,7 @@ if __name__ == "__main__":
 #         Brunner-Munzel has priority 110 as the recommended default for 2 groups.
 #     description : str
 #         Human-readable description for tooltips.
-# 
+#
 #     Examples
 #     --------
 #     >>> rule = TestRule(
@@ -704,7 +717,7 @@ if __name__ == "__main__":
 #     ...     description="Independent samples t-test (Welch)"
 #     ... )
 #     """
-# 
+#
 #     name: str
 #     family: TestFamily
 #     min_groups: int
@@ -722,17 +735,17 @@ if __name__ == "__main__":
 #     max_factors: Optional[int]
 #     priority: int = 0
 #     description: str = ""
-# 
-# 
+#
+#
 # # =============================================================================
 # # TEST_RULES Registry
 # # =============================================================================
-# 
+#
 # TEST_RULES: Dict[str, TestRule] = {
 #     # =========================================================================
 #     # Parametric Tests - Mean Comparisons
 #     # =========================================================================
-# 
+#
 #     # Independent 2-sample t-test (Welch)
 #     "ttest_ind": TestRule(
 #         name="ttest_ind",
@@ -753,7 +766,7 @@ if __name__ == "__main__":
 #         priority=90,
 #         description="Independent samples t-test (Welch)",
 #     ),
-# 
+#
 #     # Paired t-test
 #     "ttest_rel": TestRule(
 #         name="ttest_rel",
@@ -774,7 +787,7 @@ if __name__ == "__main__":
 #         priority=95,
 #         description="Paired samples t-test",
 #     ),
-# 
+#
 #     # One-way ANOVA (between)
 #     "anova_oneway": TestRule(
 #         name="anova_oneway",
@@ -795,7 +808,7 @@ if __name__ == "__main__":
 #         priority=80,
 #         description="One-way ANOVA (between subjects)",
 #     ),
-# 
+#
 #     # Repeated-measures one-way ANOVA
 #     "anova_rm_oneway": TestRule(
 #         name="anova_rm_oneway",
@@ -816,7 +829,7 @@ if __name__ == "__main__":
 #         priority=85,
 #         description="Repeated-measures one-way ANOVA",
 #     ),
-# 
+#
 #     # Welch ANOVA (unequal variances)
 #     "welch_anova": TestRule(
 #         name="welch_anova",
@@ -837,7 +850,7 @@ if __name__ == "__main__":
 #         priority=82,
 #         description="Welch's ANOVA (heterogeneous variances)",
 #     ),
-# 
+#
 #     # Two-way ANOVA (between)
 #     "anova_twoway": TestRule(
 #         name="anova_twoway",
@@ -858,7 +871,7 @@ if __name__ == "__main__":
 #         priority=78,
 #         description="Two-way ANOVA (between subjects)",
 #     ),
-# 
+#
 #     # Two-way ANOVA (mixed)
 #     "anova_twoway_mixed": TestRule(
 #         name="anova_twoway_mixed",
@@ -879,11 +892,11 @@ if __name__ == "__main__":
 #         priority=80,
 #         description="Two-way mixed-design ANOVA",
 #     ),
-# 
+#
 #     # =========================================================================
 #     # Nonparametric Tests - Rank Comparisons
 #     # =========================================================================
-# 
+#
 #     # Brunner-Munzel test (RECOMMENDED DEFAULT for 2 groups)
 #     "brunner_munzel": TestRule(
 #         name="brunner_munzel",
@@ -904,7 +917,7 @@ if __name__ == "__main__":
 #         priority=110,  # HIGHEST PRIORITY - recommended default
 #         description="Brunner-Munzel test (most robust, recommended)",
 #     ),
-# 
+#
 #     # Mann-Whitney U test
 #     "mannwhitneyu": TestRule(
 #         name="mannwhitneyu",
@@ -925,7 +938,7 @@ if __name__ == "__main__":
 #         priority=85,
 #         description="Mann-Whitney U test (rank-sum)",
 #     ),
-# 
+#
 #     # Wilcoxon signed-rank test (paired)
 #     "wilcoxon": TestRule(
 #         name="wilcoxon",
@@ -946,7 +959,7 @@ if __name__ == "__main__":
 #         priority=90,
 #         description="Wilcoxon signed-rank test (paired)",
 #     ),
-# 
+#
 #     # Kruskal-Wallis (3+ groups, between)
 #     "kruskal": TestRule(
 #         name="kruskal",
@@ -967,7 +980,7 @@ if __name__ == "__main__":
 #         priority=75,
 #         description="Kruskal-Wallis H test",
 #     ),
-# 
+#
 #     # Friedman test (3+ groups, within)
 #     "friedman": TestRule(
 #         name="friedman",
@@ -988,11 +1001,11 @@ if __name__ == "__main__":
 #         priority=80,
 #         description="Friedman test (repeated measures)",
 #     ),
-# 
+#
 #     # =========================================================================
 #     # Categorical Tests
 #     # =========================================================================
-# 
+#
 #     # Chi-square test of independence
 #     "chi2_independence": TestRule(
 #         name="chi2_independence",
@@ -1013,7 +1026,7 @@ if __name__ == "__main__":
 #         priority=80,
 #         description="Chi-square test of independence",
 #     ),
-# 
+#
 #     # Fisher's exact test (2x2)
 #     "fisher_exact": TestRule(
 #         name="fisher_exact",
@@ -1034,7 +1047,7 @@ if __name__ == "__main__":
 #         priority=90,
 #         description="Fisher's exact test (2x2)",
 #     ),
-# 
+#
 #     # McNemar's test (paired binary)
 #     "mcnemar": TestRule(
 #         name="mcnemar",
@@ -1055,11 +1068,11 @@ if __name__ == "__main__":
 #         priority=85,
 #         description="McNemar's test (paired binary)",
 #     ),
-# 
+#
 #     # =========================================================================
 #     # Correlation Tests
 #     # =========================================================================
-# 
+#
 #     # Pearson correlation
 #     "pearsonr": TestRule(
 #         name="pearsonr",
@@ -1080,7 +1093,7 @@ if __name__ == "__main__":
 #         priority=80,
 #         description="Pearson correlation coefficient",
 #     ),
-# 
+#
 #     # Spearman correlation
 #     "spearmanr": TestRule(
 #         name="spearmanr",
@@ -1101,11 +1114,11 @@ if __name__ == "__main__":
 #         priority=85,
 #         description="Spearman rank correlation",
 #     ),
-# 
+#
 #     # =========================================================================
 #     # Normality Tests
 #     # =========================================================================
-# 
+#
 #     # Shapiro-Wilk test
 #     "shapiro": TestRule(
 #         name="shapiro",
@@ -1126,7 +1139,7 @@ if __name__ == "__main__":
 #         priority=60,
 #         description="Shapiro-Wilk normality test",
 #     ),
-# 
+#
 #     # Levene's test for homogeneity of variance
 #     "levene": TestRule(
 #         name="levene",
@@ -1147,11 +1160,11 @@ if __name__ == "__main__":
 #         priority=70,
 #         description="Levene's test for homogeneity of variance",
 #     ),
-# 
+#
 #     # =========================================================================
 #     # Post-hoc Tests
 #     # =========================================================================
-# 
+#
 #     # Tukey HSD
 #     "tukey_hsd": TestRule(
 #         name="tukey_hsd",
@@ -1172,7 +1185,7 @@ if __name__ == "__main__":
 #         priority=88,
 #         description="Tukey HSD post-hoc test",
 #     ),
-# 
+#
 #     # Dunnett (control vs treatments)
 #     "dunnett": TestRule(
 #         name="dunnett",
@@ -1193,7 +1206,7 @@ if __name__ == "__main__":
 #         priority=86,
 #         description="Dunnett's test (control vs treatments)",
 #     ),
-# 
+#
 #     # Games-Howell (unequal variances)
 #     "games_howell": TestRule(
 #         name="games_howell",
@@ -1214,11 +1227,11 @@ if __name__ == "__main__":
 #         priority=89,
 #         description="Games-Howell post-hoc (unequal variances)",
 #     ),
-# 
+#
 #     # =========================================================================
 #     # Effect Size Measures
 #     # =========================================================================
-# 
+#
 #     # Cohen's d (independent)
 #     "cohens_d_ind": TestRule(
 #         name="cohens_d_ind",
@@ -1239,7 +1252,7 @@ if __name__ == "__main__":
 #         priority=90,
 #         description="Cohen's d (independent samples)",
 #     ),
-# 
+#
 #     # Cohen's d (paired)
 #     "cohens_d_paired": TestRule(
 #         name="cohens_d_paired",
@@ -1260,7 +1273,7 @@ if __name__ == "__main__":
 #         priority=92,
 #         description="Cohen's d (paired samples)",
 #     ),
-# 
+#
 #     # Hedges' g
 #     "hedges_g": TestRule(
 #         name="hedges_g",
@@ -1281,7 +1294,7 @@ if __name__ == "__main__":
 #         priority=88,
 #         description="Hedges' g (bias-corrected effect size)",
 #     ),
-# 
+#
 #     # Cliff's delta
 #     "cliffs_delta": TestRule(
 #         name="cliffs_delta",
@@ -1302,7 +1315,7 @@ if __name__ == "__main__":
 #         priority=86,
 #         description="Cliff's delta (nonparametric effect size)",
 #     ),
-# 
+#
 #     # Eta-squared
 #     "eta_squared": TestRule(
 #         name="eta_squared",
@@ -1323,7 +1336,7 @@ if __name__ == "__main__":
 #         priority=80,
 #         description="Eta-squared (variance explained)",
 #     ),
-# 
+#
 #     # Partial eta-squared
 #     "partial_eta_squared": TestRule(
 #         name="partial_eta_squared",
@@ -1344,7 +1357,7 @@ if __name__ == "__main__":
 #         priority=85,
 #         description="Partial eta-squared (multi-factor designs)",
 #     ),
-# 
+#
 #     # Effect size r (for correlations)
 #     "effect_size_r": TestRule(
 #         name="effect_size_r",
@@ -1365,7 +1378,7 @@ if __name__ == "__main__":
 #         priority=80,
 #         description="Effect size r (correlation)",
 #     ),
-# 
+#
 #     # Odds ratio
 #     "odds_ratio": TestRule(
 #         name="odds_ratio",
@@ -1386,7 +1399,7 @@ if __name__ == "__main__":
 #         priority=88,
 #         description="Odds ratio (2x2 table)",
 #     ),
-# 
+#
 #     # Risk ratio
 #     "risk_ratio": TestRule(
 #         name="risk_ratio",
@@ -1407,7 +1420,7 @@ if __name__ == "__main__":
 #         priority=86,
 #         description="Risk ratio (relative risk)",
 #     ),
-# 
+#
 #     # Probability of superiority P(X>Y)
 #     "prob_superiority": TestRule(
 #         name="prob_superiority",
@@ -1429,39 +1442,39 @@ if __name__ == "__main__":
 #         description="Probability of superiority P(X>Y)",
 #     ),
 # }
-# 
-# 
+#
+#
 # # =============================================================================
 # # Utility Functions
 # # =============================================================================
-# 
-# 
+#
+#
 # def get_test_rule(name: str) -> Optional[TestRule]:
 #     """
 #     Get a TestRule by name.
-# 
+#
 #     Parameters
 #     ----------
 #     name : str
 #         Test name (e.g., "ttest_ind", "brunner_munzel").
-# 
+#
 #     Returns
 #     -------
 #     TestRule or None
 #         The TestRule if found, else None.
 #     """
 #     return TEST_RULES.get(name)
-# 
-# 
+#
+#
 # def list_tests_by_family(family: TestFamily) -> Dict[str, TestRule]:
 #     """
 #     Get all tests in a specific family.
-# 
+#
 #     Parameters
 #     ----------
 #     family : TestFamily
 #         Test family to filter by.
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -1471,12 +1484,12 @@ if __name__ == "__main__":
 #         name: rule for name, rule in TEST_RULES.items()
 #         if rule.family == family
 #     }
-# 
-# 
+#
+#
 # # =============================================================================
 # # Public API
 # # =============================================================================
-# 
+#
 # __all__ = [
 #     "TestRule",
 #     "TestFamily",
@@ -1484,7 +1497,7 @@ if __name__ == "__main__":
 #     "get_test_rule",
 #     "list_tests_by_family",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

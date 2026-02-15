@@ -13,18 +13,18 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: scitex/plt/utils/metadata/_plot_type_detection.py
-# 
+#
 # """
 # Plot type detection utilities.
-# 
+#
 # This module provides functions to detect the primary plot type from axes content.
 # """
-# 
-# 
+#
+#
 # def _detect_plot_type(ax) -> tuple:
 #     """
 #     Detect the primary plot type and method from axes content.
-# 
+#
 #     Checks for:
 #     - Lines -> "line"
 #     - Scatter collections -> "scatter"
@@ -35,12 +35,12 @@ if __name__ == "__main__":
 #     - Image -> "image"
 #     - Contour -> "contour"
 #     - KDE -> "kde"
-# 
+#
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes
 #         The axes to analyze
-# 
+#
 #     Returns
 #     -------
 #     tuple
@@ -55,7 +55,7 @@ if __name__ == "__main__":
 #         for record in ax.history.values():
 #             if isinstance(record, tuple) and len(record) >= 2:
 #                 methods.append(record[1])  # record[1] is the method name
-# 
+#
 #         # Check methods in priority order (more specific first)
 #         for method in methods:
 #             if method == "stx_heatmap":
@@ -137,11 +137,11 @@ if __name__ == "__main__":
 #             elif method == "plot":
 #                 return "line", "plot"
 #             # Note: "plot" method is handled last as a fallback since boxplot uses it internally
-# 
+#
 #     # Check for images (takes priority)
 #     if len(ax.images) > 0:
 #         return "image", "imshow"
-# 
+#
 #     # Check for 2D density plots (hist2d, hexbin) - QuadMesh or PolyCollection
 #     if hasattr(ax, "collections"):
 #         for coll in ax.collections:
@@ -153,13 +153,13 @@ if __name__ == "__main__":
 #                 arr = coll.get_array()
 #                 if arr is not None and len(arr) > 0:
 #                     return "hexbin", "hexbin"
-# 
+#
 #     # Check for contours
 #     if hasattr(ax, "collections"):
 #         for coll in ax.collections:
 #             if "Contour" in type(coll).__name__:
 #                 return "contour", "contour"
-# 
+#
 #     # Check for bar plots
 #     if len(ax.containers) > 0:
 #         # Check if it's a boxplot (has multiple containers with specific structure)
@@ -167,7 +167,7 @@ if __name__ == "__main__":
 #             return "boxplot", "boxplot"
 #         # Otherwise assume bar plot
 #         return "bar", "bar"
-# 
+#
 #     # Check for patches (could be histogram, violin, pie, etc.)
 #     if len(ax.patches) > 0:
 #         # Check for pie chart (Wedge patches)
@@ -179,20 +179,20 @@ if __name__ == "__main__":
 #         # Check for violin plot
 #         if any("Poly" in type(p).__name__ for p in ax.patches):
 #             return "violin", "violinplot"
-# 
+#
 #     # Check for scatter plots (PathCollection)
 #     if hasattr(ax, "collections") and len(ax.collections) > 0:
 #         for coll in ax.collections:
 #             if "PathCollection" in type(coll).__name__:
 #                 return "scatter", "scatter"
-# 
+#
 #     # Check for line plots
 #     if len(ax.lines) > 0:
 #         # If there are error bars, it might be errorbar plot
 #         if any(hasattr(line, "_mpl_error") for line in ax.lines):
 #             return "errorbar", "errorbar"
 #         return "line", "plot"
-# 
+#
 #     return None, None
 
 # --------------------------------------------------------------------------------

@@ -395,6 +395,7 @@ class TestHilbert:
         assert not torch.allclose(y[0], y[1], atol=0.1)
         assert not torch.allclose(y[1], y[2], atol=0.1)
 
+
 if __name__ == "__main__":
     import os
 
@@ -411,17 +412,17 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/nn/_Hilbert.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "/home/ywatanabe/proj/scitex_repo/src/scitex/nn/_Hilbert.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # #!/usr/bin/env python
-# 
+#
 # import torch  # 1.7.1
 # import torch.nn as nn
 # from torch.fft import fft, ifft
-# 
-# 
+#
+#
 # class Hilbert(nn.Module):
 #     def __init__(self, seq_len, dim=-1, fp16=False, in_place=False):
 #         super().__init__()
@@ -436,10 +437,10 @@ if __name__ == "__main__":
 #             ]
 #         )
 #         self.register_buffer("f", f)
-# 
+#
 #     def hilbert_transform(self, x):
 #         # n = x.shape[self.dim]
-# 
+#
 #         # Create frequency dim
 #         # f = torch.cat(
 #         #     [
@@ -447,36 +448,36 @@ if __name__ == "__main__":
 #         #         torch.arange(-(n // 2), 0, device=x.device) / float(n),
 #         #     ]
 #         # )
-# 
+#
 #         orig_dtype = x.dtype
 #         x = x.float()
 #         xf = fft(x, n=self.n, dim=self.dim)
 #         x = x.to(orig_dtype)
-# 
+#
 #         # Create step function
 #         steepness = 50  # This value can be adjusted
 #         u = torch.sigmoid(
 #             steepness * self.f.type_as(x)
 #         )  # Soft step function for differentiability
-# 
+#
 #         transformed = ifft(xf * 2 * u, dim=self.dim)
-# 
+#
 #         return transformed
-# 
+#
 #     def forward(self, x):
 #         if self.fp16:
 #             x = x.half()
-# 
+#
 #         if not self.in_place:
 #             x = x.clone()  # Ensure that we do not modify the input in-place
-# 
+#
 #         x_comp = self.hilbert_transform(x)
-# 
+#
 #         pha = torch.atan2(x_comp.imag, x_comp.real)
 #         amp = x_comp.abs()
-# 
+#
 #         assert x.shape == pha.shape == amp.shape
-# 
+#
 #         out = torch.cat(
 #             [
 #                 pha.unsqueeze(-1),
@@ -484,37 +485,37 @@ if __name__ == "__main__":
 #             ],
 #             dim=-1,
 #         )
-# 
+#
 #         # if self.fp16:
 #         #     out = (
 #         #         out.float()
 #         #     )
 #         #     # Optionally cast back to float for stability in subsequent operations
-# 
+#
 #         if self.fp16:
 #             out = out.float()
-# 
+#
 #         return out
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     import scitex
-# 
+#
 #     xx, tt, fs = scitex.dsp.demo_sig()
 #     xx = torch.tensor(xx)
-# 
+#
 #     # Parameters
 #     device = "cuda"
 #     fp16 = True
 #     in_place = True
-# 
+#
 #     # Initialization
 #     m = Hilbert(xx.shape[-1], fp16=fp16, in_place=in_place).to(device)
-# 
+#
 #     # Calculation
 #     xx = xx.to(device)
 #     y = m(xx)
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

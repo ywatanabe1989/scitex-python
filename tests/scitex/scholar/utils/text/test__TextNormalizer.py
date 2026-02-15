@@ -16,21 +16,21 @@ if __name__ == "__main__":
 # # File: ./src/scitex/scholar/utils/_TextNormalizer.py
 # # ----------------------------------------
 # from __future__ import annotations
-# 
+#
 # """Text normalization utilities for improved DOI resolution.
-# 
+#
 # This module provides utilities to normalize text for better matching
 # in DOI resolution, handling Unicode, LaTeX, and encoding issues.
 # """
-# 
+#
 # import re
 # import unicodedata
 # from typing import Dict, List
-# 
-# 
+#
+#
 # class TextNormalizer:
 #     """Normalize text for better matching in academic paper searches."""
-# 
+#
 #     # LaTeX to Unicode mappings
 #     LATEX_UNICODE_MAP = {
 #         # Common accented characters
@@ -125,55 +125,55 @@ if __name__ == "__main__":
 #         r"\{\\\\H\{u\}\}": "ű",
 #         r"\{\\\\H\{U\}\}": "Ű",
 #     }
-# 
+#
 #     @classmethod
 #     def normalize_for_search(cls, text: str, preserve_case: bool = False) -> str:
 #         """Normalize text for academic paper search matching.
-# 
+#
 #         Args:
 #             text: Input text to normalize
 #             preserve_case: Whether to preserve original case
-# 
+#
 #         Returns:
 #             Normalized text suitable for fuzzy matching
 #         """
 #         if not text:
 #             return ""
-# 
+#
 #         # Convert LaTeX sequences to Unicode
 #         normalized = cls._convert_latex_to_unicode(text)
-# 
+#
 #         # Unicode normalization (decompose accented characters)
 #         normalized = unicodedata.normalize("NFKD", normalized)
-# 
+#
 #         # Convert to lowercase unless preserving case
 #         if not preserve_case:
 #             normalized = normalized.lower()
-# 
+#
 #         # Remove extra whitespace
 #         normalized = re.sub(r"\s+", " ", normalized).strip()
-# 
+#
 #         return normalized
-# 
+#
 #     @classmethod
 #     def normalize_for_fuzzy_matching(cls, text: str) -> str:
 #         """Aggressive normalization for fuzzy title matching.
-# 
+#
 #         Args:
 #             text: Input text to normalize
-# 
+#
 #         Returns:
 #             Heavily normalized text for fuzzy matching
 #         """
 #         if not text:
 #             return ""
-# 
+#
 #         # Start with search normalization
 #         normalized = cls.normalize_for_search(text, preserve_case=False)
-# 
+#
 #         # Remove punctuation and special characters
 #         normalized = re.sub(r"[^\w\s]", " ", normalized)
-# 
+#
 #         # Remove common stopwords that don't affect meaning
 #         stopwords = {
 #             "the",
@@ -204,30 +204,30 @@ if __name__ == "__main__":
 #             "among",
 #             "since",
 #         }
-# 
+#
 #         words = [w for w in normalized.split() if w not in stopwords and len(w) > 1]
-# 
+#
 #         return " ".join(words)
-# 
+#
 #     @classmethod
 #     def normalize_author_name(cls, name: str) -> str:
 #         """Normalize author names for better matching.
-# 
+#
 #         Args:
 #             name: Author name to normalize
-# 
+#
 #         Returns:
 #             Normalized author name
 #         """
 #         if not name:
 #             return ""
-# 
+#
 #         # Convert LaTeX to Unicode
 #         normalized = cls._convert_latex_to_unicode(name)
-# 
+#
 #         # Unicode normalization
 #         normalized = unicodedata.normalize("NFKD", normalized)
-# 
+#
 #         # Handle common name formats
 #         # "Last, First Middle" -> "First Middle Last"
 #         if "," in normalized:
@@ -236,24 +236,24 @@ if __name__ == "__main__":
 #                 last_name = parts[0].strip()
 #                 first_names = parts[1].strip()
 #                 normalized = f"{first_names} {last_name}"
-# 
+#
 #         # Remove extra whitespace
 #         normalized = re.sub(r"\s+", " ", normalized).strip()
-# 
+#
 #         return normalized
-# 
+#
 #     @classmethod
 #     def _convert_latex_to_unicode(cls, text: str) -> str:
 #         """Convert LaTeX sequences to Unicode characters.
-# 
+#
 #         Args:
 #             text: Text containing LaTeX sequences
-# 
+#
 #         Returns:
 #             Text with LaTeX converted to Unicode
 #         """
 #         result = text
-# 
+#
 #         # Handle common patterns from academic papers first
 #         common_patterns = [
 #             # Handle H{"u}lsemann style (without escaping)
@@ -305,84 +305,84 @@ if __name__ == "__main__":
 #             (r"\{\'i\}", "í"),
 #             (r"\{\'I\}", "Í"),
 #         ]
-# 
+#
 #         # Apply common patterns first
 #         for pattern, replacement in common_patterns:
 #             result = re.sub(pattern, replacement, result)
-# 
+#
 #         # Then apply the full mapping with proper escaping
 #         for latex_seq, unicode_char in cls.LATEX_UNICODE_MAP.items():
 #             result = re.sub(latex_seq, unicode_char, result)
-# 
+#
 #         return result
-# 
+#
 #     @classmethod
 #     def calculate_title_similarity(cls, title1: str, title2: str) -> float:
 #         """Calculate similarity between two academic paper titles.
-# 
+#
 #         Args:
 #             title1: First title
 #             title2: Second title
-# 
+#
 #         Returns:
 #             Similarity score between 0 and 1
 #         """
 #         if not title1 or not title2:
 #             return 0.0
-# 
+#
 #         # Normalize both titles for comparison
 #         norm1 = cls.normalize_for_fuzzy_matching(title1)
 #         norm2 = cls.normalize_for_fuzzy_matching(title2)
-# 
+#
 #         if norm1 == norm2:
 #             return 1.0
-# 
+#
 #         # Calculate word-based Jaccard similarity
 #         words1 = set(norm1.split())
 #         words2 = set(norm2.split())
-# 
+#
 #         if not words1 or not words2:
 #             return 0.0
-# 
+#
 #         intersection = len(words1 & words2)
 #         union = len(words1 | words2)
-# 
+#
 #         return intersection / union if union > 0 else 0.0
-# 
+#
 #     @classmethod
 #     def is_likely_same_title(
 #         cls, title1: str, title2: str, threshold: float = 0.8
 #     ) -> bool:
 #         """Check if two titles likely refer to the same paper.
-# 
+#
 #         Args:
 #             title1: First title
 #             title2: Second title
 #             threshold: Similarity threshold (0-1)
-# 
+#
 #         Returns:
 #             True if titles are likely the same paper
 #         """
 #         similarity = cls.calculate_title_similarity(title1, title2)
 #         return similarity >= threshold
-# 
+#
 #     @classmethod
 #     def normalize_title(cls, title: str, remove_trailing_period: bool = True) -> str:
 #         """Normalize paper title for storage and comparison.
-# 
+#
 #         This method provides consistent title normalization across the Scholar system:
 #         - Removes BibTeX braces: {Title} -> Title
 #         - Converts LaTeX sequences to Unicode
 #         - Normalizes whitespace
 #         - Optionally removes trailing periods
-# 
+#
 #         Args:
 #             title: Paper title to normalize
 #             remove_trailing_period: Whether to remove trailing period (default: True)
-# 
+#
 #         Returns:
 #             Normalized title string
-# 
+#
 #         Examples:
 #             >>> TextNormalizer.normalize_title("{Deep Learning in Neural Networks.}")
 #             "Deep Learning in Neural Networks"
@@ -391,38 +391,38 @@ if __name__ == "__main__":
 #         """
 #         if not title:
 #             return ""
-# 
+#
 #         # Remove BibTeX braces
 #         normalized = title.strip("{}")
-# 
+#
 #         # Convert LaTeX sequences to Unicode
 #         normalized = cls._convert_latex_to_unicode(normalized)
-# 
+#
 #         # Unicode normalization
 #         normalized = unicodedata.normalize("NFKD", normalized)
-# 
+#
 #         # Normalize whitespace
 #         normalized = re.sub(r"\s+", " ", normalized).strip()
-# 
+#
 #         # Remove trailing period if requested
 #         if remove_trailing_period and normalized.endswith("."):
 #             normalized = normalized.rstrip(".")
-# 
+#
 #         return normalized
-# 
+#
 #     @classmethod
 #     def strip_html_tags(cls, text: str) -> str:
 #         """Strip HTML/XML tags from text.
-# 
+#
 #         This method removes HTML and XML tags commonly found in academic metadata
 #         such as abstracts and titles retrieved from APIs.
-# 
+#
 #         Args:
 #             text: Text containing HTML/XML tags
-# 
+#
 #         Returns:
 #             Text with HTML/XML tags removed
-# 
+#
 #         Examples:
 #             >>> TextNormalizer.strip_html_tags("<p>Abstract <i>text</i> here.</p>")
 #             "Abstract text here."
@@ -431,11 +431,11 @@ if __name__ == "__main__":
 #         """
 #         if not text:
 #             return ""
-# 
+#
 #         # Remove HTML/XML tags using regex
 #         # This pattern matches opening and closing tags
 #         clean_text = re.sub(r"<[^>]+>", "", text)
-# 
+#
 #         # Clean up any HTML entities that might remain
 #         html_entities = {
 #             "&amp;": "&",
@@ -447,48 +447,48 @@ if __name__ == "__main__":
 #             "&#39;": "'",
 #             "&#34;": '"',
 #         }
-# 
+#
 #         for entity, replacement in html_entities.items():
 #             clean_text = clean_text.replace(entity, replacement)
-# 
+#
 #         # Normalize whitespace after tag removal
 #         clean_text = re.sub(r"\s+", " ", clean_text).strip()
-# 
+#
 #         return clean_text
-# 
+#
 #     @classmethod
 #     def clean_metadata_text(cls, text: str) -> str:
 #         """Comprehensive cleaning for metadata text fields.
-# 
+#
 #         This combines HTML tag stripping, LaTeX conversion, and normalization
 #         specifically for metadata fields like titles and abstracts.
-# 
+#
 #         Args:
 #             text: Raw metadata text
-# 
+#
 #         Returns:
 #             Cleaned and normalized text
 #         """
 #         if not text:
 #             return ""
-# 
+#
 #         # First strip HTML/XML tags
 #         cleaned = cls.strip_html_tags(text)
-# 
+#
 #         # Convert LaTeX sequences to Unicode (needed before normalization)
 #         cleaned = cls._convert_latex_to_unicode(cleaned)
-# 
+#
 #         # Then apply Unicode normalization and whitespace cleanup
 #         # Use NFC to keep composed characters like ü together
 #         cleaned = unicodedata.normalize("NFC", cleaned)
 #         cleaned = re.sub(r"\s+", " ", cleaned).strip()
-# 
+#
 #         return cleaned
-# 
-# 
+#
+#
 # # Export
 # __all__ = ["TextNormalizer"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

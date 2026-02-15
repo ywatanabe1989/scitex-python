@@ -14,24 +14,24 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: _visual.py - Visual adjustments (ticks, spines, position)
-# 
+#
 # """Mixin for visual adjustments including ticks, spines, and positioning."""
-# 
+#
 # import os
 # from typing import List, Optional, Union
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
-# 
-# 
+#
+#
 # class VisualAdjustmentMixin:
 #     """Mixin for visual adjustments to axis appearance."""
-# 
+#
 #     def _get_ax_module(self):
 #         """Lazy import ax module to avoid circular imports."""
 #         from .....plt import ax as ax_module
 #         return ax_module
-# 
+#
 #     def set_ticks(
 #         self,
 #         xvals: Optional[List[Union[int, float]]] = None,
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 #         yticks: Optional[List[str]] = None,
 #     ) -> None:
 #         """Set custom tick positions and labels.
-# 
+#
 #         Parameters
 #         ----------
 #         xvals : list of numbers, optional
@@ -59,10 +59,10 @@ if __name__ == "__main__":
 #             yvals=yvals,
 #             yticks=yticks,
 #         )
-# 
+#
 #     def set_n_ticks(self, n_xticks: int = 4, n_yticks: int = 4) -> None:
 #         """Set the number of ticks on each axis.
-# 
+#
 #         Parameters
 #         ----------
 #         n_xticks : int, optional
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 #         self._axis_mpl = self._get_ax_module().set_n_ticks(
 #             self._axis_mpl, n_xticks=n_xticks, n_yticks=n_yticks
 #         )
-# 
+#
 #     def hide_spines(
 #         self,
 #         top: bool = True,
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 #         labels: bool = False,
 #     ) -> None:
 #         """Hide specific spines and optionally ticks/labels.
-# 
+#
 #         Parameters
 #         ----------
 #         top : bool, optional
@@ -109,10 +109,10 @@ if __name__ == "__main__":
 #             ticks=ticks,
 #             labels=labels,
 #         )
-# 
+#
 #     def extend(self, x_ratio: float = 1.0, y_ratio: float = 1.0) -> None:
 #         """Extend axis limits by a ratio.
-# 
+#
 #         Parameters
 #         ----------
 #         x_ratio : float, optional
@@ -123,10 +123,10 @@ if __name__ == "__main__":
 #         self._axis_mpl = self._get_ax_module().extend(
 #             self._axis_mpl, x_ratio=x_ratio, y_ratio=y_ratio
 #         )
-# 
+#
 #     def shift(self, dx: float = 0, dy: float = 0) -> None:
 #         """Shift axis position.
-# 
+#
 #         Parameters
 #         ----------
 #         dx : float, optional
@@ -135,8 +135,8 @@ if __name__ == "__main__":
 #             Vertical shift, by default 0
 #         """
 #         self._axis_mpl = self._get_ax_module().shift(self._axis_mpl, dx=dx, dy=dy)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -14,27 +14,27 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: 2025-12-08
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/browser/debugging/_visual_cursor.py
-# 
+#
 # """
 # Visual cursor and click effects for E2E test feedback.
-# 
+#
 # Provides visual feedback during browser automation:
 # - Visual cursor indicator that follows mouse movements
 # - Click ripple effects
 # - Drag state visualization
 # - Step progress messages
-# 
+#
 # Works with both async and sync Playwright APIs.
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # from typing import TYPE_CHECKING, Union
-# 
+#
 # if TYPE_CHECKING:
 #     from playwright.async_api import Page as AsyncPage
 #     from playwright.sync_api import Page as SyncPage
-# 
+#
 # # CSS styles for visual effects
 # VISUAL_EFFECTS_CSS = """
 # /* Visual cursor indicator */
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 #     width: 28px;
 #     height: 28px;
 # }
-# 
+#
 # /* Click ripple effect */
 # .scitex-click-ripple {
 #     position: fixed;
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 #     0% { width: 0; height: 0; opacity: 1; transform: translate(-50%, -50%); }
 #     100% { width: 80px; height: 80px; opacity: 0; transform: translate(-50%, -50%); }
 # }
-# 
+#
 # /* Step message container */
 # #_scitex_step_messages {
 #     position: fixed;
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 #     0% { opacity: 0; transform: translateX(-20px); }
 #     100% { opacity: 1; transform: translateX(0); }
 # }
-# 
+#
 # /* Test result banner */
 # #_scitex_result_banner {
 #     position: fixed;
@@ -136,45 +136,45 @@ if __name__ == "__main__":
 #     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 # }
 # """
-# 
+#
 # # JavaScript to inject visual effects
 # INJECT_EFFECTS_JS = f"""
 # () => {{
 #     if (document.getElementById('_scitex_visual_effects')) return;
-# 
+#
 #     const style = document.createElement('style');
 #     style.id = '_scitex_visual_effects';
 #     style.textContent = `{VISUAL_EFFECTS_CSS}`;
 #     document.head.appendChild(style);
-# 
+#
 #     // Create cursor element
 #     const cursor = document.createElement('div');
 #     cursor.id = '_scitex_cursor';
 #     document.body.appendChild(cursor);
-# 
+#
 #     // Create step messages container
 #     const msgContainer = document.createElement('div');
 #     msgContainer.id = '_scitex_step_messages';
 #     document.body.appendChild(msgContainer);
 # }}
 # """
-# 
-# 
+#
+#
 # def inject_visual_effects(page: Union["AsyncPage", "SyncPage"]) -> None:
 #     """Inject CSS and elements for visual effects (sync version)."""
 #     page.evaluate(INJECT_EFFECTS_JS)
-# 
-# 
+#
+#
 # async def inject_visual_effects_async(page: "AsyncPage") -> None:
 #     """Inject CSS and elements for visual effects (async version)."""
 #     await page.evaluate(INJECT_EFFECTS_JS)
-# 
-# 
+#
+#
 # def show_cursor_at(
 #     page: Union["AsyncPage", "SyncPage"], x: float, y: float, state: str = "normal"
 # ) -> None:
 #     """Move visual cursor to position (sync version).
-# 
+#
 #     Args:
 #         page: Playwright page object
 #         x: X coordinate
@@ -206,8 +206,8 @@ if __name__ == "__main__":
 #     """,
 #         [x, y, state],
 #     )
-# 
-# 
+#
+#
 # async def show_cursor_at_async(
 #     page: "AsyncPage", x: float, y: float, state: str = "normal"
 # ) -> None:
@@ -237,8 +237,8 @@ if __name__ == "__main__":
 #     """,
 #         [x, y, state],
 #     )
-# 
-# 
+#
+#
 # def show_click_effect(page: Union["AsyncPage", "SyncPage"], x: float, y: float) -> None:
 #     """Show click ripple effect at position (sync version)."""
 #     page.evaluate(
@@ -250,7 +250,7 @@ if __name__ == "__main__":
 #         ripple.style.top = y + 'px';
 #         document.body.appendChild(ripple);
 #         setTimeout(() => ripple.remove(), 600);
-# 
+#
 #         const cursor = document.getElementById('_scitex_cursor');
 #         if (cursor) {
 #             cursor.classList.add('clicking');
@@ -260,8 +260,8 @@ if __name__ == "__main__":
 #     """,
 #         [x, y],
 #     )
-# 
-# 
+#
+#
 # async def show_click_effect_async(page: "AsyncPage", x: float, y: float) -> None:
 #     """Show click ripple effect at position (async version)."""
 #     await page.evaluate(
@@ -273,7 +273,7 @@ if __name__ == "__main__":
 #         ripple.style.top = y + 'px';
 #         document.body.appendChild(ripple);
 #         setTimeout(() => ripple.remove(), 600);
-# 
+#
 #         const cursor = document.getElementById('_scitex_cursor');
 #         if (cursor) {
 #             cursor.classList.add('clicking');
@@ -283,8 +283,8 @@ if __name__ == "__main__":
 #     """,
 #         [x, y],
 #     )
-# 
-# 
+#
+#
 # def show_step(
 #     page: Union["AsyncPage", "SyncPage"],
 #     step: int,
@@ -293,7 +293,7 @@ if __name__ == "__main__":
 #     level: str = "info",
 # ) -> None:
 #     """Show numbered step message in browser (sync version).
-# 
+#
 #     Args:
 #         page: Playwright page object
 #         step: Current step number
@@ -308,7 +308,7 @@ if __name__ == "__main__":
 #         "error": "#DC3545",
 #     }
 #     color = color_map.get(level, color_map["info"])
-# 
+#
 #     page.evaluate(
 #         """
 #     ([step, total, message, color]) => {
@@ -341,8 +341,8 @@ if __name__ == "__main__":
 #         [step, total, message, color],
 #     )
 #     page.wait_for_timeout(200)
-# 
-# 
+#
+#
 # async def show_step_async(
 #     page: "AsyncPage", step: int, total: int, message: str, level: str = "info"
 # ) -> None:
@@ -354,7 +354,7 @@ if __name__ == "__main__":
 #         "error": "#DC3545",
 #     }
 #     color = color_map.get(level, color_map["info"])
-# 
+#
 #     await page.evaluate(
 #         """
 #     ([step, total, message, color]) => {
@@ -387,8 +387,8 @@ if __name__ == "__main__":
 #         [step, total, message, color],
 #     )
 #     await page.wait_for_timeout(200)
-# 
-# 
+#
+#
 # def show_test_result(
 #     page: Union["AsyncPage", "SyncPage"],
 #     success: bool,
@@ -396,7 +396,7 @@ if __name__ == "__main__":
 #     delay_ms: int = 3000,
 # ) -> None:
 #     """Show test result banner (PASS/FAIL) and wait (sync version).
-# 
+#
 #     Args:
 #         page: Playwright page object
 #         success: True for PASS, False for FAIL
@@ -406,14 +406,14 @@ if __name__ == "__main__":
 #     status = "PASS" if success else "FAIL"
 #     css_class = "success" if success else "failure"
 #     display_text = f"{status}" + (f": {message}" if message else "")
-# 
+#
 #     page.evaluate(
 #         """
 #     ([displayText, cssClass]) => {
 #         // Remove existing banner
 #         const existing = document.getElementById('_scitex_result_banner');
 #         if (existing) existing.remove();
-# 
+#
 #         const banner = document.createElement('div');
 #         banner.id = '_scitex_result_banner';
 #         banner.className = cssClass;
@@ -424,8 +424,8 @@ if __name__ == "__main__":
 #         [display_text, css_class],
 #     )
 #     page.wait_for_timeout(delay_ms)
-# 
-# 
+#
+#
 # async def show_test_result_async(
 #     page: "AsyncPage", success: bool, message: str = "", delay_ms: int = 3000
 # ) -> None:
@@ -433,13 +433,13 @@ if __name__ == "__main__":
 #     status = "PASS" if success else "FAIL"
 #     css_class = "success" if success else "failure"
 #     display_text = f"{status}" + (f": {message}" if message else "")
-# 
+#
 #     await page.evaluate(
 #         """
 #     ([displayText, cssClass]) => {
 #         const existing = document.getElementById('_scitex_result_banner');
 #         if (existing) existing.remove();
-# 
+#
 #         const banner = document.createElement('div');
 #         banner.id = '_scitex_result_banner';
 #         banner.className = cssClass;
@@ -450,8 +450,8 @@ if __name__ == "__main__":
 #         [display_text, css_class],
 #     )
 #     await page.wait_for_timeout(delay_ms)
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

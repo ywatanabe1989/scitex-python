@@ -29,9 +29,9 @@ class TestSciTeXMain:
         """Test that print_config_main is properly imported."""
         import scitex.__main__ as main_module
 
-        assert hasattr(main_module, "print_config_main"), (
-            "Should import print_config_main"
-        )
+        assert hasattr(
+            main_module, "print_config_main"
+        ), "Should import print_config_main"
 
     @mock.patch("sys.argv", ["scitex"])
     def test_main_no_arguments_exits(self, mock_print_config):
@@ -103,21 +103,21 @@ class TestSciTeXMain:
         import scitex.__main__ as main_module
 
         assert main_module.__doc__ is not None, "Module should have docstring"
-        assert "entry point" in main_module.__doc__, (
-            "Should describe entry point functionality"
-        )
+        assert (
+            "entry point" in main_module.__doc__
+        ), "Should describe entry point functionality"
 
     def test_main_function_docstring(self):
         """Test that main function has proper documentation."""
         import scitex.__main__ as main_module
 
-        assert main_module.main.__doc__ is not None, (
-            "main function should have docstring"
-        )
+        assert (
+            main_module.main.__doc__ is not None
+        ), "main function should have docstring"
         docstring = main_module.main.__doc__
-        assert "command-line" in docstring.lower(), (
-            "Should describe command-line functionality"
-        )
+        assert (
+            "command-line" in docstring.lower()
+        ), "Should describe command-line functionality"
         assert "print_config" in docstring, "Should document print_config command"
 
     def test_sys_module_imported(self):
@@ -173,6 +173,7 @@ class TestSciTeXMain:
             # Simulate module execution - verify main module is importable
             assert hasattr(main_module, "main")
 
+
 if __name__ == "__main__":
     import os
 
@@ -186,13 +187,13 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # """
 # SciTeX Package Entry Point
-# 
+#
 # Allows running: python -m scitex [command]
 # """
-# 
+#
 # import sys
-# 
-# 
+#
+#
 # def _check_cli_dependencies():
 #     """Check CLI dependencies and return missing ones."""
 #     missing = []
@@ -201,8 +202,8 @@ if __name__ == "__main__":
 #     except ImportError:
 #         missing.append(("click", "pip install click"))
 #     return missing
-# 
-# 
+#
+#
 # def main():
 #     """Main entry point for scitex CLI"""
 #     # Check dependencies first
@@ -213,19 +214,19 @@ if __name__ == "__main__":
 #             print(f"  - {pkg}: {install}")
 #         print("\nOr install all CLI deps: pip install scitex[cli]")
 #         sys.exit(1)
-# 
+#
 #     try:
 #         from scitex.cli.main import cli
-# 
+#
 #         cli()
 #     except ImportError as e:
 #         print(f"SciTeX CLI import error: {e}")
 #         import traceback
-# 
+#
 #         traceback.print_exc()
 #         sys.exit(1)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     main()
 

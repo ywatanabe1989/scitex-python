@@ -12,35 +12,35 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # File: ./src/scitex/scholar/pipelines/ScholarPipelineSearchParallel.py
-# 
+#
 # """
 # ScholarPipelineSearchParallel - Parallel academic paper search across multiple engines
-# 
+#
 # Functionalities:
 #   - Searches multiple academic databases in parallel (PubMed, CrossRef, arXiv, etc.)
 #   - Aggregates and deduplicates results
 #   - Fast parallel execution with controlled concurrency
 #   - Supports query-based search with filters
-# 
+#
 # Pipeline Steps:
 #   1. Execute search queries across all engines in parallel
 #   2. Collect results from each engine
 #   3. Deduplicate by DOI/title
 #   4. Aggregate metadata
 #   5. Return ranked results
-# 
+#
 # Dependencies:
 #   - API engines (PubMed, CrossRef, arXiv, Semantic Scholar, OpenAlex)
-# 
+#
 # IO:
 #   - input: Search query string, filters, max_results
 #   - output: List of Paper objects matching the query
 # """
-# 
+#
 # import asyncio
 # from datetime import datetime
 # from typing import Any, Callable, Dict, List, Optional
-# 
+#
 # from scitex import logging
 # from scitex.scholar.core import Paper, normalize_journal_name
 # from scitex.scholar.search_engines.individual.ArXivSearchEngine import ArXivSearchEngine
@@ -56,13 +56,13 @@ if __name__ == "__main__":
 # from scitex.scholar.search_engines.individual.SemanticScholarSearchEngine import (
 #     SemanticScholarSearchEngine,
 # )
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # class ScholarPipelineSearchParallel:
 #     """Orchestrates parallel academic paper search across multiple engines."""
-# 
+#
 #     def __init__(
 #         self,
 #         max_workers: int = 5,
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 #         email: str = None,
 #     ):
 #         """Initialize parallel search pipeline.
-# 
+#
 #         Args:
 #             max_workers: Maximum number of parallel engine queries
 #             timeout_per_engine: Timeout for each engine in seconds
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 #         self.timeout_per_engine = timeout_per_engine
 #         self.use_cache = use_cache
 #         self.email = email or "research@scitex.io"
-# 
+#
 #         # Initialize search engines with email for rate limit benefits
 #         self.engines = {
 #             "PubMed": PubMedSearchEngine(email=self.email),
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 #             "Semantic_Scholar": SemanticScholarSearchEngine(email=self.email),
 #             "OpenAlex": OpenAlexSearchEngine(email=self.email),
 #         }
-# 
+#
 #         # Statistics
 #         self.stats = {
 #             "total_searches": 0,
@@ -112,12 +112,12 @@ if __name__ == "__main__":
 #                 for name in self.engines.keys()
 #             },
 #         }
-# 
+#
 #         logger.info(
 #             f"{self.name}: Initialized with {max_workers} workers, "
 #             f"engines: {', '.join(self.engines.keys())}"
 #         )
-# 
+#
 #     async def search_async(
 #         self,
 #         query: str = None,
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 #         on_progress: Optional[Callable[[str, str, int], None]] = None,
 #     ) -> Dict[str, Any]:
 #         """Search for papers across multiple engines in parallel.
-# 
+#
 #         Args:
 #             query: Search query string
 #             title: Title to search for (alternative to query)
@@ -141,7 +141,7 @@ if __name__ == "__main__":
 #                 - engine_name: Name of the search engine (str)
 #                 - status: 'loading', 'completed', or 'error' (str)
 #                 - count: Number of results found (int)
-# 
+#
 #         Returns:
 #             Dict with:
 #                 - results: List of paper dictionaries
@@ -149,29 +149,29 @@ if __name__ == "__main__":
 #         """
 #         start_time = datetime.now()
 #         self.stats["total_searches"] += 1
-# 
+#
 #         # Determine search mode
 #         search_query = query or title or doi
 #         if not search_query:
 #             raise ValueError("Must provide query, title, or doi")
-# 
+#
 #         logger.info(
 #             f"{self.name}: Starting parallel search: query='{search_query[:50]}...', "
 #             f"fields={search_fields}, filters={filters}"
 #         )
-# 
+#
 #         # Prepare search parameters
 #         filters = filters or {}
 #         search_fields = search_fields or ["title", "abstract"]
 #         per_engine_limit = max(10, max_results // len(self.engines))
-# 
+#
 #         # Initialize engine counts dictionary
 #         engine_counts = {}
-# 
+#
 #         # Create search tasks for each engine
 #         tasks = []
 #         engine_names = []
-# 
+#
 #         for engine_name, engine in self.engines.items():
 #             task = self._search_engine(
 #                 engine_name=engine_name,
@@ -185,67 +185,67 @@ if __name__ == "__main__":
 #             )
 #             tasks.append(task)
 #             engine_names.append(engine_name)
-# 
+#
 #         # Execute all searches in parallel
 #         results = await asyncio.gather(*tasks, return_exceptions=True)
-# 
+#
 #         # Aggregate results
 #         all_papers = []
 #         engines_used = []
-# 
+#
 #         for engine_name, result in zip(engine_names, results):
 #             if isinstance(result, Exception):
 #                 logger.error(f"{self.name}: {engine_name} search failed: {result}")
 #                 self.stats["engine_stats"][engine_name]["failures"] += 1
 #                 continue
-# 
+#
 #             logger.info(
 #                 f"{self.name}: {engine_name} returned {len(result) if result else 0} results (type: {type(result).__name__})"
 #             )
-# 
+#
 #             if result:
 #                 all_papers.extend(result)
 #                 engines_used.append(engine_name)
 #                 self.stats["engine_stats"][engine_name]["successes"] += 1
 #                 self.stats["engine_stats"][engine_name]["total_results"] += len(result)
-# 
+#
 #         # Deduplicate by DOI and title
 #         unique_papers = self._deduplicate_papers(all_papers)
-# 
+#
 #         # Enrich papers with missing citation counts (e.g., from PubMed)
 #         unique_papers = await self._enrich_citations(unique_papers)
-# 
+#
 #         # Enrich papers with impact factors
 #         unique_papers = self._enrich_impact_factors(unique_papers)
-# 
+#
 #         # Apply threshold filters
 #         unique_papers = self._apply_threshold_filters(unique_papers, filters)
-# 
+#
 #         # Sort if requested
 #         sort_by = filters.get("sort_by", "relevance")
 #         if sort_by and sort_by != "relevance":
 #             unique_papers = self._sort_papers(
 #                 unique_papers, sort_by, filters.get("sort_order", "desc")
 #             )
-# 
+#
 #         # Limit to max_results
 #         unique_papers = unique_papers[:max_results]
-# 
+#
 #         # Convert to response format
 #         response_papers = [self._paper_to_dict(paper) for paper in unique_papers]
-# 
+#
 #         # Calculate timing
 #         end_time = datetime.now()
 #         search_time = (end_time - start_time).total_seconds()
 #         self.stats["total_time"] += search_time
 #         self.stats["successful_searches"] += 1
-# 
+#
 #         logger.success(
 #             f"{self.name}: Parallel search completed in {search_time:.2f}s, "
 #             f"{len(engines_used)}/{len(self.engines)} engines returned results, "
 #             f"found {len(response_papers)} unique papers"
 #         )
-# 
+#
 #         return {
 #             "results": response_papers,
 #             "metadata": {
@@ -261,7 +261,7 @@ if __name__ == "__main__":
 #                 "engine_counts": engine_counts,  # Per-engine result counts
 #             },
 #         }
-# 
+#
 #     async def _search_engine(
 #         self,
 #         engine_name: str,
@@ -274,7 +274,7 @@ if __name__ == "__main__":
 #         engine_counts: Dict[str, int] = None,
 #     ) -> List[Paper]:
 #         """Search a single engine with timeout and progress callback.
-# 
+#
 #         Args:
 #             engine_name: Name of the search engine
 #             engine: Engine instance
@@ -287,7 +287,7 @@ if __name__ == "__main__":
 #         """
 #         self.stats["engine_stats"][engine_name]["attempts"] += 1
 #         engine_start = datetime.now()
-# 
+#
 #         # Notify start of search
 #         if on_progress:
 #             try:
@@ -299,18 +299,18 @@ if __name__ == "__main__":
 #                 logger.error(
 #                     f"{self.name}: Progress callback error for {engine_name}: {e}"
 #                 )
-# 
+#
 #         try:
 #             # Run synchronous search in executor to make it async
 #             loop = asyncio.get_running_loop()
-# 
+#
 #             # Prepare filters for API
 #             api_filters = {
 #                 "year_start": filters.get("year_start"),
 #                 "year_end": filters.get("year_end"),
 #                 "open_access": filters.get("open_access"),
 #             }
-# 
+#
 #             # Search with timeout using new search_by_keywords method
 #             results_list = await asyncio.wait_for(
 #                 loop.run_in_executor(
@@ -321,12 +321,12 @@ if __name__ == "__main__":
 #                 ),
 #                 timeout=self.timeout_per_engine,
 #             )
-# 
+#
 #             # Convert result dicts to Paper objects
 #             results = []
 #             for result in results_list or []:
 #                 paper = Paper()
-# 
+#
 #                 # Populate paper metadata from result
 #                 if "id" in result:
 #                     if result["id"].get("doi"):
@@ -338,7 +338,7 @@ if __name__ == "__main__":
 #                         paper.metadata.id.pmid = result["id"]["pmid"]
 #                     if result["id"].get("arxiv"):
 #                         paper.metadata.id.arxiv_id = result["id"]["arxiv"]
-# 
+#
 #                 if "basic" in result:
 #                     if result["basic"].get("title"):
 #                         paper.metadata.basic.title = result["basic"]["title"]
@@ -348,7 +348,7 @@ if __name__ == "__main__":
 #                         paper.metadata.basic.abstract = result["basic"]["abstract"]
 #                     if result["basic"].get("keywords"):
 #                         paper.metadata.basic.keywords = result["basic"]["keywords"]
-# 
+#
 #                 if "publication" in result:
 #                     if result["publication"].get("year"):
 #                         paper.metadata.basic.year = result["publication"]["year"]
@@ -356,7 +356,7 @@ if __name__ == "__main__":
 #                         paper.metadata.publication.journal = result["publication"][
 #                             "journal"
 #                         ]
-# 
+#
 #                 if "metrics" in result:
 #                     if result["metrics"].get("citation_count"):
 #                         paper.metadata.citation_count.total = result["metrics"][
@@ -367,7 +367,7 @@ if __name__ == "__main__":
 #                             "is_open_access"
 #                         ]
 #                         paper.metadata.access.is_open_access_engines = [engine_name]
-# 
+#
 #                 if "urls" in result:
 #                     if result["urls"].get("pdf"):
 #                         # pdfs is a list of dicts with url/source keys
@@ -382,9 +382,9 @@ if __name__ == "__main__":
 #                         paper.metadata.url.publisher = result["urls"]["publisher"]
 #                     if result["urls"].get("doi_url"):
 #                         paper.metadata.url.doi = result["urls"]["doi_url"]
-# 
+#
 #                 results.append(paper)
-# 
+#
 #             # Update stats
 #             response_time = (datetime.now() - engine_start).total_seconds()
 #             stats = self.stats["engine_stats"][engine_name]
@@ -392,11 +392,11 @@ if __name__ == "__main__":
 #             stats["avg_response_time"] = (
 #                 stats["avg_response_time"] * (n - 1) + response_time
 #             ) / n
-# 
+#
 #             # Store engine count
 #             if engine_counts is not None:
 #                 engine_counts[engine_name] = len(results)
-# 
+#
 #             # Notify completion
 #             if on_progress:
 #                 try:
@@ -408,14 +408,14 @@ if __name__ == "__main__":
 #                     logger.error(
 #                         f"{self.name}: Progress callback error for {engine_name}: {e}"
 #                     )
-# 
+#
 #             logger.info(
 #                 f"{self.name}: {engine_name} returned {len(results)} results "
 #                 f"in {response_time:.2f}s"
 #             )
-# 
+#
 #             return results
-# 
+#
 #         except asyncio.TimeoutError:
 #             logger.warning(
 #                 f"{self.name}: {engine_name} timed out after {self.timeout_per_engine}s"
@@ -430,7 +430,7 @@ if __name__ == "__main__":
 #         except Exception as e:
 #             logger.error(f"{self.name}: {engine_name} search failed: {e}")
 #             import traceback
-# 
+#
 #             logger.error(
 #                 f"{self.name}: {engine_name} traceback:\n{traceback.format_exc()}"
 #             )
@@ -441,13 +441,13 @@ if __name__ == "__main__":
 #                 except Exception:
 #                     pass
 #             return []
-# 
+#
 #     async def _enrich_citations(self, papers: List[Paper]) -> List[Paper]:
 #         """Enrich papers with citation counts from OpenAlex (fast and comprehensive).
-# 
+#
 #         Args:
 #             papers: List of Paper objects
-# 
+#
 #         Returns:
 #             Papers with enriched citation counts
 #         """
@@ -460,12 +460,12 @@ if __name__ == "__main__":
 #                 and paper.metadata.citation_count.total > 0
 #             ):
 #                 continue
-# 
+#
 #             # Try to enrich via DOI using OpenAlex (fastest)
 #             doi = None
 #             if hasattr(paper.metadata, "id") and paper.metadata.id.doi:
 #                 doi = paper.metadata.id.doi
-# 
+#
 #             if doi:
 #                 try:
 #                     # Use OpenAlex engine for citation lookup
@@ -477,37 +477,37 @@ if __name__ == "__main__":
 #                         ),
 #                         timeout=2.0,  # Quick timeout for enrichment
 #                     )
-# 
+#
 #                     if result and result.get("metrics", {}).get("citation_count"):
 #                         paper.metadata.citation_count.total = result["metrics"][
 #                             "citation_count"
 #                         ]
 #                         enriched += 1
-# 
+#
 #                 except asyncio.TimeoutError:
 #                     pass  # Skip on timeout
 #                 except Exception:
 #                     pass  # Skip on error
-# 
+#
 #         if enriched > 0:
 #             logger.info(f"{self.name}: Enriched {enriched} papers with citation counts")
-# 
+#
 #         return papers
-# 
+#
 #     def _enrich_impact_factors(self, papers: List[Paper]) -> List[Paper]:
 #         """Enrich papers with impact factors from JCR database.
-# 
+#
 #         Args:
 #             papers: List of Paper objects
-# 
+#
 #         Returns:
 #             Papers with enriched impact factors
 #         """
 #         from scitex.scholar.impact_factor import ImpactFactorEngine
-# 
+#
 #         engine = ImpactFactorEngine()
 #         enriched = 0
-# 
+#
 #         for paper in papers:
 #             # Skip if already has impact factor
 #             if (
@@ -515,7 +515,7 @@ if __name__ == "__main__":
 #                 and paper.metadata.publication.impact_factor
 #             ):
 #                 continue
-# 
+#
 #             # Get journal name
 #             journal = None
 #             if (
@@ -523,7 +523,7 @@ if __name__ == "__main__":
 #                 and paper.metadata.publication.journal
 #             ):
 #                 journal = paper.metadata.publication.journal
-# 
+#
 #             if journal:
 #                 try:
 #                     metrics = engine.get_metrics(journal)
@@ -541,17 +541,17 @@ if __name__ == "__main__":
 #                         enriched += 1
 #                 except Exception:
 #                     pass  # Skip on error
-# 
+#
 #         if enriched > 0:
 #             logger.info(f"{self.name}: Enriched {enriched} papers with impact factors")
-# 
+#
 #         return papers
-# 
+#
 #     def _apply_threshold_filters(
 #         self, papers: List[Paper], filters: Dict[str, Any]
 #     ) -> List[Paper]:
 #         """Apply threshold filters to papers.
-# 
+#
 #         Args:
 #             papers: List of Paper objects
 #             filters: Dictionary containing threshold filters:
@@ -559,7 +559,7 @@ if __name__ == "__main__":
 #                 - max_year: Maximum publication year
 #                 - min_citations: Minimum citation count
 #                 - min_impact_factor: Minimum journal impact factor
-# 
+#
 #         Returns:
 #             Filtered list of papers
 #         """
@@ -570,7 +570,7 @@ if __name__ == "__main__":
 #             "min_citations": 0,
 #             "min_impact_factor": 0,
 #         }
-# 
+#
 #         for paper in papers:
 #             # Check year range
 #             if "min_year" in filters:
@@ -586,7 +586,7 @@ if __name__ == "__main__":
 #                         continue
 #                 except (ValueError, AttributeError):
 #                     pass
-# 
+#
 #             if "max_year" in filters:
 #                 try:
 #                     max_year = int(filters["max_year"])
@@ -600,7 +600,7 @@ if __name__ == "__main__":
 #                         continue
 #                 except (ValueError, AttributeError):
 #                     pass
-# 
+#
 #             # Check minimum citations
 #             if "min_citations" in filters:
 #                 try:
@@ -613,7 +613,7 @@ if __name__ == "__main__":
 #                         continue
 #                 except (ValueError, AttributeError):
 #                     pass
-# 
+#
 #             # Check minimum impact factor
 #             if "min_impact_factor" in filters:
 #                 try:
@@ -629,10 +629,10 @@ if __name__ == "__main__":
 #                         continue
 #                 except (ValueError, AttributeError):
 #                     pass
-# 
+#
 #             # Paper passed all filters
 #             filtered_papers.append(paper)
-# 
+#
 #         # Log filter statistics
 #         total_filtered = sum(filter_stats.values())
 #         if total_filtered > 0:
@@ -645,27 +645,27 @@ if __name__ == "__main__":
 #                 f"{self.name}: Filtered {total_filtered} papers ({', '.join(filter_msgs)}), "
 #                 f"{len(filtered_papers)} remain"
 #             )
-# 
+#
 #         return filtered_papers
-# 
+#
 #     def _sort_papers(
 #         self, papers: List[Paper], sort_by: str, sort_order: str = "desc"
 #     ) -> List[Paper]:
 #         """Sort papers by specified criteria (supports multi-level sorting).
-# 
+#
 #         Args:
 #             papers: List of Paper objects
 #             sort_by: Sort criterion string. Can be:
 #                 - Single: 'citations', 'year', 'title'
 #                 - Multi-level (comma-separated): 'citations:desc,year:desc,title:asc'
 #             sort_order: Default sort order ('asc' or 'desc') - used when not specified in sort_by
-# 
+#
 #         Returns:
 #             Sorted list of papers
 #         """
 #         # Parse sort criteria (supports both old single format and new multi-level format)
 #         sort_criteria = []
-# 
+#
 #         if "," in sort_by:
 #             # Multi-level sorting: "citations:desc,year:desc,title:asc"
 #             for criterion in sort_by.split(","):
@@ -678,7 +678,7 @@ if __name__ == "__main__":
 #         else:
 #             # Single-level sorting (backward compatible)
 #             sort_criteria = [(sort_by, sort_order)]
-# 
+#
 #         def get_sort_value(paper, field):
 #             """Get sortable value for a specific field."""
 #             if field == "citations":
@@ -701,7 +701,7 @@ if __name__ == "__main__":
 #                     return paper.metadata.publication.impact_factor or 0
 #                 return 0
 #             return 0
-# 
+#
 #         def get_sort_key(paper):
 #             """Generate multi-level sort key tuple."""
 #             key_tuple = []
@@ -713,11 +713,11 @@ if __name__ == "__main__":
 #                 # For strings, we'll handle reverse in the sorted() call
 #                 key_tuple.append(value)
 #             return tuple(key_tuple)
-# 
+#
 #         # Sort by the multi-level key
 #         # String fields need special handling for desc order
 #         has_string_fields = any(field in ["title"] for field, _ in sort_criteria)
-# 
+#
 #         if has_string_fields:
 #             # Use multiple sorted() passes for mixed numeric/string fields (stable sort)
 #             sorted_papers = papers[:]
@@ -731,7 +731,7 @@ if __name__ == "__main__":
 #         else:
 #             # Pure numeric sorting can use single pass
 #             sorted_papers = sorted(papers, key=get_sort_key)
-# 
+#
 #         if len(sort_criteria) > 1:
 #             criteria_str = ", then by ".join(
 #                 [f"{field} ({order})" for field, order in sort_criteria]
@@ -742,46 +742,46 @@ if __name__ == "__main__":
 #             logger.info(
 #                 f"{self.name}: Sorted {len(papers)} papers by {field} ({order})"
 #             )
-# 
+#
 #         return sorted_papers
-# 
+#
 #     def _deduplicate_papers(self, papers: List[Paper]) -> List[Paper]:
 #         """Deduplicate papers by DOI and title."""
 #         seen_dois = set()
 #         seen_titles = set()
 #         unique_papers = []
-# 
+#
 #         for paper in papers:
 #             # Get DOI
 #             doi = None
 #             if hasattr(paper, "metadata") and hasattr(paper.metadata, "id"):
 #                 doi = paper.metadata.id.doi
-# 
+#
 #             # Get title
 #             title = None
 #             if hasattr(paper, "metadata") and hasattr(paper.metadata, "basic"):
 #                 title = paper.metadata.basic.title
-# 
+#
 #             # Skip if duplicate
 #             if doi and doi in seen_dois:
 #                 continue
 #             if title and title.lower().strip() in seen_titles:
 #                 continue
-# 
+#
 #             # Add to unique set
 #             if doi:
 #                 seen_dois.add(doi)
 #             if title:
 #                 seen_titles.add(title.lower().strip())
-# 
+#
 #             unique_papers.append(paper)
-# 
+#
 #         logger.info(
 #             f"{self.name}: Deduplicated {len(papers)} papers to {len(unique_papers)} unique"
 #         )
-# 
+#
 #         return unique_papers
-# 
+#
 #     def _paper_to_dict(self, paper: Paper) -> Dict[str, Any]:
 #         """Convert Paper object to dictionary for API response."""
 #         result = {
@@ -802,12 +802,12 @@ if __name__ == "__main__":
 #             "keywords": [],
 #             "source_engines": [],
 #         }
-# 
+#
 #         if not hasattr(paper, "metadata"):
 #             return result
-# 
+#
 #         meta = paper.metadata
-# 
+#
 #         # Basic info
 #         if hasattr(meta, "basic"):
 #             result["title"] = meta.basic.title or ""
@@ -815,14 +815,14 @@ if __name__ == "__main__":
 #             result["abstract"] = meta.basic.abstract or ""
 #             result["keywords"] = meta.basic.keywords or []
 #             result["year"] = meta.basic.year
-# 
+#
 #         # IDs
 #         if hasattr(meta, "id"):
 #             result["doi"] = meta.id.doi or ""
 #             result["pmid"] = meta.id.pmid or ""
 #             result["arxiv_id"] = meta.id.arxiv_id or ""
 #             result["source_engines"] = meta.id.doi_engines or []
-# 
+#
 #         # Publication info
 #         if hasattr(meta, "publication"):
 #             journal_raw = meta.publication.journal or ""
@@ -830,11 +830,11 @@ if __name__ == "__main__":
 #                 normalize_journal_name(journal_raw) if journal_raw else ""
 #             )
 #             result["impact_factor"] = meta.publication.impact_factor
-# 
+#
 #         # Metrics
 #         if hasattr(meta, "citation_count"):
 #             result["citation_count"] = meta.citation_count.total or 0
-# 
+#
 #         # Access metadata
 #         if hasattr(meta, "access"):
 #             result["is_open_access"] = meta.access.is_open_access or False
@@ -842,15 +842,15 @@ if __name__ == "__main__":
 #             result["oa_url"] = meta.access.oa_url
 #         else:
 #             result["is_open_access"] = False
-# 
+#
 #         # URLs
 #         if hasattr(meta, "url"):
 #             # Extract first PDF URL from pdfs list
 #             result["pdf_url"] = meta.url.pdfs[0]["url"] if meta.url.pdfs else ""
 #             result["external_url"] = meta.url.publisher or meta.url.doi or ""
-# 
+#
 #         return result
-# 
+#
 #     def get_statistics(self) -> Dict[str, Any]:
 #         """Get pipeline statistics."""
 #         return {
@@ -866,12 +866,12 @@ if __name__ == "__main__":
 #                 else 0
 #             ),
 #         }
-# 
+#
 #     def get_engine_capabilities(self, engine_name: str) -> Dict[str, Any]:
 #         """Get capabilities of a specific engine."""
 #         if engine_name not in self.engines:
 #             return {}
-# 
+#
 #         return {
 #             "name": engine_name,
 #             "supports_query_search": True,
@@ -880,8 +880,8 @@ if __name__ == "__main__":
 #             "max_results": 1000,
 #             "stats": self.stats["engine_stats"].get(engine_name, {}),
 #         }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

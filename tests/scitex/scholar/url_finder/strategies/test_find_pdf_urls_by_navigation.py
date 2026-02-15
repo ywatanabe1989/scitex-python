@@ -17,28 +17,28 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/scholar/url/strategies/find_pdf_urls_by_navigation.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Find PDF URLs by navigating to PDF links and following redirects.
-# 
+#
 # Handles publishers like ScienceDirect that require navigation
 # through redirect chains to reach the actual PDF URL.
 # """
-# 
+#
 # from typing import List, Optional
 # from urllib.parse import urljoin
-# 
+#
 # from playwright.async_api import Page
-# 
+#
 # from scitex.browser.debugging import browser_logger
 # from scitex.scholar import ScholarConfig
 # from scitex.scholar.browser.utils import wait_redirects
-# 
-# 
+#
+#
 # async def find_pdf_urls_by_navigation(
 #     page: Page,
 #     url: str = None,
@@ -47,24 +47,24 @@ if __name__ == "__main__":
 # ) -> List[str]:
 #     """
 #     Find PDF URLs by navigating to PDF links and capturing final URLs.
-# 
+#
 #     This handles cases like ScienceDirect where:
 #     1. Direct PDF links exist (/pdfft? endpoints)
 #     2. Navigating to them triggers redirects
 #     3. Final destination is the actual PDF on pdf.sciencedirectassets.com
-# 
+#
 #     Args:
 #         page: Playwright page object
 #         url: Current page URL (unused, for signature consistency)
 #         config: ScholarConfig instance
 #         func_name: Function name for logging
-# 
+#
 #     Returns:
 #         List of PDF URLs found
 #     """
 #     config = config or ScholarConfig()
 #     pdf_urls = []
-# 
+#
 #     try:
 #         # Check if we already have direct PDF links
 #         current_url = page.url.lower()
@@ -77,10 +77,10 @@ if __name__ == "__main__":
 #                 "ssrn.com",
 #             ]
 #         )
-# 
+#
 #         if not is_sciencedirect:
 #             return []
-# 
+#
 #         # Look for existing PDF links on the page
 #         pdf_link_selectors = [
 #             'a[href*="/pdfft?"]',  # ScienceDirect PDF endpoint
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 #             "a.pdf-link",
 #             'a[href*="/pdf/"]',
 #         ]
-# 
+#
 #         pdf_href = None
 #         for selector in pdf_link_selectors:
 #             try:
@@ -113,25 +113,25 @@ if __name__ == "__main__":
 #                     f"{func_name}: Error checking selector {selector}: {e}",
 #                 )
 #                 continue
-# 
+#
 #         if not pdf_href:
 #             await browser_logger.debug(page, f"{func_name}: No PDF links found on page")
 #             return []
-# 
+#
 #         # Navigate to PDF URL in a new page to capture final URL
 #         context = page.context
 #         new_page = None
-# 
+#
 #         try:
 #             await browser_logger.debug(
 #                 page,
 #                 f"{func_name}: Navigating to PDF URL to capture final destination...",
 #             )
 #             new_page = await context.new_page()
-# 
+#
 #             # Navigate and wait for redirects - be patient!
 #             await new_page.goto(pdf_href, wait_until="commit", timeout=60000)
-# 
+#
 #             # Wait for redirects to complete with longer timeout
 #             redirect_result = await wait_redirects(
 #                 new_page,
@@ -141,16 +141,16 @@ if __name__ == "__main__":
 #                 auth_aware=True,
 #                 wait_for_idle=True,  # Wait for network idle
 #             )
-# 
+#
 #             final_url = redirect_result.get("final_url", new_page.url)
 #             redirect_chain = redirect_result.get("redirect_chain", [])
-# 
+#
 #             # Additional wait to ensure PDF loads
 #             await new_page.wait_for_timeout(2000)
-# 
+#
 #             # Check again for final URL
 #             final_url = new_page.url
-# 
+#
 #             await browser_logger.debug(
 #                 page,
 #                 f"{func_name}: Redirect complete after {len(redirect_chain)} steps",
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 #             await browser_logger.debug(
 #                 page, f"{func_name}: Final URL: {final_url[:80]}..."
 #             )
-# 
+#
 #             # Check if final URL is a PDF
 #             if any(
 #                 indicator in final_url
@@ -179,7 +179,7 @@ if __name__ == "__main__":
 #                     page,
 #                     f"{func_name}: Final URL doesn't appear to be a PDF: {final_url}",
 #                 )
-# 
+#
 #         except Exception as e:
 #             await browser_logger.error(
 #                 page, f"{func_name}: Error navigating to PDF: {e}"
@@ -190,22 +190,22 @@ if __name__ == "__main__":
 #                     await new_page.close()
 #                 except:
 #                     pass
-# 
+#
 #         return pdf_urls
-# 
+#
 #     except Exception as e:
 #         await browser_logger.error(
 #             page, f"{func_name}: Error finding PDFs via navigation: {e}"
 #         )
 #         return []
-# 
-# 
+#
+#
 # async def find_pdf_url_from_sciencedirect_api(
 #     page: Page, func_name="find_pdf_url_from_sciencedirect_api"
 # ) -> Optional[str]:
 #     """
 #     Extract PDF URL from ScienceDirect page using their JavaScript context.
-# 
+#
 #     ScienceDirect pages often have the PDF URL in JavaScript variables.
 #     """
 #     try:
@@ -214,55 +214,55 @@ if __name__ == "__main__":
 #             """
 #             () => {
 #                 // Look for PDF URL in various places
-# 
+#
 #                 // Check for download URL in page data
 #                 const pdfLinks = document.querySelectorAll('a[href*="/pdfft?"]');
 #                 if (pdfLinks.length > 0) {
 #                     return pdfLinks[0].href;
 #                 }
-# 
+#
 #                 // Check window.SDM object (ScienceDirect)
 #                 if (window.SDM && window.SDM.pdfUrl) {
 #                     return window.SDM.pdfUrl;
 #                 }
-# 
+#
 #                 // Check for entitlement info
 #                 if (window.SD && window.SD.article && window.SD.article.pdfDownloadUrl) {
 #                     return window.SD.article.pdfDownloadUrl;
 #                 }
-# 
+#
 #                 // Look for View PDF button
 #                 const viewPdfBtn = document.querySelector('a[aria-label*="View PDF"]');
 #                 if (viewPdfBtn && viewPdfBtn.href) {
 #                     return viewPdfBtn.href;
 #                 }
-# 
+#
 #                 // Check meta tags
 #                 const pdfMeta = document.querySelector('meta[name="citation_pdf_url"]');
 #                 if (pdfMeta && pdfMeta.content) {
 #                     return pdfMeta.content;
 #                 }
-# 
+#
 #                 return null;
 #             }
 #         """
 #         )
-# 
+#
 #         if pdf_info:
 #             await browser_logger.debug(
 #                 page,
 #                 f"{func_name}: Found PDF info from page context: {pdf_info[:80]}...",
 #             )
 #             return pdf_info
-# 
+#
 #     except Exception as e:
 #         await browser_logger.debug(
 #             page, f"Could not extract PDF info from page context: {e}"
 #         )
-# 
+#
 #     return None
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -14,24 +14,24 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/stats/__main__.py
 # # ----------------------------------------
-# 
+#
 # """Stats CLI entry point.
-# 
+#
 # Subcommand-based interface:
 # - recommend: Recommend statistical tests based on data characteristics
 # - test: Run a statistical test
 # - power: Power analysis and sample size calculation
 # - mcp: Start MCP server for LLM integration
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import argparse
 # import asyncio
 # import json
 # import sys
-# 
-# 
+#
+#
 # def create_parser():
 #     """Create main argument parser with subcommands."""
 #     parser = argparse.ArgumentParser(
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 #         description="""
 # SciTeX Stats - Statistical Testing Framework
 # ═══════════════════════════════════════════
-# 
+#
 # Subcommand interface:
 #   recommend - Recommend statistical tests
 #   test      - Run a statistical test
@@ -48,13 +48,13 @@ if __name__ == "__main__":
 #         """,
 #         formatter_class=argparse.RawDescriptionHelpFormatter,
 #     )
-# 
+#
 #     subparsers = parser.add_subparsers(
 #         dest="command",
 #         help="Available commands",
 #         required=True,
 #     )
-# 
+#
 #     # ========================================
 #     # Subcommand: recommend
 #     # ========================================
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 #         default=3,
 #         help="Number of recommendations (default: 3)",
 #     )
-# 
+#
 #     # ========================================
 #     # Subcommand: test
 #     # ========================================
@@ -133,7 +133,7 @@ if __name__ == "__main__":
 #         default="two-sided",
 #         help="Alternative hypothesis (default: two-sided)",
 #     )
-# 
+#
 #     # ========================================
 #     # Subcommand: power
 #     # ========================================
@@ -172,7 +172,7 @@ if __name__ == "__main__":
 #         default=0.05,
 #         help="Significance level (default: 0.05)",
 #     )
-# 
+#
 #     # ========================================
 #     # Subcommand: mcp
 #     # ========================================
@@ -182,15 +182,15 @@ if __name__ == "__main__":
 #         description="Start the MCP (Model Context Protocol) server for Claude/LLM integration",
 #         formatter_class=argparse.RawDescriptionHelpFormatter,
 #     )
-# 
+#
 #     return parser
-# 
-# 
+#
+#
 # def run_recommend(args):
 #     """Run test recommendation."""
 #     from scitex.stats.auto import StatContext, recommend_tests
 #     from scitex.stats.auto._rules import TEST_RULES
-# 
+#
 #     ctx = StatContext(
 #         n_groups=args.n_groups,
 #         sample_sizes=args.sample_sizes or [30] * args.n_groups,
@@ -200,9 +200,9 @@ if __name__ == "__main__":
 #         has_control_group=args.has_control,
 #         n_factors=1,
 #     )
-# 
+#
 #     tests = recommend_tests(ctx, top_k=args.top_k)
-# 
+#
 #     print("\n=== Recommended Statistical Tests ===\n")
 #     for i, test_name in enumerate(tests, 1):
 #         rule = TEST_RULES.get(test_name)
@@ -215,20 +215,20 @@ if __name__ == "__main__":
 #             if rule.needs_equal_variance:
 #                 print("   Requires: equal variance assumption")
 #             print()
-# 
+#
 #     return 0
-# 
-# 
+#
+#
 # def run_test(args):
 #     """Run a statistical test."""
 #     if not args.data:
 #         print("Error: --data is required")
 #         return 1
-# 
+#
 #     data = json.loads(args.data)
-# 
+#
 #     from scitex.stats._mcp.handlers import run_test_handler
-# 
+#
 #     result = asyncio.run(
 #         run_test_handler(
 #             test_name=args.test_name,
@@ -236,15 +236,15 @@ if __name__ == "__main__":
 #             alternative=args.alternative,
 #         )
 #     )
-# 
+#
 #     print(json.dumps(result, indent=2))
 #     return 0 if result.get("success") else 1
-# 
-# 
+#
+#
 # def run_power(args):
 #     """Run power analysis."""
 #     from scitex.stats._mcp.handlers import power_analysis_handler
-# 
+#
 #     result = asyncio.run(
 #         power_analysis_handler(
 #             test_type=args.test_type,
@@ -254,25 +254,25 @@ if __name__ == "__main__":
 #             alpha=args.alpha,
 #         )
 #     )
-# 
+#
 #     print(json.dumps(result, indent=2))
 #     return 0 if result.get("success") else 1
-# 
-# 
+#
+#
 # async def run_mcp_server():
 #     """Run MCP server."""
 #     from .mcp_server import main as mcp_main
-# 
+#
 #     print("Starting Stats MCP server...", file=sys.stderr)
 #     await mcp_main()
 #     return 0
-# 
-# 
+#
+#
 # def main():
 #     """Main entry point."""
 #     parser = create_parser()
 #     args = parser.parse_args()
-# 
+#
 #     if args.command == "recommend":
 #         return run_recommend(args)
 #     elif args.command == "test":
@@ -284,12 +284,12 @@ if __name__ == "__main__":
 #     else:
 #         print(f"Unknown command: {args.command}")
 #         return 1
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     sys.exit(main())
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

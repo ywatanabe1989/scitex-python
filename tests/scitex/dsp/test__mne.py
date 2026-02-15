@@ -4,10 +4,13 @@
 # File: ./scitex_repo/tests/scitex/dsp/test__mne.py
 
 import pytest
+
 pytest.importorskip("mne")
-import pandas as pd
-import numpy as np
 import unittest.mock as mock
+
+import numpy as np
+import pandas as pd
+
 from scitex.dsp import get_eeg_pos
 from scitex.dsp.params import EEG_MONTAGE_1020
 
@@ -169,6 +172,7 @@ class TestMne:
         # Check all positions are unique
         assert len(positions) == len(set(positions))
 
+
 if __name__ == "__main__":
     import os
 
@@ -182,20 +186,20 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Time-stamp: "2024-11-04 02:07:36 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/dsp/_mne.py
-# 
+#
 # try:
 #     import mne
-# 
+#
 #     MNE_AVAILABLE = True
 # except ImportError:
 #     MNE_AVAILABLE = False
 #     mne = None
-# 
+#
 # import pandas as pd
-# 
+#
 # from .params import EEG_MONTAGE_1020
-# 
-# 
+#
+#
 # def get_eeg_pos(channel_names=EEG_MONTAGE_1020):
 #     if not MNE_AVAILABLE:
 #         raise ImportError(
@@ -206,21 +210,21 @@ if __name__ == "__main__":
 #     standard_montage.ch_names = [
 #         ch_name.upper() for ch_name in standard_montage.ch_names
 #     ]
-# 
+#
 #     # Get the positions of the electrodes in the standard montage
 #     positions = standard_montage.get_positions()
-# 
+#
 #     df = pd.DataFrame(positions["ch_pos"])[channel_names]
-# 
+#
 #     df.set_index(pd.Series(["x", "y", "z"]))
-# 
+#
 #     return df
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     print(get_eeg_pos())
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

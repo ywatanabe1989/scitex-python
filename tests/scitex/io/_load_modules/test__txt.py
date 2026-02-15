@@ -236,6 +236,7 @@ def test_load_txt_large_file():
     finally:
         os.unlink(temp_path)
 
+
 if __name__ == "__main__":
     import os
 
@@ -252,15 +253,15 @@ if __name__ == "__main__":
 # # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_modules/_txt.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
+#
 # # # UnicodeDecodeError: 'utf-8' codec can't decode byte 0x8a in position 30173: invalid start byte
 # # def _load_txt(lpath, **kwargs):
 # #     """Load text file and return non-empty lines."""
@@ -270,7 +271,7 @@ if __name__ == "__main__":
 # #             warnings.warn(
 # #                 f"File must have supported extensions: {SUPPORTED_EXTENSIONS}"
 # #             )
-# 
+#
 # #         # Try UTF-8 first (most common)
 # #         try:
 # #             with open(lpath, "r", encoding="utf-8") as f:
@@ -287,13 +288,13 @@ if __name__ == "__main__":
 # #                     for line in f.read().splitlines()
 # #                     if line.strip()
 # #                 ]
-# 
-# 
+#
+#
 # #     except (ValueError, FileNotFoundError) as e:
 # #         raise ValueError(f"Error loading file {lpath}: {str(e)}")
 # # Removed duplicate function - see main _load_txt below
-# 
-# 
+#
+#
 # # def _load_txt(lpath, strip=False, as_lines=False):
 # #     """
 # #     Load text file and return its content.
@@ -304,7 +305,7 @@ if __name__ == "__main__":
 # #     """
 # #     if not lpath.endswith((".txt", ".log", ".event", ".py", ".sh")):
 # #         warnings.warn(f"Unexpected extension for file: {lpath}")
-# 
+#
 # #     try:
 # #         with open(lpath, "r", encoding="utf-8") as file:
 # #             content = file.read()
@@ -313,21 +314,21 @@ if __name__ == "__main__":
 # #         encoding = _check_encoding(lpath)
 # #         with open(lpath, "r", encoding=encoding) as file:
 # #             content = file.read()
-# 
+#
 # #     # For backward compatibility, check if as_lines parameter or legacy behavior needed
 # #     if as_lines:
 # #         raw_lines = content.splitlines()
 # #         if strip:
 # #             return [line.strip() for line in raw_lines if line.strip()]
 # #         return [line for line in raw_lines if line.strip()]
-# 
+#
 # #     # Default: return full content (possibly stripped)
 # #     if strip:
 # #         return content.strip()
-# 
+#
 # #     return content
-# 
-# 
+#
+#
 # def _load_txt(lpath, strip=True, as_lines=True):
 #     """
 #     Load text file and return its content.
@@ -338,13 +339,13 @@ if __name__ == "__main__":
 #     """
 #     # Convert Path object to string if needed
 #     from pathlib import Path
-# 
+#
 #     if isinstance(lpath, Path):
 #         lpath = str(lpath)
-# 
+#
 #     if not lpath.endswith((".txt", ".log", ".event", ".py", ".sh", ".tex", ".bib")):
 #         logger.warning(f"Unexpected extension for file: {lpath}")
-# 
+#
 #     try:
 #         with open(lpath, "r", encoding="utf-8") as file:
 #             content = file.read()
@@ -352,22 +353,22 @@ if __name__ == "__main__":
 #         encoding = _check_encoding(lpath)
 #         with open(lpath, "r", encoding=encoding) as file:
 #             content = file.read()
-# 
+#
 #     if as_lines:
 #         raw_lines = content.splitlines()
 #         if strip:
 #             return [line.strip() for line in raw_lines if line.strip()]
 #         return [line for line in raw_lines if line]
-# 
+#
 #     if strip:
 #         return content.strip()
 #     return content
-# 
-# 
+#
+#
 # def _check_encoding(file_path):
 #     """Check file encoding by trying common encodings."""
 #     encodings = ["utf-8", "latin1", "cp1252", "iso-8859-1", "ascii"]
-# 
+#
 #     for encoding in encodings:
 #         try:
 #             with open(file_path, "r", encoding=encoding) as f:
@@ -375,40 +376,40 @@ if __name__ == "__main__":
 #             return encoding
 #         except UnicodeDecodeError:
 #             continue
-# 
+#
 #     raise ValueError(f"Unable to determine encoding for {file_path}")
-# 
-# 
+#
+#
 # # def _check_encoding(file_path):
 # #     """
 # #     Check the encoding of a given file.
-# 
+#
 # #     This function attempts to read the file with different encodings
 # #     to determine the correct one.
-# 
+#
 # #     Parameters:
 # #     -----------
 # #     file_path : str
 # #         The path to the file to check.
-# 
+#
 # #     Returns:
 # #     --------
 # #     str
 # #         The detected encoding of the file.
-# 
+#
 # #     Raises:
 # #     -------
 # #     IOError
 # #         If the file cannot be read or the encoding cannot be determined.
 # #     """
 # #     import chardet
-# 
+#
 # #     with open(file_path, "rb") as file:
 # #         raw_data = file.read()
-# 
+#
 # #     result = chardet.detect(raw_data)
 # #     return result["encoding"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -13,43 +13,43 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_utils/_plot_layout.py
-# 
+#
 # """Blueprint-style visualization for FTS layout and coordinate system.
-# 
+#
 # Provides architectural drawing style visualizations with:
 # - Canvas boundaries with dimension annotations
 # - Element bounding boxes with labels
 # - Rulers (horizontal and vertical)
 # - Grid lines
 # - Before/after comparison for auto-crop
-# 
+#
 # Usage:
 #     from scitex.io.bundle._fig._utils import plot_layout, plot_auto_crop_comparison
-# 
+#
 #     # Single layout visualization
 #     fig, ax = plot_layout(elements, canvas_size, title="My Figure")
-# 
+#
 #     # Before/after auto-crop comparison
 #     fig = plot_auto_crop_comparison(elements_before, elements_after,
 #                                      size_before, size_after)
 # """
-# 
+#
 # from typing import Any, Dict, List, Optional, Tuple
-# 
+#
 # import matplotlib.patches as mpatches
 # import matplotlib.pyplot as plt
 # from matplotlib.axes import Axes
 # from matplotlib.figure import Figure
-# 
+#
 # from ._calc_bounds import element_bounds
 # from ._normalize import normalize_size
-# 
+#
 # __all__ = [
 #     "plot_layout",
 #     "plot_auto_crop_comparison",
 #     "BLUEPRINT_STYLE",
 # ]
-# 
+#
 # # Blueprint color scheme
 # BLUEPRINT_STYLE = {
 #     "bg_color": "#1a2744",  # Dark blue background
@@ -63,8 +63,8 @@ if __name__ == "__main__":
 #     "dimension_color": "#d62728",  # Red dimensions
 #     "origin_color": "#2ca02c",  # Green origin marker
 # }
-# 
-# 
+#
+#
 # def plot_layout(
 #     elements: List[Dict[str, Any]],
 #     canvas_size: Dict[str, float],
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 #     style: Optional[Dict[str, str]] = None,
 # ) -> Tuple[Figure, Axes]:
 #     """Plot layout with blueprint-style visualization.
-# 
+#
 #     Args:
 #         elements: List of element specifications
 #         canvas_size: Canvas size {"width_mm", "height_mm"}
@@ -88,14 +88,14 @@ if __name__ == "__main__":
 #         show_dimensions: Show dimension annotations
 #         show_origin: Show origin marker
 #         style: Custom style dict (uses BLUEPRINT_STYLE if None)
-# 
+#
 #     Returns:
 #         Tuple of (Figure, Axes)
 #     """
 #     s = style or BLUEPRINT_STYLE
 #     size = normalize_size(canvas_size)
 #     w, h = size["width_mm"], size["height_mm"]
-# 
+#
 #     # Create figure if needed
 #     if ax is None:
 #         # Add space for rulers
@@ -105,33 +105,33 @@ if __name__ == "__main__":
 #         fig, ax = plt.subplots(figsize=(fig_w * 1.5, fig_h * 1.5))
 #     else:
 #         fig = ax.figure
-# 
+#
 #     # Set background
 #     ax.set_facecolor(s["bg_color"])
-# 
+#
 #     # Draw grid
 #     if show_grid:
 #         _draw_grid(ax, w, h, s)
-# 
+#
 #     # Draw canvas
 #     _draw_canvas(ax, w, h, s)
-# 
+#
 #     # Draw origin marker
 #     if show_origin:
 #         _draw_origin(ax, s)
-# 
+#
 #     # Draw elements
 #     for i, elem in enumerate(elements):
 #         _draw_element(ax, elem, i, s, show_dimensions)
-# 
+#
 #     # Draw rulers
 #     if show_rulers:
 #         _draw_rulers(ax, w, h, s)
-# 
+#
 #     # Draw canvas dimensions
 #     if show_dimensions:
 #         _draw_canvas_dimensions(ax, w, h, s)
-# 
+#
 #     # Set axis properties
 #     margin = 20 if show_rulers else 5
 #     ax.set_xlim(-margin, w + margin)
@@ -139,10 +139,10 @@ if __name__ == "__main__":
 #     ax.set_aspect("equal")
 #     ax.set_title(title, fontsize=12, fontweight="bold", color=s["text_color"])
 #     ax.axis("off")
-# 
+#
 #     return fig, ax
-# 
-# 
+#
+#
 # def plot_auto_crop_comparison(
 #     elements_before: List[Dict[str, Any]],
 #     elements_after: List[Dict[str, Any]],
@@ -152,7 +152,7 @@ if __name__ == "__main__":
 #     style: Optional[Dict[str, str]] = None,
 # ) -> Figure:
 #     """Plot before/after comparison for auto-crop.
-# 
+#
 #     Args:
 #         elements_before: Elements before auto-crop
 #         elements_after: Elements after auto-crop
@@ -160,15 +160,15 @@ if __name__ == "__main__":
 #         size_after: Canvas size after
 #         title: Overall title
 #         style: Custom style dict
-# 
+#
 #     Returns:
 #         Figure with side-by-side comparison
 #     """
 #     s = style or BLUEPRINT_STYLE
-# 
+#
 #     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
 #     fig.suptitle(title, fontsize=14, fontweight="bold")
-# 
+#
 #     # Before
 #     plot_layout(
 #         elements_before,
@@ -177,7 +177,7 @@ if __name__ == "__main__":
 #         ax=ax1,
 #         style=s,
 #     )
-# 
+#
 #     # After
 #     plot_layout(
 #         elements_after,
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 #         ax=ax2,
 #         style=s,
 #     )
-# 
+#
 #     # Add size annotations
 #     sb = normalize_size(size_before)
 #     sa = normalize_size(size_after)
@@ -206,11 +206,11 @@ if __name__ == "__main__":
 #         ha="center",
 #         fontsize=10,
 #     )
-# 
+#
 #     plt.tight_layout()
 #     return fig
-# 
-# 
+#
+#
 # def _draw_grid(ax: Axes, w: float, h: float, s: Dict[str, str]) -> None:
 #     """Draw background grid."""
 #     # Major grid every 10mm
@@ -218,8 +218,8 @@ if __name__ == "__main__":
 #         ax.axvline(x, color=s["grid_color"], linewidth=0.5, alpha=0.5)
 #     for y in range(0, int(h) + 1, 10):
 #         ax.axhline(y, color=s["grid_color"], linewidth=0.5, alpha=0.5)
-# 
-# 
+#
+#
 # def _draw_canvas(ax: Axes, w: float, h: float, s: Dict[str, str]) -> None:
 #     """Draw canvas rectangle."""
 #     rect = mpatches.Rectangle(
@@ -233,8 +233,8 @@ if __name__ == "__main__":
 #         zorder=1,
 #     )
 #     ax.add_patch(rect)
-# 
-# 
+#
+#
 # def _draw_origin(ax: Axes, s: Dict[str, str]) -> None:
 #     """Draw origin marker at (0,0)."""
 #     # Origin cross
@@ -251,8 +251,8 @@ if __name__ == "__main__":
 #         va="bottom",
 #         fontweight="bold",
 #     )
-# 
-# 
+#
+#
 # def _draw_element(
 #     ax: Axes,
 #     elem: Dict[str, Any],
@@ -264,7 +264,7 @@ if __name__ == "__main__":
 #     bounds = element_bounds(elem)
 #     x, y = bounds["x_mm"], bounds["y_mm"]
 #     w, h = bounds["width_mm"], bounds["height_mm"]
-# 
+#
 #     # Element rectangle
 #     rect = mpatches.Rectangle(
 #         (x, y),
@@ -277,7 +277,7 @@ if __name__ == "__main__":
 #         zorder=5,
 #     )
 #     ax.add_patch(rect)
-# 
+#
 #     # Element label
 #     elem_id = elem.get("id", f"E{index}")
 #     elem_type = elem.get("type", "unknown")
@@ -293,7 +293,7 @@ if __name__ == "__main__":
 #         fontweight="bold",
 #         zorder=6,
 #     )
-# 
+#
 #     # Position annotation
 #     if show_dimensions:
 #         ax.text(
@@ -315,12 +315,12 @@ if __name__ == "__main__":
 #             ha="right",
 #             va="top",
 #         )
-# 
-# 
+#
+#
 # def _draw_rulers(ax: Axes, w: float, h: float, s: Dict[str, str]) -> None:
 #     """Draw rulers along edges."""
 #     ruler_offset = -12
-# 
+#
 #     # Horizontal ruler (top)
 #     ax.plot([0, w], [ruler_offset, ruler_offset], color=s["ruler_color"], linewidth=1)
 #     for x in range(0, int(w) + 1, 10):
@@ -341,7 +341,7 @@ if __name__ == "__main__":
 #                 va="bottom",
 #                 color=s["ruler_color"],
 #             )
-# 
+#
 #     # Vertical ruler (left)
 #     ax.plot([ruler_offset, ruler_offset], [0, h], color=s["ruler_color"], linewidth=1)
 #     for y in range(0, int(h) + 1, 10):
@@ -362,8 +362,8 @@ if __name__ == "__main__":
 #                 va="center",
 #                 color=s["ruler_color"],
 #             )
-# 
-# 
+#
+#
 # def _draw_canvas_dimensions(ax: Axes, w: float, h: float, s: Dict[str, str]) -> None:
 #     """Draw canvas dimension annotations."""
 #     # Width dimension (bottom)
@@ -384,7 +384,7 @@ if __name__ == "__main__":
 #         color=s["dimension_color"],
 #         fontweight="bold",
 #     )
-# 
+#
 #     # Height dimension (right)
 #     x_pos = w + 8
 #     ax.annotate(
@@ -404,8 +404,8 @@ if __name__ == "__main__":
 #         fontweight="bold",
 #         rotation=90,
 #     )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

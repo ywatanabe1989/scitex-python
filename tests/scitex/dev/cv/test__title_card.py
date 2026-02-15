@@ -14,20 +14,20 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/dev/cv/_title_card.py
 # """Title card generation using matplotlib.
-# 
+#
 # Creates opening/closing title cards as images or short videos
 # with consistent SciTeX branding.
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # from datetime import datetime
 # from pathlib import Path
 # from typing import Optional
-# 
+#
 # import matplotlib.pyplot as plt
 # import numpy as np
-# 
+#
 # # SciTeX brand colors (using matplotlib-compatible RGBA tuples)
 # SCITEX_COLORS = {
 #     "primary": "#1a1a2e",
@@ -37,8 +37,8 @@ if __name__ == "__main__":
 #     "text_muted": (1.0, 1.0, 1.0, 0.7),  # White with 70% opacity
 #     "text_dim": (1.0, 1.0, 1.0, 0.5),  # White with 50% opacity
 # }
-# 
-# 
+#
+#
 # def _create_gradient_background(
 #     width: int = 1920,
 #     height: int = 1080,
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 #     angle: float = 135,
 # ) -> np.ndarray:
 #     """Create a gradient background.
-# 
+#
 #     Parameters
 #     ----------
 #     width : int
@@ -58,36 +58,36 @@ if __name__ == "__main__":
 #         Hex colors for gradient.
 #     angle : float
 #         Gradient angle in degrees.
-# 
+#
 #     Returns
 #     -------
 #     np.ndarray
 #         RGB image array (height, width, 3).
 #     """
 #     import matplotlib.colors as mcolors
-# 
+#
 #     # Convert hex to RGB
 #     c1 = np.array(mcolors.to_rgb(color1))
 #     c2 = np.array(mcolors.to_rgb(color2))
-# 
+#
 #     # Create gradient
 #     angle_rad = np.radians(angle)
 #     x = np.linspace(0, 1, width)
 #     y = np.linspace(0, 1, height)
 #     xx, yy = np.meshgrid(x, y)
-# 
+#
 #     # Gradient along angle direction
 #     t = xx * np.cos(angle_rad) + yy * np.sin(angle_rad)
 #     t = (t - t.min()) / (t.max() - t.min())
-# 
+#
 #     # Interpolate colors
 #     img = np.zeros((height, width, 3))
 #     for i in range(3):
 #         img[:, :, i] = c1[i] + t * (c2[i] - c1[i])
-# 
+#
 #     return img
-# 
-# 
+#
+#
 # def create_title_card(
 #     title: str,
 #     subtitle: str = "",
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 #     timestamp_fontsize: int = 18,
 # ) -> Path:
 #     """Create a title card image.
-# 
+#
 #     Parameters
 #     ----------
 #     title : str
@@ -125,7 +125,7 @@ if __name__ == "__main__":
 #         Subtitle font size in points.
 #     timestamp_fontsize : int
 #         Timestamp font size in points.
-# 
+#
 #     Returns
 #     -------
 #     Path
@@ -135,7 +135,7 @@ if __name__ == "__main__":
 #     fig_width = width / dpi
 #     fig_height = height / dpi
 #     fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=dpi)
-# 
+#
 #     # Background
 #     if background == "gradient":
 #         bg = _create_gradient_background(width, height)
@@ -144,11 +144,11 @@ if __name__ == "__main__":
 #         ax.set_facecolor(SCITEX_COLORS["primary"])
 #     else:
 #         ax.set_facecolor(background)
-# 
+#
 #     ax.set_xlim(0, 1)
 #     ax.set_ylim(0, 1)
 #     ax.axis("off")
-# 
+#
 #     # Title
 #     ax.text(
 #         0.5,
@@ -161,7 +161,7 @@ if __name__ == "__main__":
 #         color=SCITEX_COLORS["text"],
 #         transform=ax.transAxes,
 #     )
-# 
+#
 #     # Subtitle
 #     if subtitle:
 #         ax.text(
@@ -175,7 +175,7 @@ if __name__ == "__main__":
 #             color=SCITEX_COLORS["text_muted"],
 #             transform=ax.transAxes,
 #         )
-# 
+#
 #     # Timestamp
 #     ts = timestamp or datetime.now().strftime("%Y-%m-%d %H:%M")
 #     ax.text(
@@ -189,13 +189,13 @@ if __name__ == "__main__":
 #         color=SCITEX_COLORS["text_dim"],
 #         transform=ax.transAxes,
 #     )
-# 
+#
 #     # Save
 #     if output_path is None:
 #         output_path = f"/tmp/title_card_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
 #     output_path = Path(output_path)
 #     output_path.parent.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     # Save with exact dimensions (no bbox_inches='tight' to preserve size)
 #     fig.savefig(
 #         output_path,
@@ -204,10 +204,10 @@ if __name__ == "__main__":
 #         dpi=dpi,
 #     )
 #     plt.close(fig)
-# 
+#
 #     return output_path
-# 
-# 
+#
+#
 # def create_opening(
 #     title: str,
 #     subtitle: str = "Part of SciTeX",
@@ -218,7 +218,7 @@ if __name__ == "__main__":
 #     **kwargs,
 # ) -> Path:
 #     """Create an opening title card with SciTeX branding.
-# 
+#
 #     Parameters
 #     ----------
 #     title : str
@@ -235,7 +235,7 @@ if __name__ == "__main__":
 #         Version string (e.g., "v2.1.2").
 #     **kwargs
 #         Additional arguments passed to create_title_card.
-# 
+#
 #     Returns
 #     -------
 #     Path
@@ -245,10 +245,10 @@ if __name__ == "__main__":
 #         subtitle = f"{product} {version}"
 #     elif subtitle == "Part of SciTeX" and product != "SciTeX":
 #         subtitle = f"Part of SciTeX - {product}"
-# 
+#
 #     if output_path is None:
 #         output_path = f"/tmp/opening_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-# 
+#
 #     return create_title_card(
 #         title=title,
 #         subtitle=subtitle,
@@ -256,8 +256,8 @@ if __name__ == "__main__":
 #         output_path=output_path,
 #         **kwargs,
 #     )
-# 
-# 
+#
+#
 # def create_closing(
 #     output_path: Optional[str] = None,
 #     product: str = "SciTeX",
@@ -268,7 +268,7 @@ if __name__ == "__main__":
 #     dpi: int = 100,
 # ) -> Path:
 #     """Create a closing branding card.
-# 
+#
 #     Parameters
 #     ----------
 #     output_path : str, optional
@@ -283,7 +283,7 @@ if __name__ == "__main__":
 #         Image dimensions.
 #     dpi : int
 #         Output DPI.
-# 
+#
 #     Returns
 #     -------
 #     Path
@@ -292,14 +292,14 @@ if __name__ == "__main__":
 #     fig_width = width / dpi
 #     fig_height = height / dpi
 #     fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=dpi)
-# 
+#
 #     # Gradient background
 #     bg = _create_gradient_background(width, height)
 #     ax.imshow(bg, extent=[0, 1, 0, 1], aspect="auto")
 #     ax.set_xlim(0, 1)
 #     ax.set_ylim(0, 1)
 #     ax.axis("off")
-# 
+#
 #     # Product name
 #     ax.text(
 #         0.5,
@@ -312,7 +312,7 @@ if __name__ == "__main__":
 #         color=SCITEX_COLORS["text"],
 #         transform=ax.transAxes,
 #     )
-# 
+#
 #     # Tagline
 #     ax.text(
 #         0.5,
@@ -324,7 +324,7 @@ if __name__ == "__main__":
 #         color=SCITEX_COLORS["text_muted"],
 #         transform=ax.transAxes,
 #     )
-# 
+#
 #     # URL
 #     ax.text(
 #         0.5,
@@ -336,13 +336,13 @@ if __name__ == "__main__":
 #         color=SCITEX_COLORS["accent"],
 #         transform=ax.transAxes,
 #     )
-# 
+#
 #     # Save with exact dimensions
 #     if output_path is None:
 #         output_path = f"/tmp/closing_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
 #     output_path = Path(output_path)
 #     output_path.parent.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     fig.savefig(
 #         output_path,
 #         facecolor=SCITEX_COLORS["primary"],
@@ -350,16 +350,16 @@ if __name__ == "__main__":
 #         dpi=dpi,
 #     )
 #     plt.close(fig)
-# 
+#
 #     return output_path
-# 
-# 
+#
+#
 # __all__ = [
 #     "create_title_card",
 #     "create_opening",
 #     "create_closing",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

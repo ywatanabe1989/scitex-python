@@ -14,21 +14,21 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-21"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/errors.py
-# 
+#
 # """Backwards-compatible re-export of errors from scitex.logging.
-# 
+#
 # DEPRECATED: Import from scitex.logging instead.
-# 
+#
 #     # Old (deprecated)
 #     from scitex.errors import SciTeXError, SaveError
-# 
+#
 #     # New (recommended)
 #     from scitex.logging import SciTeXError, SaveError
 # """
-# 
+#
 # from __future__ import annotations
 # import warnings
-# 
+#
 # # Issue deprecation warning on import
 # # stacklevel=1 so warning appears from scitex.errors (matches scitex.* filter)
 # warnings.warn(
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 #     DeprecationWarning,
 #     stacklevel=1,
 # )
-# 
+#
 # # Re-export everything from scitex.logging for backwards compatibility
 # from scitex.logging import (
 #     # Warnings
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 #     check_file_exists,
 #     check_shape_compatibility,
 # )
-# 
+#
 # __all__ = [
 #     # Warnings
 #     "SciTeXWarning",
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 #     "check_file_exists",
 #     "check_shape_compatibility",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -23,14 +23,14 @@ if __name__ == "__main__":
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # """Main entry point for CLI."""
-# 
+#
 # import sys
-# 
+#
 # from .cli import main
-# 
+#
 # if __name__ == "__main__":
 #     sys.exit(main())
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -540,11 +540,11 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2025-07-25 05:40:00"
 # # File: monitor.py
-# 
+#
 # """
 # Real-time performance monitoring for SciTeX.
 # """
-# 
+#
 # import time
 # import threading
 # from collections import deque, defaultdict
@@ -554,12 +554,12 @@ if __name__ == "__main__":
 # import json
 # from pathlib import Path
 # import warnings
-# 
-# 
+#
+#
 # @dataclass
 # class PerformanceMetric:
 #     """Single performance measurement."""
-# 
+#
 #     timestamp: float
 #     function: str
 #     duration: float
@@ -567,12 +567,12 @@ if __name__ == "__main__":
 #     args_size: Optional[int] = None
 #     result_size: Optional[int] = None
 #     exception: Optional[str] = None
-# 
-# 
+#
+#
 # class PerformanceMonitor:
 #     """
 #     Monitor performance metrics for SciTeX functions.
-# 
+#
 #     Example
 #     -------
 #     >>> monitor = PerformanceMonitor()
@@ -580,7 +580,7 @@ if __name__ == "__main__":
 #     >>> # Your code here
 #     >>> stats = monitor.get_stats()
 #     """
-# 
+#
 #     def __init__(self, max_history: int = 1000):
 #         self.max_history = max_history
 #         self.metrics = deque(maxlen=max_history)
@@ -595,7 +595,7 @@ if __name__ == "__main__":
 #         )
 #         self.is_monitoring = False
 #         self._lock = threading.Lock()
-# 
+#
 #         # Alerts configuration
 #         self.alerts = {
 #             "slow_function": 1.0,  # Alert if function takes > 1s
@@ -603,40 +603,40 @@ if __name__ == "__main__":
 #             "error_rate": 0.1,  # Alert if error rate > 10%
 #         }
 #         self.alert_callbacks = []
-# 
+#
 #     def start(self):
 #         """Start monitoring."""
 #         self.is_monitoring = True
-# 
+#
 #     def stop(self):
 #         """Stop monitoring."""
 #         self.is_monitoring = False
-# 
+#
 #     def record_metric(self, metric: PerformanceMetric):
 #         """Record a performance metric."""
 #         if not self.is_monitoring:
 #             return
-# 
+#
 #         with self._lock:
 #             self.metrics.append(metric)
-# 
+#
 #             # Update function statistics
 #             stats = self.function_stats[metric.function]
 #             stats["count"] += 1
 #             stats["total_time"] += metric.duration
 #             stats["min_time"] = min(stats["min_time"], metric.duration)
 #             stats["max_time"] = max(stats["max_time"], metric.duration)
-# 
+#
 #             if metric.exception:
 #                 stats["errors"] += 1
-# 
+#
 #             # Check alerts
 #             self._check_alerts(metric)
-# 
+#
 #     def _check_alerts(self, metric: PerformanceMetric):
 #         """Check if metric triggers any alerts."""
 #         alerts_triggered = []
-# 
+#
 #         # Slow function alert
 #         if metric.duration > self.alerts["slow_function"]:
 #             alerts_triggered.append(
@@ -647,7 +647,7 @@ if __name__ == "__main__":
 #                     "threshold": self.alerts["slow_function"],
 #                 }
 #             )
-# 
+#
 #         # Memory spike alert
 #         if metric.memory_delta and metric.memory_delta > self.alerts["memory_spike"]:
 #             alerts_triggered.append(
@@ -658,7 +658,7 @@ if __name__ == "__main__":
 #                     "threshold": self.alerts["memory_spike"],
 #                 }
 #             )
-# 
+#
 #         # Error rate alert
 #         stats = self.function_stats[metric.function]
 #         if stats["count"] > 10:  # Only check after sufficient calls
@@ -672,25 +672,25 @@ if __name__ == "__main__":
 #                         "threshold": self.alerts["error_rate"],
 #                     }
 #                 )
-# 
+#
 #         # Trigger callbacks
 #         for alert in alerts_triggered:
 #             for callback in self.alert_callbacks:
 #                 callback(alert)
-# 
+#
 #     def add_alert_callback(self, callback: Callable[[Dict[str, Any]], None]):
 #         """Add a callback for performance alerts."""
 #         self.alert_callbacks.append(callback)
-# 
+#
 #     def get_stats(self, function: Optional[str] = None) -> Dict[str, Any]:
 #         """
 #         Get performance statistics.
-# 
+#
 #         Parameters
 #         ----------
 #         function : str, optional
 #             Specific function to get stats for
-# 
+#
 #         Returns
 #         -------
 #         dict
@@ -723,12 +723,12 @@ if __name__ == "__main__":
 #                             "error_rate": stats["errors"] / stats["count"],
 #                         }
 #                 return all_stats
-# 
+#
 #     def get_recent_metrics(self, n: int = 100) -> List[PerformanceMetric]:
 #         """Get n most recent metrics."""
 #         with self._lock:
 #             return list(self.metrics)[-n:]
-# 
+#
 #     def save_metrics(self, path: str):
 #         """Save metrics to file."""
 #         with self._lock:
@@ -747,36 +747,36 @@ if __name__ == "__main__":
 #                 ],
 #                 "stats": dict(self.function_stats),
 #             }
-# 
+#
 #         Path(path).write_text(json.dumps(data, indent=2))
-# 
+#
 #     def load_metrics(self, path: str):
 #         """Load metrics from file."""
 #         data = json.loads(Path(path).read_text())
-# 
+#
 #         with self._lock:
 #             self.metrics.clear()
 #             for m in data["metrics"]:
 #                 self.metrics.append(PerformanceMetric(**m))
-# 
+#
 #             self.function_stats.clear()
 #             self.function_stats.update(data["stats"])
-# 
+#
 #     def clear(self):
 #         """Clear all metrics."""
 #         with self._lock:
 #             self.metrics.clear()
 #             self.function_stats.clear()
-# 
-# 
+#
+#
 # # Global monitor instance
 # _global_monitor = PerformanceMonitor()
-# 
-# 
+#
+#
 # def track_performance(func: Callable) -> Callable:
 #     """
 #     Decorator to track function performance.
-# 
+#
 #     Example
 #     -------
 #     >>> @track_performance
@@ -785,26 +785,26 @@ if __name__ == "__main__":
 #     """
 #     from functools import wraps
 #     import sys
-# 
+#
 #     @wraps(func)
 #     def wrapper(*args, **kwargs):
 #         if not _global_monitor.is_monitoring:
 #             return func(*args, **kwargs)
-# 
+#
 #         # Get memory before (if available)
 #         try:
 #             import psutil
-# 
+#
 #             process = psutil.Process()
 #             mem_before = process.memory_info().rss / 1024 / 1024
 #         except:
 #             mem_before = None
-# 
+#
 #         # Time the function
 #         start_time = time.time()
 #         exception = None
 #         result = None
-# 
+#
 #         try:
 #             result = func(*args, **kwargs)
 #         except Exception as e:
@@ -812,7 +812,7 @@ if __name__ == "__main__":
 #             raise
 #         finally:
 #             duration = time.time() - start_time
-# 
+#
 #             # Get memory after
 #             mem_delta = None
 #             if mem_before is not None:
@@ -821,7 +821,7 @@ if __name__ == "__main__":
 #                     mem_delta = mem_after - mem_before
 #                 except:
 #                     pass
-# 
+#
 #             # Estimate sizes
 #             args_size = None
 #             result_size = None
@@ -831,7 +831,7 @@ if __name__ == "__main__":
 #                     result_size = sys.getsizeof(result)
 #             except:
 #                 pass
-# 
+#
 #             # Record metric
 #             metric = PerformanceMetric(
 #                 timestamp=start_time,
@@ -842,33 +842,33 @@ if __name__ == "__main__":
 #                 result_size=result_size,
 #                 exception=exception,
 #             )
-# 
+#
 #             _global_monitor.record_metric(metric)
-# 
+#
 #         return result
-# 
+#
 #     return wrapper
-# 
-# 
+#
+#
 # def start_monitoring():
 #     """Start global performance monitoring."""
 #     _global_monitor.start()
-# 
-# 
+#
+#
 # def stop_monitoring():
 #     """Stop global performance monitoring."""
 #     _global_monitor.stop()
-# 
-# 
+#
+#
 # def get_performance_stats(function: Optional[str] = None) -> Dict[str, Any]:
 #     """Get performance statistics from global monitor."""
 #     return _global_monitor.get_stats(function)
-# 
-# 
+#
+#
 # def set_performance_alerts(**thresholds):
 #     """
 #     Set performance alert thresholds.
-# 
+#
 #     Parameters
 #     ----------
 #     slow_function : float
@@ -879,12 +879,12 @@ if __name__ == "__main__":
 #         Alert if error rate exceeds this (0-1)
 #     """
 #     _global_monitor.alerts.update(thresholds)
-# 
-# 
+#
+#
 # def add_performance_alert_handler(handler: Callable[[Dict[str, Any]], None]):
 #     """
 #     Add a handler for performance alerts.
-# 
+#
 #     Example
 #     -------
 #     >>> def alert_handler(alert):
@@ -892,8 +892,8 @@ if __name__ == "__main__":
 #     >>> add_performance_alert_handler(alert_handler)
 #     """
 #     _global_monitor.add_alert_callback(handler)
-# 
-# 
+#
+#
 # # Default alert handler
 # def _default_alert_handler(alert: Dict[str, Any]):
 #     """Default handler that prints warnings."""
@@ -912,8 +912,8 @@ if __name__ == "__main__":
 #             f"High error rate: {alert['function']} has {alert['rate']:.1%} error rate "
 #             f"(threshold: {alert['threshold']:.1%})"
 #         )
-# 
-# 
+#
+#
 # # Register default handler
 # add_performance_alert_handler(_default_alert_handler)
 

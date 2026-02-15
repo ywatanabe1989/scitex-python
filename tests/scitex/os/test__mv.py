@@ -13,14 +13,14 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-04-06 09:00:45 (ywatanabe)"
-# 
+#
 # # import os
 # # import shutil
-# 
+#
 # # def mv(src, tgt):
 # #     successful = True
 # #     os.makedirs(tgt, exist_ok=True)
-# 
+#
 # #     if os.path.isdir(src):
 # #         # Iterate over the items in the directory
 # #         for item in os.listdir(src):
@@ -43,17 +43,17 @@ if __name__ == "__main__":
 # #         except OSError as e:
 # #             print(f"\nError: {e}")
 # #             successful = False
-# 
+#
 # #     return successful
-# 
-# 
+#
+#
 # def mv(src, tgt):
 #     import os
 #     import shutil
-# 
+#
 #     successful = True
 #     os.makedirs(tgt, exist_ok=True)
-# 
+#
 #     try:
 #         shutil.move(src, tgt)
 #         print(f"\nMoved from {src} to {tgt}")

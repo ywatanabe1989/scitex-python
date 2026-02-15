@@ -12,13 +12,16 @@ as expected.
 """
 
 import pytest
+
 pytest.importorskip("psycopg2")
 from unittest.mock import Mock, patch
+
 from scitex.db._BaseMixins import _BaseBackupMixin
 
 
 class ConcreteBackupMixin(_BaseBackupMixin):
     """Concrete implementation for testing."""
+
     pass
 
 
@@ -62,45 +65,45 @@ class TestBaseBackupMixin:
     def test_method_signatures(self):
         """Test that all required methods exist with correct signatures."""
         # Check method existence
-        assert hasattr(self.mixin, 'backup_table')
-        assert hasattr(self.mixin, 'restore_table')
-        assert hasattr(self.mixin, 'backup_database')
-        assert hasattr(self.mixin, 'restore_database')
-        assert hasattr(self.mixin, 'copy_table')
+        assert hasattr(self.mixin, "backup_table")
+        assert hasattr(self.mixin, "restore_table")
+        assert hasattr(self.mixin, "backup_database")
+        assert hasattr(self.mixin, "restore_database")
+        assert hasattr(self.mixin, "copy_table")
 
         # Check method signatures
         import inspect
-        
+
         # backup_table should accept table and file_path
         sig = inspect.signature(self.mixin.backup_table)
         params = list(sig.parameters.keys())
-        assert 'table' in params
-        assert 'file_path' in params
+        assert "table" in params
+        assert "file_path" in params
 
         # restore_table should accept table and file_path
         sig = inspect.signature(self.mixin.restore_table)
         params = list(sig.parameters.keys())
-        assert 'table' in params
-        assert 'file_path' in params
+        assert "table" in params
+        assert "file_path" in params
 
         # backup_database should accept file_path
         sig = inspect.signature(self.mixin.backup_database)
         params = list(sig.parameters.keys())
-        assert 'file_path' in params
+        assert "file_path" in params
 
         # restore_database should accept file_path
         sig = inspect.signature(self.mixin.restore_database)
         params = list(sig.parameters.keys())
-        assert 'file_path' in params
+        assert "file_path" in params
 
         # copy_table should accept source_table, target_table, and optional where
         sig = inspect.signature(self.mixin.copy_table)
         params = list(sig.parameters.keys())
-        assert 'source_table' in params
-        assert 'target_table' in params
-        assert 'where' in params
+        assert "source_table" in params
+        assert "target_table" in params
+        assert "where" in params
         # Check that where parameter has default None
-        assert sig.parameters['where'].default is None
+        assert sig.parameters["where"].default is None
 
     def test_inheritance(self):
         """Test proper inheritance structure."""
@@ -108,13 +111,14 @@ class TestBaseBackupMixin:
 
     def test_mixin_usage_pattern(self):
         """Test that mixin can be properly combined with other classes."""
+
         class DatabaseWithBackup(_BaseBackupMixin):
             def __init__(self):
                 self.connection = None
-                
+
             def backup_table(self, table: str, file_path: str):
                 return f"Backing up {table} to {file_path}"
-                
+
         db = DatabaseWithBackup()
         result = db.backup_table("users", "/backup/users.sql")
         assert result == "Backing up users to /backup/users.sql"
@@ -124,16 +128,16 @@ class TestBaseBackupMixin:
         # Test with empty strings
         with pytest.raises(NotImplementedError):
             self.mixin.backup_table("", "")
-            
+
         with pytest.raises(NotImplementedError):
             self.mixin.restore_table("", "")
-            
+
         with pytest.raises(NotImplementedError):
             self.mixin.backup_database("")
-            
+
         with pytest.raises(NotImplementedError):
             self.mixin.restore_database("")
-            
+
         with pytest.raises(NotImplementedError):
             self.mixin.copy_table("", "")
 
@@ -145,7 +149,9 @@ class TestBaseBackupMixin:
         """Test that methods have appropriate documentation."""
         # The abstract methods don't have docstrings in the base class,
         # but concrete implementations should add them
-        assert _BaseBackupMixin.__doc__ is None or isinstance(_BaseBackupMixin.__doc__, str)
+        assert _BaseBackupMixin.__doc__ is None or isinstance(
+            _BaseBackupMixin.__doc__, str
+        )
 
 
 # --------------------------------------------------------------------------------
@@ -164,33 +170,33 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-02-27 22:16:38 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_dev/src/scitex/db/_BaseMixins/_BaseBackupMixin.py
-# 
+#
 # THIS_FILE = (
 #     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_BaseMixins/_BaseBackupMixin.py"
 # )
-# 
+#
 # from typing import Optional
-# 
-# 
+#
+#
 # class _BaseBackupMixin:
 #     def backup_table(self, table: str, file_path: str):
 #         raise NotImplementedError
-# 
+#
 #     def restore_table(self, table: str, file_path: str):
 #         raise NotImplementedError
-# 
+#
 #     def backup_database(self, file_path: str):
 #         raise NotImplementedError
-# 
+#
 #     def restore_database(self, file_path: str):
 #         raise NotImplementedError
-# 
+#
 #     def copy_table(
 #         self, source_table: str, target_table: str, where: Optional[str] = None
 #     ):
 #         raise NotImplementedError
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

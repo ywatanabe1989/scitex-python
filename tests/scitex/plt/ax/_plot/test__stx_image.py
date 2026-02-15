@@ -16,15 +16,15 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/plt/ax/_plot/_plot_image2d.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/plt/ax/_plot/_plot_image2d.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # import matplotlib
 # from scitex.plt.utils import assert_valid_axis
-# 
-# 
+#
+#
 # def stx_image(
 #     ax,
 #     arr_2d,
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 #     Imshows an two-dimensional array with theese two conditions:
 #     1) The first dimension represents the x dim, from left to right.
 #     2) The second dimension represents the y dim, from bottom to top
-# 
+#
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 #         Maximum data value for colormap scaling, by default None
 #     **kwargs
 #         Additional keyword arguments passed to ax.imshow()
-# 
+#
 #     Returns
 #     -------
 #     matplotlib.axes.Axes or scitex.plt._subplots.AxisWrapper
@@ -80,16 +80,16 @@ if __name__ == "__main__":
 #         ax, "First argument must be a matplotlib axis or scitex axis wrapper"
 #     )
 #     assert arr_2d.ndim == 2, "Input array must be 2-dimensional"
-# 
+#
 #     if kwargs.get("xyz"):
 #         kwargs.pop("xyz")
-# 
+#
 #     # Transposes arr_2d for correct orientation
 #     arr_2d = arr_2d.T
-# 
+#
 #     # Cals the original ax.imshow() method on the transposed array
 #     im = ax.imshow(arr_2d, cmap=cmap, vmin=vmin, vmax=vmax, aspect=aspect, **kwargs)
-# 
+#
 #     # Color bar
 #     if cbar:
 #         fig = ax.get_figure()
@@ -98,13 +98,13 @@ if __name__ == "__main__":
 #         )
 #         if cbar_label:
 #             _cbar.set_label(cbar_label)
-# 
+#
 #     # Invert y-axis to match typical image orientation
 #     ax.invert_yaxis()
-# 
+#
 #     return ax
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

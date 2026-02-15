@@ -230,6 +230,7 @@ class TestAnthropic:
                 anthropic_ai = Anthropic(model="claude-3-opus-20240229", n_keep=5)
                 assert anthropic_ai.n_keep == 5
 
+
 if __name__ == "__main__":
     import os
 
@@ -246,11 +247,11 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ai/_gen_ai/_Anthropic.py
 # # ----------------------------------------
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Functionality:
 #     - Implements Anthropic AI (Claude) interface
@@ -265,19 +266,19 @@ if __name__ == "__main__":
 #     - Anthropic API key (ANTHROPIC_API_KEY environment variable)
 #     - anthropic package
 # """
-# 
+#
 # """Imports"""
 # import sys
 # from typing import Dict, Generator, List, Optional
-# 
+#
 # import anthropic
 # import matplotlib.pyplot as plt
-# 
+#
 # from ._BaseGenAI import BaseGenAI
-# 
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # class Anthropic(BaseGenAI):
 #     def __init__(
 #         self,
@@ -293,12 +294,12 @@ if __name__ == "__main__":
 #     ) -> None:
 #         if model == "claude-3-7-sonnet-2025-0219":
 #             max_tokens = 128_000
-# 
+#
 #         api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
-# 
+#
 #         if not api_key:
 #             raise ValueError("ANTHROPIC_API_KEY environment variable not set")
-# 
+#
 #         super().__init__(
 #             system_setting=system_setting,
 #             model=model,
@@ -310,10 +311,10 @@ if __name__ == "__main__":
 #             chat_history=chat_history,
 #             max_tokens=max_tokens,
 #         )
-# 
+#
 #     def _init_client(self) -> anthropic.Anthropic:
 #         return anthropic.Anthropic(api_key=self.api_key)
-# 
+#
 #     def _api_format_history(self, history):
 #         formatted_history = []
 #         for msg in history:
@@ -341,7 +342,7 @@ if __name__ == "__main__":
 #                 }
 #             formatted_history.append(formatted_msg)
 #         return formatted_history
-# 
+#
 #     def _api_call_static(self) -> str:
 #         output = self.client.messages.create(
 #             model=self.model,
@@ -350,12 +351,12 @@ if __name__ == "__main__":
 #             temperature=self.temperature,
 #         )
 #         out_text = output.content[0].text
-# 
+#
 #         self.input_tokens += output.usage.input_tokens
 #         self.output_tokens += output.usage.output_tokens
-# 
+#
 #         return out_text
-# 
+#
 #     def _api_call_stream(self) -> Generator[str, None, None]:
 #         with self.client.messages.stream(
 #             model=self.model,
@@ -369,14 +370,14 @@ if __name__ == "__main__":
 #                     self.output_tokens += chunk.message.usage.output_tokens
 #                 except AttributeError:
 #                     pass
-# 
+#
 #                 if chunk.type == "content_block_delta":
 #                     yield chunk.delta.text
-# 
-# 
+#
+#
 # def main() -> None:
 #     import scitex
-# 
+#
 #     ai = scitex.ai.GenAI(
 #         model="claude-3-5-sonnet-20241022",
 #         api_key=os.getenv("ANTHROPIC_API_KEY"),
@@ -385,7 +386,7 @@ if __name__ == "__main__":
 #     print(ai("hi"))
 #     print(ai("My name is Yusuke"))
 #     print(ai("do you remember my name?"))
-# 
+#
 #     print(
 #         ai(
 #             "hi, could you tell me what is in the pic?",
@@ -395,23 +396,23 @@ if __name__ == "__main__":
 #         )
 #     )
 #     pass
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     import scitex
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
 #         sys, plt, verbose=False
 #     )
 #     main()
 #     scitex.session.close(CONFIG, verbose=False, notify=False)
-# 
-# 
+#
+#
 # """
 # python src/scitex/ai/_gen_ai/_Anthropic.py
 # python -m src.scitex.ai._gen_ai._Anthropic
 # """
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

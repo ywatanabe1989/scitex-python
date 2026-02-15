@@ -17,30 +17,30 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/browser/stealth/HumanBehavior.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # import asyncio
 # import random
 # from typing import Optional
-# 
+#
 # from playwright.async_api import Page
-# 
+#
 # from ..debugging import browser_logger
-# 
-# 
+#
+#
 # class HumanBehavior:
 #     """Simulates human-like behavior patterns for browser automation."""
-# 
+#
 #     def __init__(
 #         self,
 #     ):
 #         self.name = self.__class__.__name__
-# 
+#
 #     async def random_delay_async(
 #         self, min_ms: int = 1000, max_ms: int = 3000, page: Page = None
 #     ) -> None:
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 #                 page, f"{self.name}: Adding delay ({delay_ms}ms)..."
 #             )
 #         await asyncio.sleep(delay_ms / 1000)
-# 
+#
 #     async def reading_delay_async(
 #         self, content_length: int = 1000, page: Page = None
 #     ) -> None:
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 #         reading_time_ms = min(
 #             max(reading_time_ms, 2000), 10000
 #         )  # Clamp between 2-10 seconds
-# 
+#
 #         # Add randomness
 #         actual_delay = reading_time_ms * random.uniform(0.8, 1.2)
 #         if page:
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 #                 f"{self.name}: Reading delay: {actual_delay:.0f}ms for {content_length} chars...",
 #             )
 #         await asyncio.sleep(actual_delay / 1000)
-# 
+#
 #     async def mouse_move_async(
 #         self, page: Page, x: Optional[int] = None, y: Optional[int] = None
 #     ) -> None:
@@ -82,24 +82,24 @@ if __name__ == "__main__":
 #             x = random.randint(100, 1200)
 #         if y is None:
 #             y = random.randint(100, 800)
-# 
+#
 #         # Move in steps for more natural movement
 #         current_x, current_y = 0, 0
 #         steps = random.randint(3, 7)
-# 
+#
 #         for i in range(steps):
 #             progress = (i + 1) / steps
 #             # Ease-in-out curve
 #             t = progress * progress * (3.0 - 2.0 * progress)
-# 
+#
 #             next_x = int(current_x + (x - current_x) * t)
 #             next_y = int(current_y + (y - current_y) * t)
-# 
+#
 #             await page.mouse.move(next_x, next_y)
 #             await asyncio.sleep(random.uniform(0.01, 0.03))
-# 
+#
 #             current_x, current_y = next_x, next_y
-# 
+#
 #     async def hover_and_click_async(
 #         self, page: Page, selector: str = None, element=None
 #     ) -> None:
@@ -107,10 +107,10 @@ if __name__ == "__main__":
 #         await browser_logger.debug(page, f"{self.name}: Hovering and clicking...")
 #         if selector:
 #             element = page.locator(selector)
-# 
+#
 #         if not element:
 #             raise ValueError("Either selector or element must be provided")
-# 
+#
 #         # Move to element area first
 #         box = await element.bounding_box()
 #         if box:
@@ -119,16 +119,16 @@ if __name__ == "__main__":
 #             offset_y = random.randint(-10, 10)
 #             target_x = box["x"] + box["width"] / 2 + offset_x
 #             target_y = box["y"] + box["height"] / 2 + offset_y
-# 
+#
 #             await HumanBehavior.mouse_move_async(page, int(target_x), int(target_y))
-# 
+#
 #         # Hover
 #         await element.hover()
 #         await HumanBehavior.random_delay_async(200, 800)
-# 
+#
 #         # Click
 #         await element.click()
-# 
+#
 #     async def scroll_async(
 #         self,
 #         page: Page,
@@ -139,25 +139,25 @@ if __name__ == "__main__":
 #         await browser_logger.debug(page, f"{self.name}: Scrolling...")
 #         if distance is None:
 #             distance = random.randint(300, 800)
-# 
+#
 #         if direction == "up":
 #             distance = -distance
-# 
+#
 #         # Scroll in small chunks for more natural behavior
 #         chunks = random.randint(2, 5)
 #         for i in range(chunks):
 #             chunk_distance = distance // chunks
 #             # Add some variation
 #             chunk_distance += random.randint(-50, 50)
-# 
+#
 #             await page.evaluate(f"window.scrollBy(0, {chunk_distance})")
 #             await HumanBehavior.random_delay_async(100, 300)
-# 
+#
 #         await browser_logger.debug(
 #             page,
 #             f"{self.name}: Scrolled {direction} ~{abs(distance)}px in {chunks} chunks",
 #         )
-# 
+#
 #     @staticmethod
 #     async def type_text_async(
 #         page: Page,
@@ -169,19 +169,19 @@ if __name__ == "__main__":
 #         """Type text with human-like timing and occasional mistakes."""
 #         if selector:
 #             element = page.locator(selector)
-# 
+#
 #         if not element:
 #             raise ValueError("Either selector or element must be provided")
-# 
+#
 #         # Click to focus
 #         await element.click()
 #         await HumanBehavior.random_delay_async(100, 300)
-# 
+#
 #         # Clear if requested
 #         if clear_first:
 #             await element.clear()
 #             await HumanBehavior.random_delay_async(100, 200)
-# 
+#
 #         # Type character by character
 #         for i, char in enumerate(text):
 #             # Occasionally make a typo and correct it (1% chance)
@@ -191,9 +191,9 @@ if __name__ == "__main__":
 #                 await HumanBehavior.random_delay_async(100, 300)
 #                 await page.keyboard.press("Backspace")
 #                 await HumanBehavior.random_delay_async(50, 150)
-# 
+#
 #             await element.type(char)
-# 
+#
 #             # Variable typing speed
 #             if char == " ":
 #                 await HumanBehavior.random_delay_async(50, 150)
@@ -201,7 +201,7 @@ if __name__ == "__main__":
 #                 await HumanBehavior.random_delay_async(150, 300)
 #             else:
 #                 await HumanBehavior.random_delay_async(30, 120)
-# 
+#
 #     @staticmethod
 #     async def random_mouse_movement_async(page: Page) -> None:
 #         """Perform random mouse movements to appear active."""
@@ -209,27 +209,27 @@ if __name__ == "__main__":
 #         for _ in range(movements):
 #             await HumanBehavior.mouse_move_async(page)
 #             await HumanBehavior.random_delay_async(500, 1500)
-# 
+#
 #     @staticmethod
 #     async def pdf_viewing_behavior_async(page: Page) -> None:
 #         """Simulate human behavior when viewing a PDF."""
 #         await browser_logger.debug(page, "Simulating PDF viewing behavior")
-# 
+#
 #         # Initial load and orientation
 #         human = HumanBehavior()
 #         await human.random_delay_async(2000, 4000, page)
-# 
+#
 #         # Scroll down a bit to "read" the first page
 #         await human.scroll_async(page, "down", random.randint(200, 400))
 #         await human.random_delay_async(3000, 5000, page)
-# 
+#
 #         # Random mouse movement while "reading"
 #         await HumanBehavior.random_mouse_movement_async(page)
-# 
+#
 #         # Scroll back up as if checking something
 #         await human.scroll_async(page, "up", random.randint(100, 200))
 #         await human.random_delay_async(1000, 2000, page)
-# 
+#
 #         # Move mouse to download area (typically top-right)
 #         viewport = page.viewport_size
 #         if viewport:
@@ -238,20 +238,20 @@ if __name__ == "__main__":
 #                 viewport["width"] - random.randint(50, 150),
 #                 random.randint(50, 150),
 #             )
-# 
+#
 #         await human.random_delay_async(500, 1000, page)
-# 
+#
 #     @staticmethod
 #     async def wait_for_download_async(page: Page) -> None:
 #         """Wait for download with human-like patience."""
 #         # Humans don't immediately close after clicking download
 #         human = HumanBehavior()
 #         await human.random_delay_async(1000, 2000, page)
-# 
+#
 #         # Might move mouse around while waiting
 #         if random.random() < 0.3:
 #             await HumanBehavior.random_mouse_movement_async(page)
-# 
+#
 #     @staticmethod
 #     async def form_interaction_async(page: Page) -> None:
 #         """Simulate human interaction with forms."""
@@ -261,31 +261,31 @@ if __name__ == "__main__":
 #         await human.scroll_async(page, "down", random.randint(100, 300))
 #         await human.random_delay_async(500, 1000, page)
 #         await human.scroll_async(page, "up", random.randint(100, 300))
-# 
-# 
+#
+#
 # def main(args):
 #     """Demonstrate HumanBehavior functionality."""
 #     import asyncio
-# 
+#
 #     from playwright.async_api import async_playwright
-# 
+#
 #     async def demo():
 #         async with async_playwright() as p:
 #             browser = await p.chromium.launch(headless=False)
 #             page = await browser.new_page()
-# 
+#
 #             # Navigate with human behavior
 #             await page.goto("https://www.google.com")
 #             print("✓ Navigated to page")
-# 
+#
 #             # Simulate human reading the page
 #             await HumanBehavior.reading_delay_async(500)
 #             print("✓ Reading delay complete")
-# 
+#
 #             # Random mouse movements
 #             await HumanBehavior.random_mouse_movement_async(page)
 #             print("✓ Random mouse movements complete")
-# 
+#
 #             # Type in search box
 #             search_box = page.locator('input[name="q"]')
 #             count = await search_box.count()
@@ -294,34 +294,34 @@ if __name__ == "__main__":
 #                     page, selector='input[name="q"]', text="test search"
 #                 )
 #                 print("✓ Human-like typing complete")
-# 
+#
 #             print("✓ Demo complete")
 #             await browser.close()
-# 
+#
 #     asyncio.run(demo())
 #     return 0
-# 
-# 
+#
+#
 # def parse_args():
 #     """Parse command line arguments."""
 #     import argparse
-# 
+#
 #     parser = argparse.ArgumentParser(description="HumanBehavior demo")
 #     return parser.parse_args()
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     global CONFIG, CC, sys, plt, rng
-# 
+#
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     import scitex as stx
-# 
+#
 #     args = parse_args()
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys,
 #         plt,
@@ -331,9 +331,9 @@ if __name__ == "__main__":
 #         verbose=False,
 #         agg=True,
 #     )
-# 
+#
 #     exit_status = main(args)
-# 
+#
 #     stx.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -341,13 +341,13 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # python -m scitex.browser.stealth.HumanBehavior
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

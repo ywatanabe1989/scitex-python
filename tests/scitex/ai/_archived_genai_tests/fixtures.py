@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Test fixtures for GenAI module tests."""
 
-from typing import Dict, Any, List, Generator
-from unittest.mock import Mock, MagicMock
+from typing import Any, Dict, Generator, List
+from unittest.mock import MagicMock, Mock
+
 import pytest
 
 

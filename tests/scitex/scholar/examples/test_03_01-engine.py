@@ -17,53 +17,53 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Functionalities:
 # - Demonstrates ScholarEngine unified search capabilities
 # - Shows metadata retrieval by title and DOI
 # - Validates multi-engine aggregation results
 # - Displays comprehensive paper metadata structures
-# 
+#
 # Dependencies:
 # - scripts:
 #   - None
 # - packages:
 #   - scitex, asyncio
-# 
+#
 # Input:
 # - Paper titles and DOIs for search queries
 # - Search engine configurations
-# 
+#
 # Output:
 # - Console output with detailed metadata from multiple engines
 # - Structured metadata showing engine sources and aggregated results
 # """
-# 
+#
 # """Imports"""
 # import argparse
 # import asyncio
 # import time
 # from pprint import pprint
-# 
+#
 # import scitex as stx
-# 
+#
 # """Warnings"""
-# 
+#
 # """Parameters"""
-# 
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # async def search_by_queries(
 #     title: str = None, doi: str = None, use_cache: bool = False
 # ) -> dict:
 #     """Demonstrate unified search capabilities.
-# 
+#
 #     Parameters
 #     ----------
 #     title : str, optional
@@ -72,39 +72,39 @@ if __name__ == "__main__":
 #         DOI to search for
 #     use_cache : bool, default=False
 #         Whether to use cached results
-# 
+#
 #     Returns
 #     -------
 #     dict
 #         Search results containing metadata from multiple engines
 #     """
 #     from scitex.scholar import ScholarEngine
-# 
+#
 #     # Default queries if not provided
 #     search_title = title or "Attention is All You Need"
 #     search_doi = doi or "10.1038/nature14539"
-# 
+#
 #     print(f"🔍 Initializing ScholarEngine (cache: {use_cache})...")
 #     engine = ScholarEngine(use_cache=use_cache)
 #     outputs = {}
-# 
+#
 #     print("🔍 Searching by title...")
 #     outputs["metadata_by_title"] = await engine.search_async(
 #         title=search_title,
 #     )
-# 
+#
 #     print("🔍 Searching by DOI...")
 #     outputs["metadata_by_doi"] = await engine.search_async(
 #         doi=search_doi,
 #     )
-# 
+#
 #     for k, v in outputs.items():
 #         print("=" * 50)
 #         print(f"📊 {k.replace('_', ' ').title()}")
 #         print("=" * 50)
 #         pprint(v)
 #         time.sleep(1)
-# 
+#
 #     # Semantic_Scholar returned title: Attention is All you Need
 #     # CrossRef returned title: Is Attention All You Need?
 #     # OpenAlex returned title: Attention Is All You Need
@@ -383,18 +383,18 @@ if __name__ == "__main__":
 #     #                            ('searched_by_PubMed', True),
 #     #                            ('searched_by_Semantic_Scholar', False),
 #     #                            ('searched_by_URL', True)]))])
-# 
+#
 #     return outputs
-# 
-# 
+#
+#
 # async def main_async(args) -> dict:
 #     """Main async function to demonstrate engine capabilities.
-# 
+#
 #     Parameters
 #     ----------
 #     args : argparse.Namespace
 #         Command line arguments
-# 
+#
 #     Returns
 #     -------
 #     dict
@@ -402,23 +402,23 @@ if __name__ == "__main__":
 #     """
 #     print("🔍 Scholar Engine Demonstration")
 #     print("=" * 40)
-# 
+#
 #     results = await search_by_queries(
 #         title=args.title, doi=args.doi, use_cache=not args.no_cache
 #     )
-# 
+#
 #     print("✅ Engine demonstration completed")
 #     return results
-# 
-# 
+#
+#
 # def main(args) -> int:
 #     """Main function wrapper for asyncio execution.
-# 
+#
 #     Parameters
 #     ----------
 #     args : argparse.Namespace
 #         Command line arguments
-# 
+#
 #     Returns
 #     -------
 #     int
@@ -430,8 +430,8 @@ if __name__ == "__main__":
 #     except Exception as e:
 #         print(f"❌ Error: {e}")
 #         return 1
-# 
-# 
+#
+#
 # def parse_args() -> argparse.Namespace:
 #     """Parse command line arguments."""
 #     parser = argparse.ArgumentParser(
@@ -460,18 +460,18 @@ if __name__ == "__main__":
 #     )
 #     args = parser.parse_args()
 #     return args
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     global CONFIG, CC, sys, plt
-# 
+#
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     args = parse_args()
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = stx.session.start(
 #         sys,
 #         plt,
@@ -480,9 +480,9 @@ if __name__ == "__main__":
 #         verbose=False,
 #         agg=True,
 #     )
-# 
+#
 #     exit_status = main(args)
-# 
+#
 #     stx.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -490,11 +490,11 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

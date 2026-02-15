@@ -13,21 +13,21 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2026-01-13
 # # File: src/scitex/plt/_mcp/handlers.py
-# 
+#
 # """MCP Handler implementations for SciTeX plt module.
-# 
+#
 # Provides async handlers for publication-quality plotting operations.
 # This module re-exports handlers from submodules for backward compatibility.
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # # Re-export annotation handlers
 # from ._handlers_annotation import (
 #     add_panel_label_handler,
 #     add_significance_handler,
 # )
-# 
+#
 # # Re-export figure registry and helper
 # # Re-export figure management handlers
 # from ._handlers_figure import (
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 #     crop_figure_handler,
 #     save_figure_handler,
 # )
-# 
+#
 # # Re-export plot handlers
 # from ._handlers_plot import (
 #     plot_bar_handler,
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 #     plot_scatter_handler,
 #     plot_violin_handler,
 # )
-# 
+#
 # # Re-export style handlers
 # from ._handlers_style import (
 #     get_color_palette_handler,
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 #     list_presets_handler,
 #     set_style_handler,
 # )
-# 
+#
 # __all__ = [
 #     # Style handlers
 #     "get_style_handler",
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 #     "_FIGURE_REGISTRY",
 #     "_get_axes",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

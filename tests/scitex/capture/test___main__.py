@@ -147,6 +147,7 @@ class TestModuleAttributes:
         # Check the source structure is correct
         assert __main__ is not None
 
+
 if __name__ == "__main__":
     import os
 
@@ -164,22 +165,22 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/capture/__main__.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Entry point for python -m scitex.capture
 # """
-# 
+#
 # import sys
-# 
+#
 # from .cli import main
-# 
+#
 # if __name__ == "__main__":
 #     sys.exit(main())
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

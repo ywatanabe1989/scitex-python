@@ -14,27 +14,27 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: _scientific.py - Scientific/specialized plot methods
-# 
+#
 # """Scientific and domain-specific plotting methods."""
-# 
+#
 # import os
 # from typing import Any, Dict, List, Optional, Tuple
-# 
+#
 # import matplotlib
 # import numpy as np
 # import pandas as pd
 # from scipy.stats import gaussian_kde
-# 
+#
 # from scitex.pd import to_xyz
 # from scitex.types import ArrayLike
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
-# 
-# 
+#
+#
 # class ScientificPlotMixin:
 #     """Mixin for scientific and domain-specific plotting methods.
-# 
+#
 #     Provides specialized visualizations for:
 #     - Image display with colorbars
 #     - Kernel density estimation
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 #     - Joint distributions (scatter + marginal histograms)
 #     - Heatmaps with annotations
 #     """
-# 
+#
 #     def stx_image(
 #         self,
 #         data: ArrayLike,
@@ -54,7 +54,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> "Axes":
 #         """Display a 2D array as an image with SciTeX styling.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -66,37 +66,37 @@ if __name__ == "__main__":
 #         **kwargs
 #             Additional arguments passed to the image function.
 #             Common options: cmap, vmin, vmax, aspect, colorbar.
-# 
+#
 #         Returns
 #         -------
 #         Axes
 #             The axes with the image displayed.
-# 
+#
 #         See Also
 #         --------
 #         stx_imshow : Lower-level image display.
 #         stx_heatmap : Annotated heatmap.
 #         sns_heatmap : DataFrame-based heatmap.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_image(matrix, cmap='viridis', colorbar=True)
 #         """
 #         method_name = "stx_image"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl = self._get_ax_module().stx_image(
 #                 self._axis_mpl, data, **kwargs
 #             )
-# 
+#
 #         tracked_dict = {"image_df": pd.DataFrame(data)}
 #         if kwargs.get("xyz", False):
 #             tracked_dict["image_df"] = to_xyz(tracked_dict["image_df"])
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl
-# 
+#
 #     def stx_kde(
 #         self,
 #         data: ArrayLike,
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> "Axes":
 #         """Plot a kernel density estimate of the data.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -127,60 +127,60 @@ if __name__ == "__main__":
 #         **kwargs
 #             Additional arguments passed to the plot function.
 #             Common options: color, linewidth, linestyle, label.
-# 
+#
 #         Returns
 #         -------
 #         Axes
 #             The axes with the KDE plot.
-# 
+#
 #         See Also
 #         --------
 #         sns_kdeplot : DataFrame-based KDE plot.
 #         stx_ecdf : Empirical cumulative distribution function.
 #         hist : Histogram alternative.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_kde(samples, fill=True, alpha=0.3)
 #         >>> ax.stx_kde(data, cumulative=True, label='CDF')
 #         """
 #         method_name = "stx_kde"
-# 
+#
 #         n_samples = (~np.isnan(data)).sum()
 #         if kwargs.get("label"):
 #             kwargs["label"] = f"{kwargs['label']} ($n$={n_samples})"
-# 
+#
 #         if xlim is None:
 #             xlim = (np.nanmin(data), np.nanmax(data))
-# 
+#
 #         xx = np.linspace(xlim[0], xlim[1], int(1e3))
 #         density = gaussian_kde(data)(xx)
 #         density /= density.sum()
-# 
+#
 #         if cumulative:
 #             density = np.cumsum(density)
-# 
+#
 #         with self._no_tracking():
 #             from scitex.plt.utils import mm_to_pt
-# 
+#
 #             if "linewidth" not in kwargs and "lw" not in kwargs:
 #                 kwargs["linewidth"] = mm_to_pt(0.2)
 #             if "color" not in kwargs and "c" not in kwargs:
 #                 kwargs["color"] = "black"
 #             if "linestyle" not in kwargs and "ls" not in kwargs:
 #                 kwargs["linestyle"] = "--"
-# 
+#
 #             if fill:
 #                 self._axis_mpl.fill_between(xx, density, **kwargs)
 #             else:
 #                 self._axis_mpl.plot(xx, density, **kwargs)
-# 
+#
 #         tracked_dict = {"x": xx, "kde": density, "n": n_samples}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl
-# 
+#
 #     def stx_conf_mat(
 #         self,
 #         data: ArrayLike,
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", Optional[float]]:
 #         """Plot a confusion matrix with optional balanced accuracy calculation.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -231,22 +231,22 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the heatmap function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, balanced_accuracy) - balanced_accuracy is None if calc_bacc=False.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_conf_mat(cm, x_labels=['A', 'B'], y_labels=['A', 'B'])
 #         >>> ax, bacc = ax.stx_conf_mat(cm, calc_bacc=True)
 #         """
 #         method_name = "stx_conf_mat"
-# 
+#
 #         if cbar_kw is None:
 #             cbar_kw = {}
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, bacc_val = self._get_ax_module().stx_conf_mat(
 #                 self._axis_mpl,
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 #                 calc_bacc=calc_bacc,
 #                 **kwargs,
 #             )
-# 
+#
 #         tracked_dict = {
 #             "args": [data],
 #             "balanced_accuracy": bacc_val,
@@ -272,9 +272,9 @@ if __name__ == "__main__":
 #         }
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, bacc_val
-# 
+#
 #     def stx_raster(
 #         self,
 #         spike_times: List[ArrayLike],
@@ -287,7 +287,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", pd.DataFrame]:
 #         """Plot a raster plot (spike train visualization).
-# 
+#
 #         Parameters
 #         ----------
 #         spike_times : list of array-like
@@ -304,29 +304,29 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the raster function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, DataFrame) - The axes and digitized raster data.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_raster([spikes_unit1, spikes_unit2], labels=['Unit 1', 'Unit 2'])
 #         """
 #         method_name = "stx_raster"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, raster_digit_df = self._get_ax_module().stx_raster(
 #                 self._axis_mpl, spike_times, time=time
 #             )
-# 
+#
 #         tracked_dict = {"raster_digit_df": raster_digit_df}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, raster_digit_df
-# 
+#
 #     def stx_ecdf(
 #         self,
 #         data: ArrayLike,
@@ -336,7 +336,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", pd.DataFrame]:
 #         """Plot an empirical cumulative distribution function (ECDF).
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -348,34 +348,34 @@ if __name__ == "__main__":
 #         **kwargs
 #             Additional arguments passed to the ECDF function.
 #             Common options: color, linewidth, label.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, DataFrame) - The axes and ECDF data (x, y columns).
-# 
+#
 #         See Also
 #         --------
 #         stx_kde : Kernel density estimate (continuous).
 #         hist : Histogram (discrete bins).
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_ecdf(samples, label='Distribution A')
 #         """
 #         method_name = "stx_ecdf"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, ecdf_df = self._get_ax_module().stx_ecdf(
 #                 self._axis_mpl, data, **kwargs
 #             )
-# 
+#
 #         tracked_dict = {"ecdf_df": ecdf_df}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, ecdf_df
-# 
+#
 #     def stx_joyplot(
 #         self,
 #         data: ArrayLike,
@@ -385,7 +385,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> "Axes":
 #         """Plot a joyplot (ridgeline plot) for distribution comparison.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -396,29 +396,29 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the joyplot function.
-# 
+#
 #         Returns
 #         -------
 #         Axes
 #             The axes with the joyplot.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax.stx_joyplot(distributions_2d, overlap=0.5)
 #         """
 #         method_name = "stx_joyplot"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl = self._get_ax_module().stx_joyplot(
 #                 self._axis_mpl, data, **kwargs
 #             )
-# 
+#
 #         tracked_dict = {"joyplot_data": data}
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl
-# 
+#
 #     def stx_scatter_hist(
 #         self,
 #         x: ArrayLike,
@@ -437,7 +437,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", "Axes", "Axes", Dict]:
 #         """Plot a scatter plot with marginal histograms.
-# 
+#
 #         Parameters
 #         ----------
 #         x : array-like
@@ -466,23 +466,23 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the scatter function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (main_ax, hist_x_ax, hist_y_ax, hist_data) - Axes and histogram data.
-# 
+#
 #         See Also
 #         --------
 #         stx_scatter : Simple scatter plot.
 #         sns_jointplot : Seaborn joint plot.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax, ax_hx, ax_hy, data = ax.stx_scatter_hist(x, y, hist_bins=30)
 #         """
 #         method_name = "stx_scatter_hist"
-# 
+#
 #         with self._no_tracking():
 #             self._axis_mpl, ax_histx, ax_histy, hist_data = (
 #                 self._get_ax_module().stx_scatter_hist(
@@ -500,7 +500,7 @@ if __name__ == "__main__":
 #                     **kwargs,
 #                 )
 #             )
-# 
+#
 #         tracked_dict = {
 #             "x": x,
 #             "y": y,
@@ -511,9 +511,9 @@ if __name__ == "__main__":
 #         }
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return self._axis_mpl, ax_histx, ax_histy, hist_data
-# 
+#
 #     def stx_heatmap(
 #         self,
 #         data: ArrayLike,
@@ -531,7 +531,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> Tuple["Axes", matplotlib.image.AxesImage, matplotlib.colorbar.Colorbar]:
 #         """Plot an annotated heatmap.
-# 
+#
 #         Parameters
 #         ----------
 #         data : array-like
@@ -558,24 +558,24 @@ if __name__ == "__main__":
 #             Unique identifier for this plot element.
 #         **kwargs
 #             Additional arguments passed to the heatmap function.
-# 
+#
 #         Returns
 #         -------
 #         tuple
 #             (Axes, AxesImage, Colorbar) - The axes, image, and colorbar objects.
-# 
+#
 #         See Also
 #         --------
 #         sns_heatmap : DataFrame-based heatmap.
 #         stx_conf_mat : Confusion matrix heatmap.
 #         stx_image : Simple image display.
-# 
+#
 #         Examples
 #         --------
 #         >>> ax, im, cbar = ax.stx_heatmap(matrix, x_labels=['A', 'B'], cmap='coolwarm')
 #         """
 #         method_name = "stx_heatmap"
-# 
+#
 #         with self._no_tracking():
 #             ax, im, cbar = self._get_ax_module().stx_heatmap(
 #                 self._axis_mpl,
@@ -590,7 +590,7 @@ if __name__ == "__main__":
 #                 annot_color_darker=annot_color_darker,
 #                 **kwargs,
 #             )
-# 
+#
 #         tracked_dict = {
 #             "data": data,
 #             "x_labels": x_labels,
@@ -598,10 +598,10 @@ if __name__ == "__main__":
 #         }
 #         self._track(track, id, method_name, tracked_dict, None)
 #         self._apply_scitex_postprocess(method_name)
-# 
+#
 #         return ax, im, cbar
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

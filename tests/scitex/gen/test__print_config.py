@@ -2,15 +2,15 @@
 """Tests for scitex.gen._print_config module."""
 
 import pytest
+
 pytest.importorskip("torch")
-import sys
-from unittest.mock import patch, MagicMock, call
-from io import StringIO
 import argparse
+import sys
+from io import StringIO
+from unittest.mock import MagicMock, call, patch
 
 from scitex.gen import print_config
 from scitex.gen._print_config import print_config_main
-
 
 
 class TestPrintConfig:
@@ -260,6 +260,7 @@ class TestIntegration:
             captured = capsys.readouterr()
             assert expected in captured.out
 
+
 if __name__ == "__main__":
     import os
 
@@ -274,7 +275,7 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-10-13 18:53:04 (ywatanabe)"
 # # /home/yusukew/proj/scitex_repo/src/scitex/gen/_print_config.py
-# 
+#
 # """
 # 1. Functionality:
 #    - Prints configuration values from YAML files
@@ -284,60 +285,60 @@ if __name__ == "__main__":
 #    - Corresponding configuration value
 # 4. Prerequisites:
 #    - scitex package with load_configs function
-# 
+#
 # Example:
 #     python _print_config.py PATH.TITAN.MAT
 # """
-# 
+#
 # import sys
 # import os
 # import argparse
 # from pprint import pprint
 # import sys
-# 
-# 
+#
+#
 # def print_config(key):
 #     CONFIG = scitex.io.load_configs()
-# 
+#
 #     if key is None:
 #         print("Available configurations:")
 #         pprint(CONFIG)
 #         return
-# 
+#
 #     try:
 #         keys = key.split(".")
 #         value = CONFIG
 #         for k in keys:
 #             if isinstance(value, (dict, scitex.gen.utils._DotDict.DotDict)):
 #                 value = value.get(k)
-# 
+#
 #             elif isinstance(value, list):
 #                 try:
 #                     value = value[int(k)]
 #                 except (ValueError, IndexError):
 #                     value = None
-# 
+#
 #             elif isinstance(value, str):
 #                 break
-# 
+#
 #             else:
 #                 value = None
-# 
+#
 #             if value is None:
 #                 break
-# 
+#
 #         print(value)
-# 
+#
 #     except Exception as e:
 #         print(f"Error: {e}")
 #         print("Available configurations:")
 #         pprint(value)
-# 
-# 
+#
+#
 # def print_config_main(args=None):
 #     if args is None:
 #         args = sys.argv[1:]
-# 
+#
 #     parser = argparse.ArgumentParser(description="Print configuration values")
 #     parser.add_argument(
 #         "key",
@@ -347,8 +348,8 @@ if __name__ == "__main__":
 #     )
 #     parsed_args = parser.parse_args(args)
 #     print_config(parsed_args.key)
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     print_config_main()
 

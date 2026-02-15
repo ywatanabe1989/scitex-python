@@ -13,9 +13,9 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2026-01-07
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/bundle/_saver.py
-# 
+#
 # """Bundle saving utilities.
-# 
+#
 # Bundle structure (IDENTICAL for all kinds):
 #     bundle.zip/
 #     ├── canonical/              # Source of truth (editable, human-readable)
@@ -40,21 +40,21 @@ if __name__ == "__main__":
 #     └── children/               # ALWAYS exists (empty for kind=plot)
 #         └── {child_id}.zip
 # """
-# 
+#
 # import hashlib
 # import io
 # import json
 # from pathlib import Path
 # from typing import TYPE_CHECKING, Any, Dict, Optional
-# 
+#
 # from ._storage import Storage, get_storage
-# 
+#
 # if TYPE_CHECKING:
 #     from ._dataclasses import DataInfo, Spec
 #     from .kinds._plot._dataclasses import Encoding, Theme
 #     from .kinds._stats._dataclasses import Stats
-# 
-# 
+#
+#
 # def save_bundle_components(
 #     path: Path,
 #     spec: Optional["Spec"] = None,
@@ -65,9 +65,9 @@ if __name__ == "__main__":
 #     render: bool = True,
 # ) -> None:
 #     """Save all bundle components to storage.
-# 
+#
 #     Uses the new canonical/artifacts/payload/children structure.
-# 
+#
 #     Args:
 #         path: Bundle path (directory or ZIP)
 #         spec: Spec metadata (saved to canonical/spec.json)
@@ -78,10 +78,10 @@ if __name__ == "__main__":
 #         render: Whether to generate exports/cache (default True)
 #     """
 #     storage = get_storage(path)
-# 
+#
 #     # Collect all files to write
 #     files = {}
-# 
+#
 #     # === ALWAYS create all directories and placeholder files ===
 #     # Use .keep files as directory markers for ZIP compatibility
 #     files["canonical/.keep"] = ""
@@ -91,24 +91,24 @@ if __name__ == "__main__":
 #     files["artifacts/exports/.keep"] = ""
 #     files["artifacts/cache/.keep"] = ""
 #     files["children/.keep"] = ""
-# 
+#
 #     # canonical/ - Source of truth
 #     if spec:
 #         files["canonical/spec.json"] = json.dumps(spec.to_dict(), indent=2)
-# 
+#
 #     if encoding:
 #         files["canonical/encoding.json"] = encoding.to_json()
-# 
+#
 #     if theme:
 #         files["canonical/theme.json"] = theme.to_json()
-# 
+#
 #     if data_info:
 #         files["canonical/data_info.json"] = data_info.to_json()
-# 
+#
 #     # payload/ - Data files (for leaf kinds)
 #     if stats and stats.analyses:
 #         files["payload/stats.json"] = stats.to_json()
-# 
+#
 #     # Write files, preserving any existing children/ files
 #     # For ZIP, we need to merge with existing content
 #     if hasattr(storage, "write_all_preserve"):
@@ -119,8 +119,8 @@ if __name__ == "__main__":
 #             if isinstance(data, str):
 #                 data = data.encode("utf-8")
 #             storage.write(name, data)
-# 
-# 
+#
+#
 # def save_render_outputs(
 #     storage: Storage,
 #     figure: Any,  # matplotlib.figure.Figure
@@ -131,9 +131,9 @@ if __name__ == "__main__":
 #     dpi: int = 300,
 # ) -> None:
 #     """Save artifacts/exports/ and artifacts/cache/.
-# 
+#
 #     Same structure for both kind=plot and kind=figure.
-# 
+#
 #     Args:
 #         storage: Bundle storage
 #         figure: Matplotlib figure to save
@@ -148,7 +148,7 @@ if __name__ == "__main__":
 #         buf = io.BytesIO()
 #         figure.savefig(buf, format=fmt, dpi=dpi, bbox_inches="tight")
 #         storage.write(f"artifacts/exports/figure.{fmt}", buf.getvalue())
-# 
+#
 #     # Save artifacts/cache/geometry_px.json
 #     # Add coordinate space declaration
 #     geometry_with_space = {
@@ -159,14 +159,14 @@ if __name__ == "__main__":
 #         "artifacts/cache/geometry_px.json",
 #         json.dumps(geometry_with_space, indent=2).encode(),
 #     )
-# 
+#
 #     # Generate and save hitmaps
 #     hitmap_png, hitmap_svg = generate_hitmap(figure, geometry, dpi)
 #     if hitmap_png:
 #         storage.write("artifacts/cache/hitmap.png", hitmap_png)
 #     if hitmap_svg:
 #         storage.write("artifacts/cache/hitmap.svg", hitmap_svg)
-# 
+#
 #     # Save render manifest (includes cache invalidation keys)
 #     manifest = {
 #         "dpi": dpi,
@@ -180,15 +180,15 @@ if __name__ == "__main__":
 #         "artifacts/cache/render_manifest.json",
 #         json.dumps(manifest, indent=2).encode(),
 #     )
-# 
-# 
+#
+#
 # def generate_hitmap(
 #     figure: Any,  # matplotlib.figure.Figure
 #     geometry: Dict,
 #     dpi: int = 300,
 # ) -> tuple:
 #     """Generate hitmap.png and hitmap.svg for click detection.
-# 
+#
 #     Returns:
 #         (hitmap_png_bytes, hitmap_svg_bytes) - bytes or None if failed
 #     """
@@ -196,16 +196,16 @@ if __name__ == "__main__":
 #     # This is a simplified version; full implementation would color-code elements
 #     try:
 #         import io
-# 
+#
 #         import matplotlib.pyplot as plt
-# 
+#
 #         # Create hitmap figure with same dimensions
 #         fig_size = figure.get_size_inches()
 #         hitmap_fig, ax = plt.subplots(figsize=fig_size, dpi=dpi)
 #         ax.set_xlim(0, 1)
 #         ax.set_ylim(0, 1)
 #         ax.axis("off")
-# 
+#
 #         # Draw colored regions for each element in geometry
 #         elements = geometry.get("elements", [])
 #         for i, elem in enumerate(elements):
@@ -221,54 +221,54 @@ if __name__ == "__main__":
 #                         edgecolor="none",
 #                     )
 #                 )
-# 
+#
 #         # Save as PNG
 #         png_buf = io.BytesIO()
 #         hitmap_fig.savefig(png_buf, format="png", dpi=dpi, bbox_inches="tight")
 #         png_bytes = png_buf.getvalue()
-# 
+#
 #         # Save as SVG
 #         svg_buf = io.BytesIO()
 #         hitmap_fig.savefig(svg_buf, format="svg", bbox_inches="tight")
 #         svg_bytes = svg_buf.getvalue()
-# 
+#
 #         plt.close(hitmap_fig)
 #         return png_bytes, svg_bytes
-# 
+#
 #     except Exception:
 #         # If hitmap generation fails, return None (non-critical)
 #         return None, None
-# 
-# 
+#
+#
 # def compute_canonical_hash(storage: Storage) -> str:
 #     """Compute hash of canonical/ directory for cache invalidation."""
 #     hasher = hashlib.sha256()
-# 
+#
 #     canonical_files = [
 #         "canonical/spec.json",
 #         "canonical/encoding.json",
 #         "canonical/theme.json",
 #         "canonical/data_info.json",
 #     ]
-# 
+#
 #     for filepath in canonical_files:
 #         if storage.exists(filepath):
 #             data = storage.read(filepath)
 #             hasher.update(data)
-# 
+#
 #     return hasher.hexdigest()[:16]
-# 
-# 
+#
+#
 # def compute_theme_hash(theme: Optional["Theme"]) -> str:
 #     """Compute hash of theme for cache invalidation."""
 #     if theme is None:
 #         return "default"
-# 
+#
 #     hasher = hashlib.sha256()
 #     hasher.update(theme.to_json().encode())
 #     return hasher.hexdigest()[:16]
-# 
-# 
+#
+#
 # __all__ = [
 #     "save_bundle_components",
 #     "save_render_outputs",
@@ -276,7 +276,7 @@ if __name__ == "__main__":
 #     "compute_canonical_hash",
 #     "compute_theme_hash",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

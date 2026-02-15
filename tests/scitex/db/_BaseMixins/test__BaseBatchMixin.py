@@ -11,14 +11,18 @@ including bulk inserts and DataFrame conversions.
 """
 
 import pytest
+
 pytest.importorskip("psycopg2")
-import pandas as pd
 from unittest.mock import Mock, patch
+
+import pandas as pd
+
 from scitex.db._BaseMixins import _BaseBatchMixin
 
 
 class ConcreteBatchMixin(_BaseBatchMixin):
     """Concrete implementation for testing."""
+
     pass
 
 
@@ -31,10 +35,7 @@ class TestBaseBatchMixin:
 
     def test_insert_many_not_implemented(self):
         """Test insert_many raises NotImplementedError."""
-        records = [
-            {"id": 1, "name": "Alice"},
-            {"id": 2, "name": "Bob"}
-        ]
+        records = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
         with pytest.raises(NotImplementedError):
             self.mixin.insert_many("users", records)
 
@@ -52,72 +53,63 @@ class TestBaseBatchMixin:
 
     def test_prepare_batch_parameters_not_implemented(self):
         """Test _prepare_batch_parameters raises NotImplementedError."""
-        records = [
-            {"id": 1, "name": "Alice"},
-            {"id": 2, "name": "Bob"}
-        ]
+        records = [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
         with pytest.raises(NotImplementedError):
             self.mixin._prepare_batch_parameters(records)
 
     def test_dataframe_to_sql_not_implemented(self):
         """Test dataframe_to_sql raises NotImplementedError."""
-        df = pd.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"]
-        })
+        df = pd.DataFrame({"id": [1, 2, 3], "name": ["Alice", "Bob", "Charlie"]})
         with pytest.raises(NotImplementedError):
             self.mixin.dataframe_to_sql(df, "users")
 
     def test_dataframe_to_sql_with_if_exists_not_implemented(self):
         """Test dataframe_to_sql with if_exists parameter raises NotImplementedError."""
-        df = pd.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Alice", "Bob", "Charlie"]
-        })
+        df = pd.DataFrame({"id": [1, 2, 3], "name": ["Alice", "Bob", "Charlie"]})
         with pytest.raises(NotImplementedError):
             self.mixin.dataframe_to_sql(df, "users", if_exists="replace")
 
     def test_method_signatures(self):
         """Test that all required methods exist with correct signatures."""
         # Check method existence
-        assert hasattr(self.mixin, 'insert_many')
-        assert hasattr(self.mixin, '_prepare_insert_query')
-        assert hasattr(self.mixin, '_prepare_batch_parameters')
-        assert hasattr(self.mixin, 'dataframe_to_sql')
+        assert hasattr(self.mixin, "insert_many")
+        assert hasattr(self.mixin, "_prepare_insert_query")
+        assert hasattr(self.mixin, "_prepare_batch_parameters")
+        assert hasattr(self.mixin, "dataframe_to_sql")
 
         # Check method signatures
         import inspect
-        
+
         # insert_many should accept table, records, and optional batch_size
         sig = inspect.signature(self.mixin.insert_many)
         params = list(sig.parameters.keys())
-        assert 'table' in params
-        assert 'records' in params
-        assert 'batch_size' in params
-        assert sig.parameters['batch_size'].default is None
+        assert "table" in params
+        assert "records" in params
+        assert "batch_size" in params
+        assert sig.parameters["batch_size"].default is None
 
         # _prepare_insert_query should accept table and record
         sig = inspect.signature(self.mixin._prepare_insert_query)
         params = list(sig.parameters.keys())
-        assert 'table' in params
-        assert 'record' in params
+        assert "table" in params
+        assert "record" in params
         # Check return type annotation
         assert sig.return_annotation == str
 
         # _prepare_batch_parameters should accept records
         sig = inspect.signature(self.mixin._prepare_batch_parameters)
         params = list(sig.parameters.keys())
-        assert 'records' in params
+        assert "records" in params
         # Check return type annotation
         assert sig.return_annotation == tuple
 
         # dataframe_to_sql should accept df, table, and if_exists
         sig = inspect.signature(self.mixin.dataframe_to_sql)
         params = list(sig.parameters.keys())
-        assert 'df' in params
-        assert 'table' in params
-        assert 'if_exists' in params
-        assert sig.parameters['if_exists'].default == 'fail'
+        assert "df" in params
+        assert "table" in params
+        assert "if_exists" in params
+        assert sig.parameters["if_exists"].default == "fail"
 
     def test_inheritance(self):
         """Test proper inheritance structure."""
@@ -125,15 +117,16 @@ class TestBaseBatchMixin:
 
     def test_mixin_usage_pattern(self):
         """Test that mixin can be properly combined with other classes."""
+
         class DatabaseWithBatch(_BaseBatchMixin):
             def __init__(self):
                 self.connection = None
                 self.inserted_count = 0
-                
+
             def insert_many(self, table: str, records: list, batch_size: int = None):
                 self.inserted_count += len(records)
                 return f"Inserted {len(records)} records into {table}"
-                
+
         db = DatabaseWithBatch()
         result = db.insert_many("users", [{"id": 1}, {"id": 2}])
         assert result == "Inserted 2 records into users"
@@ -144,14 +137,14 @@ class TestBaseBatchMixin:
         # Test with empty lists
         with pytest.raises(NotImplementedError):
             self.mixin.insert_many("users", [])
-            
+
         with pytest.raises(NotImplementedError):
             self.mixin._prepare_batch_parameters([])
 
         # Test with empty table name
         with pytest.raises(NotImplementedError):
             self.mixin.insert_many("", [{"id": 1}])
-            
+
         # Test with empty DataFrame
         empty_df = pd.DataFrame()
         with pytest.raises(NotImplementedError):
@@ -165,15 +158,15 @@ class TestBaseBatchMixin:
     def test_batch_size_scenarios(self):
         """Test various batch size scenarios."""
         large_records = [{"id": i, "data": f"data_{i}"} for i in range(1000)]
-        
+
         # Test with None batch_size (should process all at once)
         with pytest.raises(NotImplementedError):
             self.mixin.insert_many("large_table", large_records, batch_size=None)
-            
+
         # Test with specific batch_size
         with pytest.raises(NotImplementedError):
             self.mixin.insert_many("large_table", large_records, batch_size=50)
-            
+
         # Test with batch_size larger than records
         with pytest.raises(NotImplementedError):
             self.mixin.insert_many("large_table", large_records[:10], batch_size=100)
@@ -181,14 +174,16 @@ class TestBaseBatchMixin:
     def test_dataframe_scenarios(self):
         """Test various DataFrame scenarios."""
         # Test with different column types
-        df_mixed = pd.DataFrame({
-            "int_col": [1, 2, 3],
-            "str_col": ["a", "b", "c"],
-            "float_col": [1.1, 2.2, 3.3],
-            "bool_col": [True, False, True],
-            "date_col": pd.date_range("2024-01-01", periods=3)
-        })
-        
+        df_mixed = pd.DataFrame(
+            {
+                "int_col": [1, 2, 3],
+                "str_col": ["a", "b", "c"],
+                "float_col": [1.1, 2.2, 3.3],
+                "bool_col": [True, False, True],
+                "date_col": pd.date_range("2024-01-01", periods=3),
+            }
+        )
+
         with pytest.raises(NotImplementedError):
             self.mixin.dataframe_to_sql(df_mixed, "mixed_table")
 
@@ -196,7 +191,9 @@ class TestBaseBatchMixin:
         """Test that methods have appropriate documentation."""
         # The abstract methods don't have docstrings in the base class,
         # but concrete implementations should add them
-        assert _BaseBatchMixin.__doc__ is None or isinstance(_BaseBatchMixin.__doc__, str)
+        assert _BaseBatchMixin.__doc__ is None or isinstance(
+            _BaseBatchMixin.__doc__, str
+        )
 
 
 # --------------------------------------------------------------------------------
@@ -215,15 +212,15 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Time-stamp: "2024-11-25 01:43:41 (ywatanabe)"
 # # File: ./scitex_repo/src/scitex/db/_BaseMixins/_BaseBatchMixin.py
-# 
+#
 # THIS_FILE = (
 #     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_BaseMixins/_BaseBatchMixin.py"
 # )
-# 
+#
 # from typing import List, Any, Optional, Dict, Union
 # import pandas as pd
-# 
-# 
+#
+#
 # class _BaseBatchMixin:
 #     def insert_many(
 #         self,
@@ -232,17 +229,17 @@ if __name__ == "__main__":
 #         batch_size: Optional[int] = None,
 #     ):
 #         raise NotImplementedError
-# 
+#
 #     def _prepare_insert_query(self, table: str, record: Dict[str, Any]) -> str:
 #         raise NotImplementedError
-# 
+#
 #     def _prepare_batch_parameters(self, records: List[Dict[str, Any]]) -> tuple:
 #         raise NotImplementedError
-# 
+#
 #     def dataframe_to_sql(self, df: pd.DataFrame, table: str, if_exists: str = "fail"):
 #         raise NotImplementedError
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

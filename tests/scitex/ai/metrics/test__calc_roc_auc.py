@@ -14,16 +14,16 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-02 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ml/metrics/_calc_roc_auc.py
-# 
+#
 # """Calculate ROC AUC score."""
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # from typing import Any, Dict, List, Optional
 # import numpy as np
 # from sklearn.metrics import roc_auc_score, roc_curve
-# 
-# 
+#
+#
 # def calc_roc_auc(
 #     y_true: np.ndarray,
 #     y_proba: np.ndarray,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 # ) -> Dict[str, Any]:
 #     """
 #     Calculate ROC AUC score with robust handling.
-# 
+#
 #     Parameters
 #     ----------
 #     y_true : np.ndarray
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 #         Fold number for tracking
 #     return_curve : bool
 #         Whether to return ROC curve data
-# 
+#
 #     Returns
 #     -------
 #     Dict[str, Any]
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 #             else:
 #                 label_map = {label: idx for idx, label in enumerate(unique_labels)}
 #                 y_true_norm = np.array([label_map[y] for y in y_true])
-# 
+#
 #         # Handle binary vs multiclass
 #         if y_proba.ndim == 2 and y_proba.shape[1] == 2:
 #             # Binary with 2 columns
@@ -86,14 +86,14 @@ if __name__ == "__main__":
 #         else:
 #             # 1D array
 #             auc_score = roc_auc_score(y_true_norm, y_proba)
-# 
+#
 #         result = {
 #             "metric": "roc_auc",
 #             "value": float(auc_score),
 #             "fold": fold,
 #             "labels": label_names,
 #         }
-# 
+#
 #         if (
 #             return_curve
 #             and y_proba.ndim <= 2
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 #                 }
 #             except:
 #                 pass
-# 
+#
 #         return result
 #     except Exception as e:
 #         return {
@@ -119,8 +119,8 @@ if __name__ == "__main__":
 #             "fold": fold,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

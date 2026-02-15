@@ -14,12 +14,12 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # File: ./src/scitex/vis/editor/flask_editor/utils.py
 # """Port management utilities for Flask editor."""
-# 
+#
 # import socket
 # import subprocess
 # import sys
-# 
-# 
+#
+#
 # def find_available_port(start_port: int = 5050, max_attempts: int = 10) -> int:
 #     """Find an available port, starting from start_port."""
 #     for offset in range(max_attempts):
@@ -30,12 +30,12 @@ if __name__ == "__main__":
 #                 return port
 #         except OSError:
 #             continue
-# 
+#
 #     raise RuntimeError(
 #         f"Could not find available port in range {start_port}-{start_port + max_attempts}"
 #     )
-# 
-# 
+#
+#
 # def kill_process_on_port(port: int) -> bool:
 #     """Try to kill process using the specified port. Returns True if successful."""
 #     try:
@@ -63,7 +63,7 @@ if __name__ == "__main__":
 #             )
 #             if result.returncode == 0:
 #                 return True
-# 
+#
 #             # Fallback to lsof
 #             result = subprocess.run(
 #                 ["lsof", "-t", f"-i:{port}"], capture_output=True, text=True
@@ -75,10 +75,10 @@ if __name__ == "__main__":
 #                 return True
 #     except Exception:
 #         pass
-# 
+#
 #     return False
-# 
-# 
+#
+#
 # def check_port_available(port: int) -> bool:
 #     """Check if a port is available."""
 #     try:
@@ -87,8 +87,8 @@ if __name__ == "__main__":
 #             return True
 #     except OSError:
 #         return False
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

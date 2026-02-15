@@ -13,22 +13,22 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: scitex/plt/utils/metadata/_patch_artists.py
-# 
+#
 # """
 # Patch artist extraction utilities.
-# 
+#
 # This module provides functions to extract Rectangle (bar/hist) and Wedge (pie) patches
 # from matplotlib axes.
 # """
-# 
+#
 # import matplotlib.colors as mcolors
 # from ._label_parsing import _get_csv_column_names
-# 
-# 
+#
+#
 # def _extract_rectangle_artists(mpl_ax, ax_for_detection, plot_type, ax_row, ax_col, skip_unlabeled):
 #     """
 #     Extract Rectangle patches (bar/barh/hist charts).
-# 
+#
 #     Parameters
 #     ----------
 #     mpl_ax : matplotlib.axes.Axes
@@ -43,24 +43,24 @@ if __name__ == "__main__":
 #         Column position in grid
 #     skip_unlabeled : bool
 #         Whether to skip unlabeled internal artists
-# 
+#
 #     Returns
 #     -------
 #     list
 #         List of artist dictionaries
 #     """
 #     artists = []
-# 
+#
 #     # First, collect all rectangles
 #     rectangles = []
 #     for i, patch in enumerate(mpl_ax.patches):
 #         patch_type = type(patch).__name__
 #         if patch_type == "Rectangle":
 #             rectangles.append((i, patch))
-# 
+#
 #     is_bar = plot_type in ("bar", "barh")
 #     is_hist = plot_type == "hist"
-# 
+#
 #     # Get trace_id from history for data_ref
 #     trace_id_for_bars = None
 #     if hasattr(ax_for_detection, "history"):
@@ -70,49 +70,49 @@ if __name__ == "__main__":
 #                 if method_name in ("bar", "barh", "hist"):
 #                     trace_id_for_bars = record[0]
 #                     break
-# 
+#
 #     bar_count = 0
 #     for rect_idx, (i, patch) in enumerate(rectangles):
 #         patch_type = type(patch).__name__
-# 
+#
 #         scitex_id = getattr(patch, "_scitex_id", None)
 #         label = patch.get_label() if hasattr(patch, "get_label") else ""
-# 
+#
 #         # For bar/hist, we want ALL rectangles even if unlabeled
 #         if not (is_bar or is_hist):
 #             if skip_unlabeled and not scitex_id and (not label or label.startswith("_")):
 #                 continue
-# 
+#
 #         artist = {}
-# 
+#
 #         # Generate unique ID with index
 #         base_id = scitex_id or (label if label and not label.startswith("_") else trace_id_for_bars or "bar")
 #         artist["id"] = f"{base_id}_{bar_count}"
 #         artist["group_id"] = base_id
-# 
+#
 #         # Semantic layer
 #         artist["mark"] = "bar"
 #         if is_hist:
 #             artist["role"] = "hist_bin"
 #         else:
 #             artist["role"] = "bar_body"
-# 
+#
 #         # Legend inclusion - only first bar of a group
 #         if label and not label.startswith("_") and bar_count == 0:
 #             artist["label"] = label
 #             artist["legend_included"] = True
 #         else:
 #             artist["legend_included"] = False
-# 
+#
 #         artist["zorder"] = patch.get_zorder()
-# 
+#
 #         # Backend layer
 #         backend = {
 #             "name": "matplotlib",
 #             "artist_class": patch_type,
 #             "props": {}
 #         }
-# 
+#
 #         try:
 #             backend["props"]["facecolor"] = mcolors.to_hex(patch.get_facecolor(), keep_alpha=False)
 #         except (ValueError, TypeError):
@@ -125,9 +125,9 @@ if __name__ == "__main__":
 #             backend["props"]["linewidth_pt"] = patch.get_linewidth()
 #         except (ValueError, TypeError):
 #             pass
-# 
+#
 #         artist["backend"] = backend
-# 
+#
 #         # Bar geometry
 #         try:
 #             artist["geometry"] = {
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 #             }
 #         except (ValueError, TypeError):
 #             pass
-# 
+#
 #         # data_ref with row_index
 #         if trace_id_for_bars:
 #             if is_hist:
@@ -152,22 +152,22 @@ if __name__ == "__main__":
 #             else:
 #                 artist["data_ref"] = _get_csv_column_names(trace_id_for_bars, ax_row, ax_col)
 #                 artist["data_ref"]["row_index"] = bar_count
-# 
+#
 #         bar_count += 1
 #         artists.append(artist)
-# 
+#
 #     return artists
-# 
-# 
+#
+#
 # def _extract_wedge_artists(mpl_ax):
 #     """
 #     Extract Wedge patches (pie charts).
-# 
+#
 #     Parameters
 #     ----------
 #     mpl_ax : matplotlib.axes.Axes
 #         Raw matplotlib axes
-# 
+#
 #     Returns
 #     -------
 #     list
@@ -175,18 +175,18 @@ if __name__ == "__main__":
 #     """
 #     artists = []
 #     wedge_count = 0
-# 
+#
 #     for i, patch in enumerate(mpl_ax.patches):
 #         patch_type = type(patch).__name__
-# 
+#
 #         if patch_type != "Wedge":
 #             continue
-# 
+#
 #         artist = {}
-# 
+#
 #         scitex_id = getattr(patch, "_scitex_id", None)
 #         label = patch.get_label() if hasattr(patch, "get_label") else ""
-# 
+#
 #         if scitex_id:
 #             artist["id"] = scitex_id
 #         elif label and not label.startswith("_"):
@@ -194,18 +194,18 @@ if __name__ == "__main__":
 #         else:
 #             artist["id"] = f"wedge_{wedge_count}"
 #             wedge_count += 1
-# 
+#
 #         artist["mark"] = "pie"
 #         artist["role"] = "pie_wedge"
-# 
+#
 #         if label and not label.startswith("_"):
 #             artist["label"] = label
 #             artist["legend_included"] = True
 #         else:
 #             artist["legend_included"] = False
-# 
+#
 #         artist["zorder"] = patch.get_zorder()
-# 
+#
 #         # Backend layer
 #         backend = {
 #             "name": "matplotlib",
@@ -216,10 +216,10 @@ if __name__ == "__main__":
 #             backend["props"]["facecolor"] = mcolors.to_hex(patch.get_facecolor(), keep_alpha=False)
 #         except (ValueError, TypeError):
 #             pass
-# 
+#
 #         artist["backend"] = backend
 #         artists.append(artist)
-# 
+#
 #     return artists
 
 # --------------------------------------------------------------------------------

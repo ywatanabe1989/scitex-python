@@ -9,10 +9,11 @@ __FILE__ = "./src/scitex/dt/_linspace.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
-from typing import Union, Optional, List, Any
-import numpy as np
 import datetime
 from datetime import timedelta
+from typing import Any, List, Optional, Union
+
+import numpy as np
 
 
 def linspace(

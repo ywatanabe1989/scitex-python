@@ -433,6 +433,7 @@ class TestLaTeXFallbackError:
         except LaTeXFallbackError as e:
             assert "Custom message" in str(e)
 
+
 if __name__ == "__main__":
     import os
 
@@ -448,23 +449,23 @@ if __name__ == "__main__":
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/str/_latex_fallback.py
 # # ----------------------------------------
 # from __future__ import annotations
-# 
+#
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # # Time-stamp: "2025-06-05 12:00:00 (ywatanabe)"
-# 
-# 
+#
+#
 # """
 # LaTeX Fallback Mechanism for SciTeX
-# 
+#
 # This module provides a robust fallback system for LaTeX rendering issues.
 # When LaTeX compilation fails (e.g., missing fonts, Node.js conflicts),
 # it gracefully degrades to mathtext or plain text alternatives.
-# 
+#
 # Functionality:
 #     - Detect LaTeX rendering capabilities
 #     - Convert LaTeX to mathtext equivalents
@@ -477,46 +478,46 @@ if __name__ == "__main__":
 # Prerequisites:
 #     matplotlib
 # """
-# 
+#
 # import functools
 # import re
 # from typing import Any, Callable, Dict
-# 
+#
 # # matplotlib imports moved to functions that need them
-# 
-# 
+#
+#
 # # Delay logging import to avoid circular dependency
 # # scitex.logging imports _Tee which imports scitex.str which imports this file
 # def _get_logger():
 #     """Get logger lazily to avoid circular import."""
 #     from scitex import logging
-# 
+#
 #     return logging.getLogger(__name__)
-# 
-# 
+#
+#
 # # Use property-like access for logger
 # class _LoggerProxy:
 #     def __getattr__(self, name):
 #         return getattr(_get_logger(), name)
-# 
-# 
+#
+#
 # logger = _LoggerProxy()
-# 
+#
 # # Global state for LaTeX capability
 # _latex_available = None
 # _fallback_mode = "auto"  # "auto", "force_mathtext", "force_plain"
-# 
-# 
+#
+#
 # class LaTeXFallbackError(Exception):
 #     """Raised when LaTeX fallback mechanisms fail."""
-# 
+#
 #     pass
-# 
-# 
+#
+#
 # def set_fallback_mode(mode: str) -> None:
 #     """
 #     Set the global fallback mode for LaTeX rendering.
-# 
+#
 #     Parameters
 #     ----------
 #     mode : str
@@ -529,47 +530,47 @@ if __name__ == "__main__":
 #     # Reset capability cache when mode changes
 #     global _latex_available
 #     _latex_available = None
-# 
-# 
+#
+#
 # def get_fallback_mode() -> str:
 #     """Get the current fallback mode."""
 #     return _fallback_mode
-# 
-# 
+#
+#
 # @functools.lru_cache(maxsize=1)
 # def check_latex_capability() -> bool:
 #     """
 #     Check if LaTeX rendering is available and working.
-# 
+#
 #     Returns
 #     -------
 #     bool
 #         True if LaTeX is available, False otherwise
 #     """
 #     global _latex_available
-# 
+#
 #     # Import matplotlib here when actually needed
 #     try:
 #         import matplotlib.pyplot as plt
 #     except ImportError:
 #         _latex_available = False
 #         return False
-# 
+#
 #     # If forcing a mode, return accordingly
 #     if _fallback_mode == "force_mathtext" or _fallback_mode == "force_plain":
 #         _latex_available = False
 #         return False
-# 
+#
 #     # Cache the result if already determined
 #     if _latex_available is not None:
 #         return _latex_available
-# 
+#
 #     try:
 #         # Test if LaTeX is configured
 #         if not plt.rcParams.get("text.usetex", False):
 #             _latex_available = False
 #             return False
-# 
+#
 #         # Try a simple LaTeX rendering test
 #         fig, ax = plt.subplots(figsize=(1, 1))
 #         try:
@@ -584,24 +585,24 @@ if __name__ == "__main__":
 #             result = False
 #         finally:
 #             plt.close(fig)
-# 
+#
 #         return result
-# 
+#
 #     except Exception as e:
 #         logger.debug(f"LaTeX capability check failed: {e}")
 #         _latex_available = False
 #         return False
-# 
-# 
+#
+#
 # def latex_to_mathtext(latex_str: str) -> str:
 #     """
 #     Convert LaTeX syntax to matplotlib mathtext equivalent.
-# 
+#
 #     Parameters
 #     ----------
 #     latex_str : str
 #         LaTeX string to convert
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -609,12 +610,12 @@ if __name__ == "__main__":
 #     """
 #     if not latex_str:
 #         return latex_str
-# 
+#
 #     # Remove outer $ if present
 #     text = latex_str.strip()
 #     if text.startswith("$") and text.endswith("$"):
 #         text = text[1:-1]
-# 
+#
 #     # Simple string replacements (double backslash to single)
 #     simple_conversions = {
 #         # Greek letters
@@ -651,11 +652,11 @@ if __name__ == "__main__":
 #         r"\\ln": "\\ln",
 #         r"\\exp": "\\exp",
 #     }
-# 
+#
 #     # Apply simple string replacements
 #     for pattern, replacement in simple_conversions.items():
 #         text = text.replace(pattern, replacement)
-# 
+#
 #     # Regex patterns with capture groups
 #     regex_conversions = [
 #         # Formatting (limited mathtext support)
@@ -670,24 +671,24 @@ if __name__ == "__main__":
 #         # Fractions (simple ones)
 #         (r"\\frac\{([^}]+)\}\{([^}]+)\}", r"\\frac{\1}{\2}"),
 #     ]
-# 
+#
 #     # Apply regex conversions
 #     for pattern, replacement in regex_conversions:
 #         text = re.sub(pattern, replacement, text)
-# 
+#
 #     # Wrap in mathtext markers
 #     return f"${text}$"
-# 
-# 
+#
+#
 # def latex_to_unicode(latex_str: str) -> str:
 #     """
 #     Convert LaTeX to Unicode plain text equivalent.
-# 
+#
 #     Parameters
 #     ----------
 #     latex_str : str
 #         LaTeX string to convert
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -695,12 +696,12 @@ if __name__ == "__main__":
 #     """
 #     if not latex_str:
 #         return latex_str
-# 
+#
 #     # Remove outer $ if present
 #     text = latex_str.strip()
 #     if text.startswith("$") and text.endswith("$"):
 #         text = text[1:-1]
-# 
+#
 #     # Greek letters to Unicode
 #     greek_conversions = {
 #         r"\\alpha": "α",
@@ -739,7 +740,7 @@ if __name__ == "__main__":
 #         r"\\Psi": "Ψ",
 #         r"\\Omega": "Ω",
 #     }
-# 
+#
 #     # Mathematical symbols to Unicode
 #     symbol_conversions = {
 #         r"\\pm": "±",
@@ -758,7 +759,7 @@ if __name__ == "__main__":
 #         r"\\angle": "∠",
 #         r"\\degree": "°",
 #     }
-# 
+#
 #     # Superscript numbers
 #     superscript_conversions = {
 #         r"\^0": "⁰",
@@ -782,7 +783,7 @@ if __name__ == "__main__":
 #         r"\^\{8\}": "⁸",
 #         r"\^\{9\}": "⁹",
 #     }
-# 
+#
 #     # Subscript numbers
 #     subscript_conversions = {
 #         r"_0": "₀",
@@ -806,7 +807,7 @@ if __name__ == "__main__":
 #         r"_\{8\}": "₈",
 #         r"_\{9\}": "₉",
 #     }
-# 
+#
 #     # Apply all conversions
 #     all_conversions = {
 #         **greek_conversions,
@@ -814,26 +815,26 @@ if __name__ == "__main__":
 #         **superscript_conversions,
 #         **subscript_conversions,
 #     }
-# 
+#
 #     for latex_pattern, unicode_char in all_conversions.items():
 #         text = re.sub(latex_pattern, unicode_char, text)
-# 
+#
 #     # Remove remaining LaTeX commands (simple cleanup)
 #     text = re.sub(
 #         r"\\[a-zA-Z]+\{([^}]*)\}", r"\1", text
 #     )  # \command{content} -> content
 #     text = re.sub(r"\\[a-zA-Z]+", "", text)  # \command -> remove
 #     text = re.sub(r"[{}]", "", text)  # Remove remaining braces
-# 
+#
 #     return text
-# 
-# 
+#
+#
 # def safe_latex_render(
 #     text: str, fallback_strategy: str = "auto", preserve_math: bool = True
 # ) -> str:
 #     """
 #     Safely render LaTeX text with automatic fallback.
-# 
+#
 #     Parameters
 #     ----------
 #     text : str
@@ -842,7 +843,7 @@ if __name__ == "__main__":
 #         Strategy when LaTeX fails: "auto", "mathtext", "unicode", "plain"
 #     preserve_math : bool, optional
 #         Whether to preserve mathematical notation in fallbacks
-# 
+#
 #     Returns
 #     -------
 #     str
@@ -850,13 +851,13 @@ if __name__ == "__main__":
 #     """
 #     if not text or not isinstance(text, str):
 #         return text
-# 
+#
 #     # Import matplotlib when needed
 #     import matplotlib.pyplot as plt
-# 
+#
 #     # Determine if we should attempt LaTeX
 #     use_latex = _fallback_mode == "auto" and check_latex_capability()
-# 
+#
 #     if use_latex:
 #         # Try LaTeX first
 #         try:
@@ -873,7 +874,7 @@ if __name__ == "__main__":
 #         except Exception:
 #             # Fall through to fallback strategies
 #             pass
-# 
+#
 #     # Apply fallback strategy
 #     if fallback_strategy == "auto":
 #         # Automatically choose best fallback
@@ -884,43 +885,43 @@ if __name__ == "__main__":
 #                 return latex_to_unicode(text)
 #         else:
 #             return latex_to_unicode(text)
-# 
+#
 #     elif fallback_strategy == "mathtext":
 #         return latex_to_mathtext(text)
-# 
+#
 #     elif fallback_strategy == "unicode":
 #         return latex_to_unicode(text)
-# 
+#
 #     elif fallback_strategy == "plain":
 #         # Strip all LaTeX and return plain text
 #         plain = latex_to_unicode(text)
 #         # Remove any remaining special characters
 #         plain = re.sub(r"[^\w\s\(\)\[\].,;:!?-]", "", plain)
 #         return plain
-# 
+#
 #     else:
 #         raise ValueError(f"Unknown fallback strategy: {fallback_strategy}")
-# 
-# 
+#
+#
 # def latex_fallback_decorator(
 #     fallback_strategy: str = "auto", preserve_math: bool = True
 # ):
 #     """
 #     Decorator to add LaTeX fallback capability to functions.
-# 
+#
 #     Parameters
 #     ----------
 #     fallback_strategy : str, optional
 #         Fallback strategy to use
 #     preserve_math : bool, optional
 #         Whether to preserve mathematical notation
-# 
+#
 #     Returns
 #     -------
 #     callable
 #         Decorated function with LaTeX fallback
 #     """
-# 
+#
 #     def decorator(func: Callable) -> Callable:
 #         @functools.wraps(func)
 #         def wrapper(*args, **kwargs):
@@ -940,11 +941,11 @@ if __name__ == "__main__":
 #                     "dvipng",
 #                     "ghostscript",
 #                 ]
-# 
+#
 #                 if any(indicator in error_str for indicator in latex_error_indicators):
 #                     logger.warning(f"LaTeX error in {func.__name__}: {e}")
 #                     logger.warning("Falling back to alternative text rendering")
-# 
+#
 #                     # Try to apply fallback to string arguments
 #                     new_args = []
 #                     for arg in args:
@@ -954,7 +955,7 @@ if __name__ == "__main__":
 #                             )
 #                         else:
 #                             new_args.append(arg)
-# 
+#
 #                     new_kwargs = {}
 #                     for key, value in kwargs.items():
 #                         if isinstance(value, str):
@@ -963,14 +964,14 @@ if __name__ == "__main__":
 #                             )
 #                         else:
 #                             new_kwargs[key] = value
-# 
+#
 #                     # Import matplotlib when needed
 #                     import matplotlib.pyplot as plt
-# 
+#
 #                     # Temporarily disable LaTeX for this call
 #                     original_usetex = plt.rcParams.get("text.usetex", False)
 #                     plt.rcParams["text.usetex"] = False
-# 
+#
 #                     try:
 #                         result = func(*new_args, **new_kwargs)
 #                         return result
@@ -979,23 +980,23 @@ if __name__ == "__main__":
 #                 else:
 #                     # Re-raise non-LaTeX errors
 #                     raise
-# 
+#
 #         return wrapper
-# 
+#
 #     return decorator
-# 
-# 
+#
+#
 # def get_latex_status() -> Dict[str, Any]:
 #     """
 #     Get comprehensive LaTeX status information.
-# 
+#
 #     Returns
 #     -------
 #     Dict[str, Any]
 #         Status information including capability, mode, and configuration
 #     """
 #     import matplotlib.pyplot as plt
-# 
+#
 #     return {
 #         "latex_available": check_latex_capability(),
 #         "fallback_mode": get_fallback_mode(),
@@ -1004,27 +1005,27 @@ if __name__ == "__main__":
 #         "font_family": plt.rcParams.get("font.family", ["serif"]),
 #         "cache_info": check_latex_capability.cache_info()._asdict(),
 #     }
-# 
-# 
+#
+#
 # # Convenience functions
 # def enable_latex_fallback(mode: str = "auto") -> None:
 #     """Enable LaTeX fallback with specified mode."""
 #     set_fallback_mode(mode)
-# 
-# 
+#
+#
 # def disable_latex_fallback() -> None:
 #     """Disable LaTeX fallback (force LaTeX usage)."""
 #     global _latex_available
 #     _latex_available = True  # Force LaTeX usage
-# 
-# 
+#
+#
 # def reset_latex_cache() -> None:
 #     """Reset the LaTeX capability cache."""
 #     check_latex_capability.cache_clear()
 #     global _latex_available
 #     _latex_available = None
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

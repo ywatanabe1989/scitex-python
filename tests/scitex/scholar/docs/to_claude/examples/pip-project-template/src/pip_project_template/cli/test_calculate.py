@@ -23,10 +23,10 @@ if __name__ == "__main__":
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
 # """Calculate command."""
-# 
+#
 # import argparse
-# 
-# 
+#
+#
 # def create_parser():
 #     """Create parser for calculate command."""
 #     parser = argparse.ArgumentParser(description="Perform calculations", add_help=False)
@@ -39,20 +39,20 @@ if __name__ == "__main__":
 #         help="Operation to perform",
 #     )
 #     return parser
-# 
-# 
+#
+#
 # def main(args=None):
 #     """Execute calculate command."""
 #     parser = create_parser()
 #     parsed = parser.parse_args(args)
-# 
+#
 #     from ..core._Calculator import Calculator
-# 
+#
 #     calc = Calculator()
 #     result = calc.calculate(parsed.a, parsed.b, parsed.operation)
 #     print(f"{parsed.a} {parsed.operation} {parsed.b} = {result}")
 #     return 0
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

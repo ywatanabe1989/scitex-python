@@ -6,9 +6,11 @@
 """Test suite for scitex.gen._paste module."""
 
 import pytest
+
 pytest.importorskip("torch")
-from unittest.mock import patch, MagicMock, call
 import textwrap
+from unittest.mock import MagicMock, call, patch
+
 from scitex.gen import paste
 
 
@@ -39,7 +41,7 @@ class TestPaste:
             def hello():
                 print('Hello')
                 return 42
-            
+
             result = hello()
         """
         mock_pyperclip_paste.return_value = clipboard_content
@@ -185,7 +187,7 @@ class TestPasteEdgeCases:
             class MyClass:
                 def __init__(self):
                     self.value = 42
-                    
+
                 def method(self):
                     if self.value > 0:
                         print("Positive")
@@ -262,6 +264,7 @@ def test_main():
     """Main function for running tests."""
     pytest.main([__file__, "-xvs"])
 
+
 if __name__ == "__main__":
     import os
 
@@ -278,17 +281,17 @@ if __name__ == "__main__":
 # # File: ./scitex_repo/src/scitex/gen/_paste.py
 # def paste():
 #     import textwrap
-# 
+#
 #     import pyperclip
-# 
+#
 #     try:
 #         clipboard_content = pyperclip.paste()
 #         clipboard_content = textwrap.dedent(clipboard_content)
 #         exec(clipboard_content)
 #     except Exception as e:
 #         print(f"Could not execute clipboard content: {e}")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

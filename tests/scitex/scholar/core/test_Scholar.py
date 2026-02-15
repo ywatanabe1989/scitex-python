@@ -140,9 +140,9 @@ class TestScholarInit:
         with patch.object(Scholar, "_ensure_project_exists"):
             with patch(
                 "scitex.scholar.core.Scholar.isinstance",
-                side_effect=lambda obj, cls: True
-                if cls is ScholarConfig
-                else isinstance(obj, cls),
+                side_effect=lambda obj, cls: (
+                    True if cls is ScholarConfig else isinstance(obj, cls)
+                ),
             ):
                 scholar = Scholar(config=mock_config)
 
@@ -239,9 +239,9 @@ class TestScholarInitConfig:
         # Patch isinstance to accept our mock as ScholarConfig
         with patch(
             "scitex.scholar.core.Scholar.isinstance",
-            side_effect=lambda obj, cls: True
-            if cls is ScholarConfig
-            else isinstance(obj, cls),
+            side_effect=lambda obj, cls: (
+                True if cls is ScholarConfig else isinstance(obj, cls)
+            ),
         ):
             result = Scholar._init_config(None, mock_config)
 

@@ -12,27 +12,27 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/__main__.py
-# 
+#
 # """Scholar CLI entry point - Subcommand-based interface.
-# 
+#
 # Clean interface routing to battle-tested pipeline implementations:
 # - single: Process single paper (DOI or title)
 # - parallel: Process multiple papers in parallel
 # - bibtex: Process papers from BibTeX file
 # - mcp: Start MCP server for LLM integration
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import argparse
 # import asyncio
 # import sys
-# 
+#
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # def create_parser():
 #     """Create main argument parser with subcommands."""
 #     parser = argparse.ArgumentParser(
@@ -40,26 +40,26 @@ if __name__ == "__main__":
 #         description="""
 # SciTeX Scholar - Scientific Literature Management
 # ═════════════════════════════════════════════════
-# 
+#
 # Clean subcommand interface to battle-tested pipelines:
 #   single   - Process a single paper (DOI or title)
 #   parallel - Process multiple papers in parallel
 #   bibtex   - Process papers from BibTeX file
 #   mcp      - Start MCP server for LLM integration
-# 
+#
 # STORAGE: ~/.scitex/scholar/library/
 #   MASTER/{8DIGITID}/  - Centralized storage (no duplicates)
 #   {project}/          - Project symlinks to MASTER
 #         """,
 #         formatter_class=argparse.RawDescriptionHelpFormatter,
 #     )
-# 
+#
 #     subparsers = parser.add_subparsers(
 #         dest="command",
 #         help="Available commands",
 #         required=True,
 #     )
-# 
+#
 #     # ========================================
 #     # Subcommand: single
 #     # ========================================
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 #         action="store_true",
 #         help="Force re-download even if files exist",
 #     )
-# 
+#
 #     # ========================================
 #     # Subcommand: parallel
 #     # ========================================
@@ -156,7 +156,7 @@ if __name__ == "__main__":
 #         default="system",
 #         help="Base Chrome profile to sync from (default: system)",
 #     )
-# 
+#
 #     # ========================================
 #     # Subcommand: bibtex
 #     # ========================================
@@ -205,7 +205,7 @@ if __name__ == "__main__":
 #         default="system",
 #         help="Base Chrome profile to sync from (default: system)",
 #     )
-# 
+#
 #     # ========================================
 #     # Subcommand: mcp
 #     # ========================================
@@ -215,116 +215,116 @@ if __name__ == "__main__":
 #         description="Start the MCP (Model Context Protocol) server for Claude/LLM integration",
 #         formatter_class=argparse.RawDescriptionHelpFormatter,
 #     )
-# 
+#
 #     return parser
-# 
-# 
+#
+#
 # async def run_single_pipeline(args):
 #     """Run single paper pipeline."""
 #     from .pipelines.ScholarPipelineSingle import ScholarPipelineSingle
-# 
+#
 #     # Validate input
 #     if not args.doi and not args.title:
 #         logger.error("Either --doi or --title is required")
 #         return 1
-# 
+#
 #     doi_or_title = args.doi if args.doi else args.title
-# 
+#
 #     logger.info(f"Running single paper pipeline: {doi_or_title}")
-# 
+#
 #     pipeline = ScholarPipelineSingle(
 #         browser_mode=args.browser_mode,
 #         chrome_profile=args.chrome_profile,
 #     )
-# 
+#
 #     paper, symlink_path = await pipeline.process_single_paper(
 #         doi_or_title=doi_or_title,
 #         project=args.project,
 #         force=args.force,
 #     )
-# 
+#
 #     logger.success("Single paper pipeline completed")
 #     return 0
-# 
-# 
+#
+#
 # async def run_parallel_pipeline(args):
 #     """Run parallel papers pipeline."""
 #     from .pipelines.ScholarPipelineParallel import ScholarPipelineParallel
-# 
+#
 #     # Validate input
 #     if not args.dois and not args.titles:
 #         logger.error("Either --dois or --titles is required")
 #         return 1
-# 
+#
 #     # Combine DOIs and titles into single list
 #     queries = []
 #     if args.dois:
 #         queries.extend(args.dois)
 #     if args.titles:
 #         queries.extend(args.titles)
-# 
+#
 #     logger.info(
 #         f"Running parallel pipeline: {len(queries)} papers with {args.num_workers} workers"
 #     )
-# 
+#
 #     pipeline = ScholarPipelineParallel(
 #         num_workers=args.num_workers,
 #         browser_mode=args.browser_mode,
 #         base_chrome_profile=args.chrome_profile,
 #     )
-# 
+#
 #     papers = await pipeline.process_papers_from_list_async(
 #         doi_or_title_list=queries,
 #         project=args.project,
 #     )
-# 
+#
 #     logger.success(f"Parallel pipeline completed: {len(papers)} papers processed")
 #     return 0
-# 
-# 
+#
+#
 # async def run_bibtex_pipeline(args):
 #     """Run BibTeX file pipeline."""
 #     from pathlib import Path
-# 
+#
 #     from .pipelines.ScholarPipelineBibTeX import ScholarPipelineBibTeX
-# 
+#
 #     bibtex_path = Path(args.bibtex)
 #     if not bibtex_path.exists():
 #         logger.error(f"BibTeX file not found: {bibtex_path}")
 #         return 1
-# 
+#
 #     logger.info(f"Running BibTeX pipeline: {bibtex_path}")
-# 
+#
 #     pipeline = ScholarPipelineBibTeX(
 #         num_workers=args.num_workers,
 #         browser_mode=args.browser_mode,
 #         base_chrome_profile=args.chrome_profile,
 #     )
-# 
+#
 #     papers = await pipeline.process_bibtex_file_async(
 #         bibtex_path=bibtex_path,
 #         project=args.project,
 #         output_bibtex_path=args.output,
 #     )
-# 
+#
 #     logger.success(f"BibTeX pipeline completed: {len(papers)} papers processed")
 #     return 0
-# 
-# 
+#
+#
 # async def run_mcp_server():
 #     """Run MCP server."""
 #     from .mcp_server import main as mcp_main
-# 
+#
 #     logger.info("Starting Scholar MCP server...")
 #     await mcp_main()
 #     return 0
-# 
-# 
+#
+#
 # async def main_async():
 #     """Main async entry point."""
 #     parser = create_parser()
 #     args = parser.parse_args()
-# 
+#
 #     # Route to appropriate pipeline
 #     if args.command == "single":
 #         return await run_single_pipeline(args)
@@ -337,17 +337,17 @@ if __name__ == "__main__":
 #     else:
 #         logger.error(f"Unknown command: {args.command}")
 #         return 1
-# 
-# 
+#
+#
 # def main():
 #     """Synchronous entry point."""
 #     return asyncio.run(main_async())
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     sys.exit(main())
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -17,53 +17,53 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """
 # Functionalities:
 # - Demonstrates BibTeX parsing utilities in Scholar module
 # - Shows parsing of different BibTeX file formats (openaccess, paywalled)
 # - Validates BibTeX entry structure and field extraction
 # - Displays sample entries with detailed metadata
-# 
+#
 # Dependencies:
 # - scripts:
 #   - None
 # - packages:
 #   - scitex
-# 
+#
 # Input:
 # - ./data/scholar/openaccess.bib
 # - ./data/scholar/paywalled.bib
-# 
+#
 # Output:
 # - Console output showing parsed BibTeX entries
 # - Sample entries with authors, titles, journals, and metadata
 # """
-# 
+#
 # """Imports"""
 # import argparse
 # from pprint import pprint
-# 
+#
 # import scitex as stx
-# 
+#
 # """Warnings"""
-# 
+#
 # """Parameters"""
-# 
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # def demonstrate_bibtex_parsing(
 #     openaccess_path: str = "./data/scholar/openaccess.bib",
 #     paywalled_path: str = "./data/scholar/paywalled.bib",
 #     n_samples: int = 3,
 # ) -> dict:
 #     """Demonstrate BibTeX parsing capabilities.
-# 
+#
 #     Parameters
 #     ----------
 #     openaccess_path : str, default="./data/scholar/openaccess.bib"
@@ -72,45 +72,45 @@ if __name__ == "__main__":
 #         Path to paywalled BibTeX file
 #     n_samples : int, default=3
 #         Number of sample entries to display
-# 
+#
 #     Returns
 #     -------
 #     dict
 #         Parsed BibTeX entries
 #     """
 #     from scitex.scholar.utils import parse_bibtex
-# 
+#
 #     results = {}
-# 
+#
 #     print(f"📚 Parsing OpenAccess BibTeX file: {openaccess_path}")
 #     openaccess_parsed = parse_bibtex(openaccess_path)
 #     print(f"📊 Found {len(openaccess_parsed)} OpenAccess papers")
-# 
+#
 #     print(f"\n📋 Sample OpenAccess entries (first {n_samples}):")
 #     print("=" * 50)
 #     pprint(openaccess_parsed[:n_samples])
-# 
+#
 #     print(f"\n📚 Parsing Paywalled BibTeX file: {paywalled_path}")
 #     paywalled_parsed = parse_bibtex(paywalled_path)
 #     print(f"📊 Found {len(paywalled_parsed)} Paywalled papers")
-# 
+#
 #     print(f"\n📋 Sample Paywalled entries (first {n_samples}):")
 #     print("=" * 50)
 #     pprint(paywalled_parsed[:n_samples])
-# 
+#
 #     results = {"openaccess": openaccess_parsed, "paywalled": paywalled_parsed}
-# 
+#
 #     return results
-# 
-# 
+#
+#
 # def main(args) -> int:
 #     """Main function to demonstrate BibTeX parsing.
-# 
+#
 #     Parameters
 #     ----------
 #     args : argparse.Namespace
 #         Command line arguments
-# 
+#
 #     Returns
 #     -------
 #     int
@@ -118,23 +118,23 @@ if __name__ == "__main__":
 #     """
 #     print("📚 Scholar BibTeX Parser Demonstration")
 #     print("=" * 40)
-# 
+#
 #     try:
 #         results = demonstrate_bibtex_parsing(
 #             openaccess_path=args.openaccess_path,
 #             paywalled_path=args.paywalled_path,
 #             n_samples=args.n_samples,
 #         )
-# 
+#
 #         total_entries = len(results["openaccess"]) + len(results["paywalled"])
 #         print(f"\n✅ Successfully parsed {total_entries} total BibTeX entries")
 #         return 0
-# 
+#
 #     except Exception as e:
 #         print(f"❌ Error: {e}")
 #         return 1
-# 
-# 
+#
+#
 # def parse_args() -> argparse.Namespace:
 #     """Parse command line arguments."""
 #     parser = argparse.ArgumentParser(
@@ -164,18 +164,18 @@ if __name__ == "__main__":
 #     args = parser.parse_args()
 #     stx.str.printc(args, c="yellow")
 #     return args
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     global CONFIG, CC, sys, plt
-# 
+#
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     args = parse_args()
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC = stx.session.start(
 #         sys,
 #         plt,
@@ -184,9 +184,9 @@ if __name__ == "__main__":
 #         verbose=False,
 #         agg=True,
 #     )
-# 
+#
 #     exit_status = main(args)
-# 
+#
 #     stx.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -194,11 +194,11 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # EOF
 # # [{'ENTRYTYPE': 'article',
 # #   'ID': 'Hlsemann2019QuantificationOPA',
@@ -264,7 +264,7 @@ if __name__ == "__main__":
 # #   'url': 'https://api.semanticscholar.org/CorpusID:7724159',
 # #   'volume': '4',
 # #   'year': '2010'}]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

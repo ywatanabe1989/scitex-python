@@ -13,19 +13,19 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_dataclasses/TraceEncoding.py
-# 
+#
 # """TraceEncoding - Encoding for a single trace/data series."""
-# 
+#
 # from dataclasses import dataclass
 # from typing import Any, Dict, Optional
-# 
+#
 # from ._ChannelEncoding import ChannelEncoding
-# 
-# 
+#
+#
 # @dataclass
 # class TraceEncoding:
 #     """Encoding specification for a single trace/data series."""
-# 
+#
 #     trace_id: str
 #     data_ref: Optional[str] = None  # Path to data file within bundle
 #     x: Optional[ChannelEncoding] = None
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 #     size: Optional[ChannelEncoding] = None
 #     group: Optional[ChannelEncoding] = None
 #     label: Optional[ChannelEncoding] = None
-# 
+#
 #     def to_dict(self) -> Dict[str, Any]:
 #         result = {"trace_id": self.trace_id}
 #         if self.data_ref:
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 #             if enc:
 #                 result[channel] = enc.to_dict()
 #         return result
-# 
+#
 #     @classmethod
 #     def from_dict(cls, data: Dict[str, Any]) -> "TraceEncoding":
 #         return cls(
@@ -57,10 +57,10 @@ if __name__ == "__main__":
 #             group=ChannelEncoding.from_dict(data["group"]) if "group" in data else None,
 #             label=ChannelEncoding.from_dict(data["label"]) if "label" in data else None,
 #         )
-# 
-# 
+#
+#
 # __all__ = ["TraceEncoding"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

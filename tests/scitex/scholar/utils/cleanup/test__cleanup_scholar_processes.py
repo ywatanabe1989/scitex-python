@@ -17,28 +17,28 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/scholar/utils/_cleanup.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """Process cleanup utilities for Scholar."""
-# 
+#
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
-# 
+#
+#
 # def cleanup_scholar_processes(signal_num=None, frame=None):
 #     """Cleanup function to stop all Scholar browser processes gracefully."""
 #     import sys
-# 
+#
 #     if signal_num:
 #         logger.info(f"Received signal {signal_num}, cleaning up Scholar processes...")
-# 
+#
 #     try:
 #         import subprocess
-# 
+#
 #         # Kill Chrome/Chromium processes (suppress stderr)
 #         subprocess.run(
 #             ["pkill", "-f", "chrome"],
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 #             stdout=subprocess.DEVNULL,
 #             check=False,
 #         )
-# 
+#
 #         # Kill Xvfb displays
 #         subprocess.run(
 #             ["pkill", "Xvfb"],
@@ -62,20 +62,20 @@ if __name__ == "__main__":
 #         )
 #     except Exception as e:
 #         logger.debug(f"Cleanup error: {e}")
-# 
+#
 #     # Exit after cleanup if called from signal handler
 #     if signal_num:
 #         sys.exit(128 + signal_num)
-# 
-# 
+#
+#
 # def cleanup_scholar_processes(signal_num=None, frame=None):
 #     """Cleanup function to stop all Scholar browser processes gracefully."""
 #     if signal_num:
 #         logger.info(f"Received signal {signal_num}, cleaning up Scholar processes...")
-# 
+#
 #     try:
 #         import subprocess
-# 
+#
 #         # Kill Chrome/Chromium processes (suppress stderr)
 #         subprocess.run(
 #             ["pkill", "-f", "chrome"],
@@ -89,7 +89,7 @@ if __name__ == "__main__":
 #             stdout=subprocess.DEVNULL,
 #             check=False,
 #         )
-# 
+#
 #         # Kill Xvfb displays
 #         subprocess.run(
 #             ["pkill", "Xvfb"],
@@ -99,8 +99,8 @@ if __name__ == "__main__":
 #         )
 #     except Exception as e:
 #         logger.debug(f"Cleanup error: {e}")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

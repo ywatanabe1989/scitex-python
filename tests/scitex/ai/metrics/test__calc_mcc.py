@@ -14,17 +14,17 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-02 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ml/metrics/_calc_mcc.py
-# 
+#
 # """Calculate Matthews Correlation Coefficient."""
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # from typing import Any, Dict, List, Optional
 # import numpy as np
 # from sklearn.metrics import matthews_corrcoef
 # from ._normalize_labels import normalize_labels
-# 
-# 
+#
+#
 # def calc_mcc(
 #     y_true: np.ndarray,
 #     y_pred: np.ndarray,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 # ) -> Dict[str, Any]:
 #     """
 #     Calculate Matthews Correlation Coefficient with robust label handling.
-# 
+#
 #     Parameters
 #     ----------
 #     y_true : np.ndarray
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 #         Expected label list
 #     fold : int, optional
 #         Fold number for tracking
-# 
+#
 #     Returns
 #     -------
 #     Dict[str, Any]
@@ -68,8 +68,8 @@ if __name__ == "__main__":
 #             "fold": fold,
 #             "error": str(e),
 #         }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

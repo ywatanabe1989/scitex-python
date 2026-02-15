@@ -14,16 +14,16 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-10-02 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ml/metrics/_normalize_labels.py
-# 
+#
 # """Label normalization utility for classification metrics."""
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # from typing import List, Optional, Tuple
 # import numpy as np
 # from sklearn.preprocessing import LabelEncoder
-# 
-# 
+#
+#
 # def normalize_labels(
 #     y_true: np.ndarray,
 #     y_pred: np.ndarray,
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 # ) -> Tuple[np.ndarray, np.ndarray, List, LabelEncoder]:
 #     """
 #     Normalize labels using sklearn.preprocessing.LabelEncoder.
-# 
+#
 #     Parameters
 #     ----------
 #     y_true : np.ndarray
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 #         Predicted labels (can be str or int)
 #     labels : List, optional
 #         Expected label list. If provided, will be used as display names.
-# 
+#
 #     Returns
 #     -------
 #     y_true_norm : np.ndarray
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 #         List of label names in order
 #     encoder : LabelEncoder
 #         Fitted encoder for inverse transform
-# 
+#
 #     Notes
 #     -----
 #     Uses sklearn.preprocessing.LabelEncoder for robust label handling.
@@ -60,16 +60,16 @@ if __name__ == "__main__":
 #     """
 #     # Get unique values from data
 #     all_data_labels = np.unique(np.concatenate([y_true, y_pred]))
-# 
+#
 #     # Create encoder
 #     le = LabelEncoder()
-# 
+#
 #     # Handle edge case: integer data with string label names
 #     if labels is not None:
 #         # Check if data is integers but labels are strings
 #         data_is_int = isinstance(all_data_labels[0], (int, np.integer))
 #         labels_are_str = isinstance(labels[0], str)
-# 
+#
 #         if data_is_int and labels_are_str:
 #             # Data: [0, 1], labels: ['Negative', 'Positive']
 #             # Fit encoder on the integer data
@@ -84,14 +84,14 @@ if __name__ == "__main__":
 #         # No labels provided: fit on observed data
 #         le.fit(all_data_labels)
 #         label_names = list(le.classes_)
-# 
+#
 #     # Transform to integers
 #     y_true_norm = le.transform(y_true)
 #     y_pred_norm = le.transform(y_pred)
-# 
+#
 #     return y_true_norm, y_pred_norm, label_names, le
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

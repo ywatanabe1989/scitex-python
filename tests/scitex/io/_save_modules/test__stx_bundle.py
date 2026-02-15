@@ -13,26 +13,26 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-19
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_stx_bundle.py
-# 
+#
 # """Save functions for SciTeX bundle format (.zip or directory)."""
-# 
+#
 # from pathlib import Path
-# 
-# 
+#
+#
 # def save_stx_bundle(obj, spath, as_zip=True, bundle_type=None, basename=None, **kwargs):
 #     """Save an object as a SciTeX bundle (.zip or directory).
-# 
+#
 #     SciTeX bundles support three types:
 #     - figure: Publication figures with multiple panels
 #     - plot: Single matplotlib plots
 #     - stats: Statistical results
-# 
+#
 #     The content type is auto-detected from the object:
 #     - Bundle instance -> delegates to Bundle.save()
 #     - matplotlib.figure.Figure -> plot
 #     - dict with 'panels' or 'elements' -> figure
 #     - dict with 'comparisons' -> stats
-# 
+#
 #     Bundle structure:
 #         output/                 # or output.zip
 #             spec.json           # Bundle metadata
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 #             theme.json          # Visual styling
 #             data/               # Raw data files
 #             exports/            # PNG, SVG, PDF exports
-# 
+#
 #     Parameters
 #     ----------
 #     obj : Any
@@ -55,23 +55,23 @@ if __name__ == "__main__":
 #         Additional arguments passed to format-specific savers.
 #     """
 #     from scitex.io.bundle import Bundle
-# 
+#
 #     if isinstance(obj, Bundle):
 #         # Delegate to Bundle.save()
 #         obj.save()
 #         return
-# 
+#
 #     p = Path(spath)
-# 
+#
 #     # Extract basename from path if not provided
 #     if basename is None:
 #         basename = p.stem
-# 
+#
 #     # Auto-detect content type from object
 #     content_type = bundle_type
 #     if content_type is None:
 #         import matplotlib.figure
-# 
+#
 #         if isinstance(obj, matplotlib.figure.Figure):
 #             content_type = "plot"
 #         elif hasattr(obj, "figure"):
@@ -89,15 +89,15 @@ if __name__ == "__main__":
 #                 f"Cannot auto-detect bundle type for {type(obj).__name__}. "
 #                 "Please specify bundle_type='figure', 'plot', or 'stats'."
 #             )
-# 
+#
 #     # Route to appropriate handler based on content type
 #     if content_type == "plot":
 #         from ._plot_scitex import save_plot_as_scitex
-# 
+#
 #         save_plot_as_scitex(obj, spath, as_zip=as_zip, basename=basename, **kwargs)
 #     elif content_type == "figure":
 #         from scitex.io.bundle import Bundle
-# 
+#
 #         bundle = Bundle(spath, create=True, bundle_type="figure")
 #         if isinstance(obj, dict):
 #             if "title" in obj:
@@ -107,12 +107,12 @@ if __name__ == "__main__":
 #         bundle.save()
 #     elif content_type == "stats":
 #         import scitex.stats as sstats
-# 
+#
 #         sstats.save_stats(obj, spath, as_zip=as_zip, **kwargs)
 #     else:
 #         raise ValueError(f"Unknown bundle type: {content_type}")
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

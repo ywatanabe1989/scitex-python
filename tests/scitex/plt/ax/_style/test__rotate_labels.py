@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+
 pytest.importorskip("zarr")
 
 matplotlib.use("Agg")
@@ -122,6 +123,7 @@ class TestMainFunctionality:
         actual_spath = os.path.join(ACTUAL_SAVE_DIR, spath)
         assert os.path.exists(actual_spath), f"Failed to save figure to {spath}"
 
+
 if __name__ == "__main__":
     import os
 
@@ -139,20 +141,20 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # # Time-stamp: "2024-10-27 13:24:32 (ywatanabe)"
 # # /home/ywatanabe/proj/_scitex_repo_openhands/src/scitex/plt/ax/_rotate_labels.py
-# 
+#
 # """This script does XYZ."""
-# 
+#
 # """Imports"""
 # import numpy as np
-# 
-# 
+#
+#
 # def rotate_labels(
 #     ax,
 #     x=None,
@@ -167,7 +169,7 @@ if __name__ == "__main__":
 # ):
 #     """
 #     Rotate x and y axis labels of a matplotlib Axes object with automatic positioning.
-# 
+#
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes
@@ -192,19 +194,19 @@ if __name__ == "__main__":
 #         Whether to follow scientific plotting conventions. Default is True.
 #     tight_layout : bool, optional
 #         Whether to apply tight_layout to prevent overlapping. Default is False.
-# 
+#
 #     Returns
 #     -------
 #     matplotlib.axes.Axes
 #         The modified Axes object.
-# 
+#
 #     Example
 #     -------
 #     fig, ax = plt.subplots()
 #     ax.plot([1, 2, 3], [1, 2, 3])
 #     rotate_labels(ax)
 #     plt.show()
-# 
+#
 #     Notes
 #     -----
 #     Scientific conventions for label rotation:
@@ -215,15 +217,15 @@ if __name__ == "__main__":
 #     # Determine which axes to rotate (skip if None or 0)
 #     rotate_x = x is not None and x != 0
 #     rotate_y = y is not None and y != 0
-# 
+#
 #     # Get current tick positions
 #     xticks = ax.get_xticks()
 #     yticks = ax.get_yticks()
-# 
+#
 #     # Set ticks explicitly
 #     ax.set_xticks(xticks)
 #     ax.set_yticks(yticks)
-# 
+#
 #     # Auto-adjust alignment based on rotation angle and scientific conventions
 #     if auto_adjust:
 #         if rotate_x:
@@ -234,7 +236,7 @@ if __name__ == "__main__":
 #             y_ha, y_va = _get_optimal_alignment(
 #                 "y", y, y_ha, y_va, scientific_convention
 #             )
-# 
+#
 #     # Apply defaults if not auto-adjusting
 #     if rotate_x:
 #         if x_ha is None:
@@ -246,27 +248,27 @@ if __name__ == "__main__":
 #             y_ha = "center"
 #         if y_va is None:
 #             y_va = "center"
-# 
+#
 #     # Check if this axis is part of a shared x-axis configuration
 #     # If labels are already visible (bottom subplot or not shared), keep them visible
 #     # This preserves matplotlib's default sharex behavior
 #     x_labels_visible = ax.xaxis.get_tick_params()["labelbottom"]
 #     y_labels_visible = ax.yaxis.get_tick_params()["labelleft"]
-# 
+#
 #     # Set labels with rotation and proper alignment
 #     # Only set labels if they're currently visible (respects sharex/sharey)
 #     if x_labels_visible and rotate_x:
 #         ax.set_xticklabels(ax.get_xticklabels(), rotation=x, ha=x_ha, va=x_va)
 #     if y_labels_visible and rotate_y:
 #         ax.set_yticklabels(ax.get_yticklabels(), rotation=y, ha=y_ha, va=y_va)
-# 
+#
 #     # Auto-adjust subplot parameters for better layout if needed
 #     if auto_adjust and scientific_convention:
 #         # Only pass non-zero angles for adjustment
 #         x_angle = x if rotate_x else 0
 #         y_angle = y if rotate_y else 0
 #         _adjust_subplot_params(ax, x_angle, y_angle)
-# 
+#
 #     # Apply tight_layout if requested to prevent overlapping
 #     if tight_layout:
 #         fig = ax.get_figure()
@@ -277,14 +279,14 @@ if __name__ == "__main__":
 #             x_angle = x if rotate_x else 0
 #             y_angle = y if rotate_y else 0
 #             _adjust_subplot_params(ax, x_angle, y_angle)
-# 
+#
 #     return ax
-# 
-# 
+#
+#
 # def _get_optimal_alignment(axis, angle, ha, va, scientific_convention):
 #     """
 #     Determine optimal alignment based on rotation angle and scientific conventions.
-# 
+#
 #     Parameters
 #     ----------
 #     axis : str
@@ -297,7 +299,7 @@ if __name__ == "__main__":
 #         Current vertical alignment
 #     scientific_convention : bool
 #         Whether to follow scientific conventions
-# 
+#
 #     Returns
 #     -------
 #     tuple
@@ -305,7 +307,7 @@ if __name__ == "__main__":
 #     """
 #     # Normalize angle to 0-360 range
 #     angle = angle % 360
-# 
+#
 #     if axis == "x":
 #         if scientific_convention:
 #             # Scientific convention for x-axis labels
@@ -343,7 +345,7 @@ if __name__ == "__main__":
 #         else:
 #             ha = ha or "center"
 #             va = va or "top"
-# 
+#
 #     else:  # y-axis
 #         if scientific_convention:
 #             # Scientific convention for y-axis labels
@@ -374,14 +376,14 @@ if __name__ == "__main__":
 #         else:
 #             ha = ha or "center"
 #             va = va or "center"
-# 
+#
 #     return ha, va
-# 
-# 
+#
+#
 # def _adjust_subplot_params(ax, x_angle, y_angle):
 #     """
 #     Automatically adjust subplot parameters to accommodate rotated labels.
-# 
+#
 #     Parameters
 #     ----------
 #     ax : matplotlib.axes.Axes
@@ -392,7 +394,7 @@ if __name__ == "__main__":
 #         Y-axis rotation angle
 #     """
 #     fig = ax.get_figure()
-# 
+#
 #     # Check if figure is using a layout engine that is incompatible with subplots_adjust
 #     try:
 #         # For matplotlib >= 3.6
@@ -403,7 +405,7 @@ if __name__ == "__main__":
 #                 return
 #     except AttributeError:
 #         pass
-# 
+#
 #     # Check for constrained_layout (older matplotlib versions)
 #     try:
 #         if hasattr(fig, "get_constrained_layout"):
@@ -412,7 +414,7 @@ if __name__ == "__main__":
 #                 return
 #     except AttributeError:
 #         pass
-# 
+#
 #     # Calculate required margins based on rotation angles
 #     # Special handling for 90-degree rotation
 #     if x_angle == 90:
@@ -420,37 +422,37 @@ if __name__ == "__main__":
 #     else:
 #         # Increase margin more significantly for rotated x-axis labels to prevent xlabel overlap
 #         x_margin_factor = abs(np.sin(np.radians(x_angle))) * 0.25  # Increased from 0.2
-# 
+#
 #     y_margin_factor = abs(np.sin(np.radians(y_angle))) * 0.15
-# 
+#
 #     # Get current subplot parameters
 #     try:
 #         subplotpars = fig.subplotpars
 #         current_bottom = subplotpars.bottom
 #         current_left = subplotpars.left
-# 
+#
 #         # Adjust margins if they need to be increased
 #         # Ensure more space for rotated x-labels and xlabel
 #         new_bottom = max(
 #             current_bottom, 0.2 + x_margin_factor
 #         )  # Increased base from 0.15
 #         new_left = max(current_left, 0.1 + y_margin_factor)
-# 
+#
 #         # Only adjust if we're increasing the margins significantly
 #         if (
 #             new_bottom > current_bottom + 0.02 or new_left > current_left + 0.02
 #         ):  # Reduced threshold
 #             # Suppress warning and try to adjust
 #             import warnings
-# 
+#
 #             with warnings.catch_warnings():
 #                 warnings.simplefilter("ignore")
 #                 fig.subplots_adjust(bottom=new_bottom, left=new_left)
 #     except Exception:
 #         # Skip adjustment if there are issues
 #         pass
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

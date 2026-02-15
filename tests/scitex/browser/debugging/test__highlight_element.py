@@ -17,50 +17,50 @@ if __name__ == "__main__":
 # # ----------------------------------------
 # from __future__ import annotations
 # import os
-# 
+#
 # __FILE__ = "./src/scitex/browser/debugging/highlight_element.py"
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # __FILE__ = __file__
-# 
+#
 # """
 # Functionalities:
 #   - Highlights a Playwright element with red overlay for visual debugging
 #   - Scrolls element into view and displays a temporary visual indicator
 #   - Demonstrates element highlighting when run standalone
-# 
+#
 # Dependencies:
 #   - packages:
 #     - playwright
-# 
+#
 # IO:
 #   - input-files:
 #     - None
 #   - output-files:
 #     - None
 # """
-# 
+#
 # """Imports"""
 # import argparse
-# 
+#
 # from playwright.async_api import Locator
-# 
+#
 # import scitex as stx
 # from scitex import logging
-# 
+#
 # logger = logging.getLogger(__name__)
-# 
+#
 # """Functions & Classes"""
-# 
-# 
+#
+#
 # async def highlight_element_async(
 #     element: Locator,
 #     duration_ms: int = 1_000,
 #     func_name: str = "highlight_element_async",
 # ):
 #     """Highlight element with red overlay rectangle.
-# 
+#
 #     Args:
 #         element: Locator to highlight
 #         duration_ms: Duration to display highlight in milliseconds
@@ -70,12 +70,12 @@ if __name__ == "__main__":
 #         """(element, duration) => {
 #             // Scroll element into view FIRST
 #             element.scrollIntoView({behavior: 'smooth', block: 'center'});
-# 
+#
 #             // Wait for scroll to complete, then create overlay
 #             setTimeout(() => {
 #                 // Get element position AFTER scroll
 #                 const rect = element.getBoundingClientRect();
-# 
+#
 #                 // Create overlay div
 #                 const overlay = document.createElement('div');
 #                 overlay.id = 'highlight-overlay-' + Date.now();
@@ -91,9 +91,9 @@ if __name__ == "__main__":
 #                     z-index: 999999;
 #                     box-shadow: 0 0 20px red;
 #                 `;
-# 
+#
 #                 document.body.appendChild(overlay);
-# 
+#
 #                 // Remove overlay after duration
 #                 setTimeout(() => {
 #                     if (overlay && overlay.parentNode) {
@@ -105,38 +105,38 @@ if __name__ == "__main__":
 #         duration_ms,
 #     )
 #     await element.page.wait_for_timeout(duration_ms)
-# 
-# 
+#
+#
 # def main(args):
 #     logger.debug(
 #         "Element highlighting utility - use highlight_element_async() in your code"
 #     )
 #     return 0
-# 
-# 
+#
+#
 # def parse_args() -> argparse.Namespace:
 #     """Parse command line arguments."""
 #     import scitex as stx
-# 
+#
 #     parser = argparse.ArgumentParser(
 #         description="Element highlighting utility for debugging"
 #     )
 #     args = parser.parse_args()
 #     return args
-# 
-# 
+#
+#
 # def run_main() -> None:
 #     """Initialize scitex framework, run main function, and cleanup."""
 #     global CONFIG, CC, sys, plt, rng
-# 
+#
 #     import sys
-# 
+#
 #     import matplotlib.pyplot as plt
-# 
+#
 #     import scitex as stx
-# 
+#
 #     args = parse_args()
-# 
+#
 #     CONFIG, sys.stdout, sys.stderr, plt, CC, rng = stx.session.start(
 #         sys,
 #         plt,
@@ -146,9 +146,9 @@ if __name__ == "__main__":
 #         verbose=False,
 #         agg=True,
 #     )
-# 
+#
 #     exit_status = main(args)
-# 
+#
 #     stx.session.close(
 #         CONFIG,
 #         verbose=False,
@@ -156,11 +156,11 @@ if __name__ == "__main__":
 #         message="",
 #         exit_status=exit_status,
 #     )
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     run_main()
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

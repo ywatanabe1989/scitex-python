@@ -181,6 +181,7 @@ class TestAsyncSend:
         assert result.success is False
         assert "No webhook URL" in result.error
 
+
 if __name__ == "__main__":
     import os
 
@@ -194,9 +195,9 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2026-01-13 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/ui/_backends.py
-# 
+#
 # """Re-export from _backends package for backward compatibility."""
-# 
+#
 # from ._backends import (
 #     BACKENDS,
 #     AudioBackend,
@@ -211,7 +212,7 @@ if __name__ == "__main__":
 #     available_backends,
 #     get_backend,
 # )
-# 
+#
 # __all__ = [
 #     "NotifyLevel",
 #     "NotifyResult",
@@ -226,7 +227,7 @@ if __name__ == "__main__":
 #     "get_backend",
 #     "available_backends",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

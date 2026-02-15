@@ -155,6 +155,7 @@ class TestIntegration:
             # Restore
             scitex.gen._is_ipython.is_ipython = original_is_ipython
 
+
 if __name__ == "__main__":
     import os
 
@@ -171,10 +172,10 @@ if __name__ == "__main__":
 #         ipython_mode = True
 #     except NameError:
 #         ipython_mode = False
-# 
+#
 #     return ipython_mode
-# 
-# 
+#
+#
 # def is_script():
 #     return not is_ipython()
 

@@ -13,17 +13,17 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_models/_plot_types/_line.py
-# 
+#
 # """Line plot configurations."""
-# 
+#
 # from dataclasses import dataclass
 # from typing import List, Optional
-# 
-# 
+#
+#
 # @dataclass
 # class LinePlotConfig:
 #     """Line plot configuration."""
-# 
+#
 #     x: List[float]
 #     y: List[float]
 #     color: Optional[str] = None
@@ -34,12 +34,12 @@ if __name__ == "__main__":
 #     alpha: Optional[float] = None
 #     label: Optional[str] = None
 #     id: Optional[str] = None
-# 
-# 
+#
+#
 # @dataclass
 # class PlotLineConfig:
 #     """Plot line configuration (scitex.plt.ax.stx_line)."""
-# 
+#
 #     y: List[float]
 #     x: Optional[List[float]] = None
 #     color: Optional[str] = None
@@ -47,12 +47,12 @@ if __name__ == "__main__":
 #     linestyle: Optional[str] = "-"
 #     label: Optional[str] = None
 #     id: Optional[str] = None
-# 
-# 
+#
+#
 # @dataclass
 # class ShadedLineConfig:
 #     """Shaded line configuration (scitex.plt.ax.stx_shaded_line)."""
-# 
+#
 #     x: List[float]
 #     y_lower: List[float]
 #     y_middle: List[float]
@@ -62,10 +62,10 @@ if __name__ == "__main__":
 #     linewidth_mm: Optional[float] = None
 #     label: Optional[str] = None
 #     id: Optional[str] = None
-# 
-# 
+#
+#
 # __all__ = ["LinePlotConfig", "PlotLineConfig", "ShadedLineConfig"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

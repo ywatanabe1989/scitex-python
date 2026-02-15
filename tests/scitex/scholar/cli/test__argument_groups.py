@@ -13,46 +13,46 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # -*- coding: utf-8 -*-
 # # File: ./src/scitex/scholar/cli/_argument_groups.py
-# 
+#
 # """Centralized argument group definitions for Scholar CLI.
-# 
+#
 # Single source of truth for all command-line arguments.
 # Separation of concerns: definitions here, parsing in _CentralArgumentParser.
 # """
-# 
+#
 # from dataclasses import dataclass, field
 # from typing import Any, List, Optional
-# 
-# 
+#
+#
 # @dataclass
 # class ArgumentDef:
 #     """Definition for a single command-line argument."""
-# 
+#
 #     # Positional/flag names
 #     names: List[str]  # e.g., ["--bibtex"] or ["-p", "--project"]
-# 
+#
 #     # Help text
 #     help: str
-# 
+#
 #     # Type and validation
 #     type: Optional[type] = None
 #     choices: Optional[List[str]] = None
 #     nargs: Optional[str] = None
-# 
+#
 #     # Default behavior
 #     default: Any = None
 #     action: Optional[str] = None
 #     const: Any = None
-# 
+#
 #     # Metadata
 #     metavar: Optional[str] = None
 #     required: bool = False
 #     dest: Optional[str] = None
-# 
-# 
+#
+#
 # class ArgumentGroups:
 #     """Centralized definitions of all argument groups."""
-# 
+#
 #     # ========================================
 #     # Input Sources
 #     # ========================================
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 #             type=str,
 #         ),
 #     ]
-# 
+#
 #     # ========================================
 #     # Project Management
 #     # ========================================
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 #             type=str,
 #         ),
 #     ]
-# 
+#
 #     # ========================================
 #     # Operations
 #     # ========================================
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 #             metavar="FILE",
 #         ),
 #     ]
-# 
+#
 #     # ========================================
 #     # Filtering
 #     # ========================================
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 #             action="store_true",
 #         ),
 #     ]
-# 
+#
 #     # ========================================
 #     # Output
 #     # ========================================
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 #             metavar="FILE",
 #         ),
 #     ]
-# 
+#
 #     # ========================================
 #     # System
 #     # ========================================
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 #             action="store_true",
 #         ),
 #     ]
-# 
+#
 #     @classmethod
 #     def get_all_groups(cls):
 #         """Get all argument groups as a dictionary."""
@@ -229,8 +229,8 @@ if __name__ == "__main__":
 #             "Output": cls.OUTPUT,
 #             "System": cls.SYSTEM,
 #         }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

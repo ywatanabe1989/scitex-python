@@ -13,14 +13,14 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: "2026-01-13 (ywatanabe)"
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/ui/_mcp/handlers.py
-# 
+#
 # """MCP handlers for scitex-notify server."""
-# 
+#
 # from __future__ import annotations
-# 
+#
 # from datetime import datetime
 # from typing import Optional
-# 
+#
 # __all__ = [
 #     "notify_handler",
 #     "notify_by_level_handler",
@@ -28,8 +28,8 @@ if __name__ == "__main__":
 #     "available_backends_handler",
 #     "get_config_handler",
 # ]
-# 
-# 
+#
+#
 # async def notify_handler(
 #     message: str,
 #     title: Optional[str] = None,
@@ -41,14 +41,14 @@ if __name__ == "__main__":
 #     """Send notification via specified backend(s)."""
 #     from .._backends import BACKENDS, NotifyLevel, get_backend
 #     from .._backends._config import get_config
-# 
+#
 #     try:
 #         # Determine notification level
 #         try:
 #             notify_level = NotifyLevel(level.lower())
 #         except ValueError:
 #             notify_level = NotifyLevel.INFO
-# 
+#
 #         # Determine backends to use
 #         config = get_config()
 #         if backends:
@@ -57,10 +57,10 @@ if __name__ == "__main__":
 #             backend_list = [backend]
 #         else:
 #             backend_list = [config.default_backend]
-# 
+#
 #         results = []
 #         success_count = 0
-# 
+#
 #         for backend_name in backend_list:
 #             try:
 #                 if backend_name not in BACKENDS:
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 #                         }
 #                     )
 #                     continue
-# 
+#
 #                 b = get_backend(backend_name)
 #                 result = await b.send(
 #                     message,
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 #                     level=notify_level,
 #                     timeout=timeout,
 #                 )
-# 
+#
 #                 results.append(
 #                     {
 #                         "backend": backend_name,
@@ -89,10 +89,10 @@ if __name__ == "__main__":
 #                         "details": result.details,
 #                     }
 #                 )
-# 
+#
 #                 if result.success:
 #                     success_count += 1
-# 
+#
 #             except Exception as e:
 #                 results.append(
 #                     {
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 #                         "error": str(e),
 #                     }
 #                 )
-# 
+#
 #         return {
 #             "success": success_count > 0,
 #             "message": message,
@@ -113,15 +113,15 @@ if __name__ == "__main__":
 #             "total_count": len(backend_list),
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {
 #             "success": False,
 #             "error": str(e),
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
-# 
+#
+#
 # async def notify_by_level_handler(
 #     message: str,
 #     title: Optional[str] = None,
@@ -130,21 +130,21 @@ if __name__ == "__main__":
 #     """Send notification using backends configured for the level."""
 #     from .._backends import NotifyLevel
 #     from .._backends._config import get_config
-# 
+#
 #     try:
 #         # Determine notification level
 #         try:
 #             notify_level = NotifyLevel(level.lower())
 #         except ValueError:
 #             notify_level = NotifyLevel.INFO
-# 
+#
 #         # Get backends configured for this level
 #         config = get_config()
 #         backend_list = config.get_available_backends_for_level(notify_level)
-# 
+#
 #         if not backend_list:
 #             backend_list = [config.default_backend]
-# 
+#
 #         # Use notify_handler with determined backends
 #         return await notify_handler(
 #             message=message,
@@ -152,29 +152,29 @@ if __name__ == "__main__":
 #             level=level,
 #             backends=backend_list,
 #         )
-# 
+#
 #     except Exception as e:
 #         return {
 #             "success": False,
 #             "error": str(e),
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
-# 
+#
+#
 # async def list_backends_handler() -> dict:
 #     """List all notification backends with their status."""
 #     from .._backends import BACKENDS
 #     from .._backends._config import is_backend_available
-# 
+#
 #     try:
 #         backends_info = []
-# 
+#
 #         for name, cls in BACKENDS.items():
 #             try:
 #                 backend = cls()
 #                 is_available = backend.is_available()
 #                 pkg_available = is_backend_available(name)
-# 
+#
 #                 backends_info.append(
 #                     {
 #                         "name": name,
@@ -191,7 +191,7 @@ if __name__ == "__main__":
 #                         "error": str(e),
 #                     }
 #                 )
-# 
+#
 #         return {
 #             "success": True,
 #             "backends": backends_info,
@@ -199,46 +199,46 @@ if __name__ == "__main__":
 #             "available_count": sum(1 for b in backends_info if b.get("available")),
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {
 #             "success": False,
 #             "error": str(e),
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
-# 
+#
+#
 # async def available_backends_handler() -> dict:
 #     """Get list of currently available backends."""
 #     from .._backends import available_backends
-# 
+#
 #     try:
 #         available = available_backends()
-# 
+#
 #         return {
 #             "success": True,
 #             "available_backends": available,
 #             "count": len(available),
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {
 #             "success": False,
 #             "error": str(e),
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
-# 
+#
+#
 # async def get_config_handler() -> dict:
 #     """Get current notification configuration."""
 #     from .._backends._config import UIConfig, get_config
-# 
+#
 #     try:
 #         # Reset to get fresh config
 #         UIConfig.reset()
 #         config = get_config()
-# 
+#
 #         return {
 #             "success": True,
 #             "config": {
@@ -260,15 +260,15 @@ if __name__ == "__main__":
 #             },
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
+#
 #     except Exception as e:
 #         return {
 #             "success": False,
 #             "error": str(e),
 #             "timestamp": datetime.now().isoformat(),
 #         }
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

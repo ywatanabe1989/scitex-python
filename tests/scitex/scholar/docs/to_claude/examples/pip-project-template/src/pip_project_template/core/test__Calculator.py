@@ -22,15 +22,15 @@ if __name__ == "__main__":
 # )
 # __DIR__ = os.path.dirname(__FILE__)
 # # ----------------------------------------
-# 
+#
 # """Simple calculator."""
-# 
+#
 # from ..utils import add, multiply
-# 
-# 
+#
+#
 # class Calculator:
 #     """Basic calculator."""
-# 
+#
 #     def calculate(self, a: float, b: float, operation: str = "add") -> float:
 #         """Perform calculation."""
 #         if operation == "add":
@@ -39,18 +39,18 @@ if __name__ == "__main__":
 #             return multiply(a, b)
 #         else:
 #             raise ValueError(f"Unknown operation: {operation}")
-# 
-# 
+#
+#
 # def main():
 #     """Demo calculator."""
 #     calculator = Calculator()
 #     print(calculator.calculate(10, 5, "add"))
 #     print(calculator.calculate(3, 4, "multiply"))
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     main()
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import pytest
+
 pytest.importorskip("zarr")
 # -*- coding: utf-8 -*-
 

@@ -14,21 +14,21 @@ if __name__ == "__main__":
 # # Timestamp: 2026-01-08
 # # File: src/scitex/dev/cv/_compose.py
 # """Video composition utilities using ffmpeg.
-# 
+#
 # Provides tools for:
 # - Converting images to video clips
 # - Concatenating videos
 # - Composing opening + content + closing
 # """
-# 
+#
 # from __future__ import annotations
-# 
+#
 # import subprocess
 # import tempfile
 # from pathlib import Path
 # from typing import List, Optional, Union
-# 
-# 
+#
+#
 # def _check_ffmpeg() -> bool:
 #     """Check if ffmpeg is available."""
 #     try:
@@ -40,8 +40,8 @@ if __name__ == "__main__":
 #         return True
 #     except (subprocess.CalledProcessError, FileNotFoundError):
 #         return False
-# 
-# 
+#
+#
 # def image_to_video(
 #     image_path: Union[str, Path],
 #     output_path: Union[str, Path],
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 #     resolution: Optional[str] = None,
 # ) -> Path:
 #     """Convert a static image to a video clip.
-# 
+#
 #     Parameters
 #     ----------
 #     image_path : str or Path
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 #         Fade-out duration in seconds.
 #     resolution : str, optional
 #         Output resolution (e.g., "1920x1080").
-# 
+#
 #     Returns
 #     -------
 #     Path
@@ -77,33 +77,33 @@ if __name__ == "__main__":
 #     """
 #     if not _check_ffmpeg():
 #         raise RuntimeError("ffmpeg not found. Install with: apt install ffmpeg")
-# 
+#
 #     image_path = Path(image_path)
 #     output_path = Path(output_path)
 #     output_path.parent.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     # Build filter chain
 #     filters = []
-# 
+#
 #     # Duration loop
 #     filters.append("loop=loop=-1:size=1")
-# 
+#
 #     # Scale if resolution specified
 #     if resolution:
 #         filters.append(f"scale={resolution}")
-# 
+#
 #     # Fade effects
 #     if fade_in > 0:
 #         filters.append(f"fade=t=in:st=0:d={fade_in}")
 #     if fade_out > 0:
 #         fade_out_start = duration - fade_out
 #         filters.append(f"fade=t=out:st={fade_out_start}:d={fade_out}")
-# 
+#
 #     # Trim to duration
 #     filters.append(f"trim=duration={duration}")
-# 
+#
 #     filter_str = ",".join(filters)
-# 
+#
 #     cmd = [
 #         "ffmpeg",
 #         "-y",
@@ -123,14 +123,14 @@ if __name__ == "__main__":
 #         "23",
 #         str(output_path),
 #     ]
-# 
+#
 #     result = subprocess.run(cmd, capture_output=True)
 #     if result.returncode != 0:
 #         raise RuntimeError(f"ffmpeg failed: {result.stderr.decode()}")
-# 
+#
 #     return output_path
-# 
-# 
+#
+#
 # def concatenate_videos(
 #     video_paths: List[Union[str, Path]],
 #     output_path: Union[str, Path],
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 #     transition_duration: float = 0.5,
 # ) -> Path:
 #     """Concatenate multiple videos.
-# 
+#
 #     Parameters
 #     ----------
 #     video_paths : list
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 #         Transition type: "none", "fade", "dissolve".
 #     transition_duration : float
 #         Transition duration in seconds.
-# 
+#
 #     Returns
 #     -------
 #     Path
@@ -157,19 +157,19 @@ if __name__ == "__main__":
 #     """
 #     if not _check_ffmpeg():
 #         raise RuntimeError("ffmpeg not found. Install with: apt install ffmpeg")
-# 
+#
 #     if not video_paths:
 #         raise ValueError("No videos to concatenate")
-# 
+#
 #     output_path = Path(output_path)
 #     output_path.parent.mkdir(parents=True, exist_ok=True)
-# 
+#
 #     # Create concat file
 #     with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
 #         for vp in video_paths:
 #             f.write(f"file '{Path(vp).absolute()}'\n")
 #         concat_file = f.name
-# 
+#
 #     try:
 #         if transition == "none":
 #             # Simple concatenation
@@ -197,10 +197,10 @@ if __name__ == "__main__":
 #             # Build input list and filter
 #             inputs = []
 #             filter_parts = []
-# 
+#
 #             for i, vp in enumerate(video_paths):
 #                 inputs.extend(["-i", str(vp)])
-# 
+#
 #             # For fade/dissolve, use xfade filter
 #             if len(video_paths) == 2:
 #                 filter_str = f"[0:v][1:v]xfade=transition={transition}:duration={transition_duration}:offset=0[outv]"
@@ -241,17 +241,17 @@ if __name__ == "__main__":
 #                     "23",
 #                     str(output_path),
 #                 ]
-# 
+#
 #         result = subprocess.run(cmd, capture_output=True)
 #         if result.returncode != 0:
 #             raise RuntimeError(f"ffmpeg failed: {result.stderr.decode()}")
-# 
+#
 #     finally:
 #         Path(concat_file).unlink(missing_ok=True)
-# 
+#
 #     return output_path
-# 
-# 
+#
+#
 # def compose(
 #     content: Union[str, Path],
 #     output: Union[str, Path],
@@ -263,7 +263,7 @@ if __name__ == "__main__":
 #     transition_duration: float = 0.5,
 # ) -> Path:
 #     """Compose a full video with opening, content, and closing.
-# 
+#
 #     Parameters
 #     ----------
 #     content : str or Path
@@ -282,7 +282,7 @@ if __name__ == "__main__":
 #         Transition type: "none", "fade", "dissolve".
 #     transition_duration : float
 #         Transition duration in seconds.
-# 
+#
 #     Returns
 #     -------
 #     Path
@@ -290,7 +290,7 @@ if __name__ == "__main__":
 #     """
 #     videos_to_concat = []
 #     temp_files = []
-# 
+#
 #     try:
 #         # Process opening
 #         if opening:
@@ -303,10 +303,10 @@ if __name__ == "__main__":
 #                 videos_to_concat.append(temp_opening)
 #             else:
 #                 videos_to_concat.append(opening)
-# 
+#
 #         # Add main content
 #         videos_to_concat.append(Path(content))
-# 
+#
 #         # Process closing
 #         if closing:
 #             closing = Path(closing)
@@ -318,7 +318,7 @@ if __name__ == "__main__":
 #                 videos_to_concat.append(temp_closing)
 #             else:
 #                 videos_to_concat.append(closing)
-# 
+#
 #         # Concatenate all
 #         return concatenate_videos(
 #             videos_to_concat,
@@ -326,19 +326,19 @@ if __name__ == "__main__":
 #             transition=transition,
 #             transition_duration=transition_duration,
 #         )
-# 
+#
 #     finally:
 #         # Cleanup temp files
 #         for tf in temp_files:
 #             tf.unlink(missing_ok=True)
-# 
-# 
+#
+#
 # __all__ = [
 #     "image_to_video",
 #     "concatenate_videos",
 #     "compose",
 # ]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

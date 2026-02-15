@@ -11,8 +11,8 @@ if __name__ == "__main__":
 # Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/ai/activation/_define.py
 # --------------------------------------------------------------------------------
 # import torch.nn as nn
-# 
-# 
+#
+#
 # def define(act_str):
 #     acts_dict = {
 #         "relu": nn.ReLU(),

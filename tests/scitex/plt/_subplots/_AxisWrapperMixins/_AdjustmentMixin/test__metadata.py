@@ -14,24 +14,24 @@ if __name__ == "__main__":
 # # -*- coding: utf-8 -*-
 # # Timestamp: "2025-12-13 (ywatanabe)"
 # # File: _metadata.py - Axis metadata and labels
-# 
+#
 # """Mixin for axis labels, titles, and metadata."""
-# 
+#
 # import os
 # from typing import Optional
-# 
+#
 # __FILE__ = __file__
 # __DIR__ = os.path.dirname(__FILE__)
-# 
-# 
+#
+#
 # class MetadataMixin:
 #     """Mixin for setting axis labels, titles, and metadata."""
-# 
+#
 #     def _get_ax_module(self):
 #         """Lazy import ax module to avoid circular imports."""
 #         from .....plt import ax as ax_module
 #         return ax_module
-# 
+#
 #     def set_xyt(
 #         self,
 #         x: Optional[str] = None,
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 #             t=t,
 #             format_labels=format_labels,
 #         )
-# 
+#
 #     def set_xytc(
 #         self,
 #         x: Optional[str] = None,
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 #         format_labels: bool = True,
 #     ) -> None:
 #         """Set xlabel, ylabel, title, and caption for automatic saving.
-# 
+#
 #         Parameters
 #         ----------
 #         x : str, optional
@@ -79,10 +79,10 @@ if __name__ == "__main__":
 #             c=c,
 #             format_labels=format_labels,
 #         )
-# 
+#
 #         if c is not False and c is not None:
 #             self._scitex_caption = c
-# 
+#
 #     def set_supxyt(
 #         self,
 #         xlabel: Optional[str] = None,
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 #             title=title,
 #             format_labels=format_labels,
 #         )
-# 
+#
 #     def set_supxytc(
 #         self,
 #         xlabel: Optional[str] = None,
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 #         format_labels: bool = True,
 #     ) -> None:
 #         """Set figure-level xlabel, ylabel, title, and caption.
-# 
+#
 #         Parameters
 #         ----------
 #         xlabel : str, optional
@@ -130,11 +130,11 @@ if __name__ == "__main__":
 #             caption=caption,
 #             format_labels=format_labels,
 #         )
-# 
+#
 #         if caption is not False and caption is not None:
 #             fig = self._axis_mpl.get_figure()
 #             fig._scitex_main_caption = caption
-# 
+#
 #     def set_meta(
 #         self,
 #         caption=None,
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> None:
 #         """Set comprehensive scientific metadata with YAML export capability.
-# 
+#
 #         Parameters
 #         ----------
 #         caption : str, optional
@@ -177,7 +177,7 @@ if __name__ == "__main__":
 #             significance=significance,
 #             **kwargs,
 #         )
-# 
+#
 #     def set_figure_meta(
 #         self,
 #         caption=None,
@@ -190,7 +190,7 @@ if __name__ == "__main__":
 #         **kwargs,
 #     ) -> None:
 #         """Set figure-level metadata for multi-panel figures.
-# 
+#
 #         Parameters
 #         ----------
 #         caption : str, optional
@@ -220,8 +220,8 @@ if __name__ == "__main__":
 #             data_availability=data_availability,
 #             **kwargs,
 #         )
-# 
-# 
+#
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

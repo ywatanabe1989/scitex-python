@@ -13,17 +13,17 @@ if __name__ == "__main__":
 # #!/usr/bin/env python3
 # # Timestamp: 2025-12-20
 # # File: /home/ywatanabe/proj/scitex-code/src/scitex/fsb/_fig/_models/_plot_types/_bar.py
-# 
+#
 # """Bar plot configurations."""
-# 
+#
 # from dataclasses import dataclass
 # from typing import List, Optional, Union
-# 
-# 
+#
+#
 # @dataclass
 # class BarPlotConfig:
 #     """Bar plot configuration."""
-# 
+#
 #     x: Union[List[float], List[str]]
 #     height: List[float]
 #     width: Optional[float] = 0.8
@@ -33,12 +33,12 @@ if __name__ == "__main__":
 #     edgecolor: Optional[str] = None
 #     label: Optional[str] = None
 #     id: Optional[str] = None
-# 
-# 
+#
+#
 # @dataclass
 # class BarHPlotConfig:
 #     """Horizontal bar plot configuration."""
-# 
+#
 #     y: Union[List[float], List[str]]
 #     width: List[float]
 #     height: Optional[float] = 0.8
@@ -48,10 +48,10 @@ if __name__ == "__main__":
 #     edgecolor: Optional[str] = None
 #     label: Optional[str] = None
 #     id: Optional[str] = None
-# 
-# 
+#
+#
 # __all__ = ["BarPlotConfig", "BarHPlotConfig"]
-# 
+#
 # # EOF
 
 # --------------------------------------------------------------------------------

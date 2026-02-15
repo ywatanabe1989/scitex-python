@@ -1,7 +1,8 @@
-import pytest
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import pytest
+
 import scitex
 
 
@@ -16,12 +17,12 @@ class TestCalcNormResampleFiltHilbert:
         """Test basic functionality with demo signal."""
         # Generate demo signal
         xx, tt, fs = scitex.dsp.demo_sig(t_sec=2, fs=1000, sig_type="chirp")
-        
+
         # Apply function
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx, tt, fs, sig_type="chirp", verbose=False
         )
-        
+
         # Check output structure
         assert isinstance(sigs, pd.DataFrame)
         assert sigs.index.name == "index"
@@ -33,7 +34,7 @@ class TestCalcNormResampleFiltHilbert:
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx, tt, fs, sig_type="chirp", verbose=False
         )
-        
+
         expected_cols = [
             "orig",
             "z_normed",
@@ -44,9 +45,9 @@ class TestCalcNormResampleFiltHilbert:
             "pink_noise_added",
             "brown_noise_added",
             "hilbert_amp",
-            "hilbert_pha"
+            "hilbert_pha",
         ]
-        
+
         for col in expected_cols:
             assert any(col in c for c in sigs.columns), f"Missing column: {col}"
 
@@ -56,10 +57,10 @@ class TestCalcNormResampleFiltHilbert:
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx, tt, fs, sig_type="chirp", verbose=False
         )
-        
+
         # Original signal shape
         orig_shape = sigs["orig"][0].shape
-        
+
         # Most signals should preserve shape
         for col in ["z_normed", "minmax_normed", "hilbert_amp", "hilbert_pha"]:
             sig, _, _ = sigs[col]
@@ -70,14 +71,14 @@ class TestCalcNormResampleFiltHilbert:
         src_fs = 1024
         tgt_fs = 512  # Default target in example
         xx, tt, fs = scitex.dsp.demo_sig(t_sec=1, fs=src_fs)
-        
+
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx, tt, fs, sig_type="chirp", verbose=False
         )
-        
+
         # Check resampled signal
         resampled_sig, resampled_tt, resampled_fs = sigs["resampled"]
-        
+
         # Time dimension should be halved
         expected_samples = xx.shape[-1] // (src_fs // tgt_fs)
         assert resampled_sig.shape[-1] == expected_samples
@@ -90,26 +91,26 @@ class TestCalcNormResampleFiltHilbert:
         xx_3d = np.random.randn(2, 10, 1000, 2)  # Extra dimension
         tt = np.linspace(0, 1, 1000)
         fs = 1000
-        
+
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx_3d, tt, fs, sig_type="tensorpac", verbose=False
         )
-        
+
         # Should extract first component
         assert sigs["orig"][0].shape == (2, 10, 1000)
 
     def test_filtering_parameters(self):
         """Test that filtering uses correct parameters."""
         xx, tt, fs = scitex.dsp.demo_sig(t_sec=1, fs=1000)
-        
+
         # These are hardcoded in the example
         LOW_HZ = 20
         HIGH_HZ = 50
-        
+
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx, tt, fs, sig_type="chirp", verbose=False
         )
-        
+
         # Check column names contain correct frequencies
         bandpass_cols = [c for c in sigs.columns if "bandpass" in c]
         assert len(bandpass_cols) == 1
@@ -119,12 +120,12 @@ class TestCalcNormResampleFiltHilbert:
     def test_verbose_output(self, capsys):
         """Test verbose output."""
         xx, tt, fs = scitex.dsp.demo_sig(t_sec=0.5, fs=512)
-        
+
         # With verbose=True
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx, tt, fs, sig_type="chirp", verbose=True
         )
-        
+
         captured = capsys.readouterr()
         assert "Index" in captured.out or "index" in captured.out
         assert len(captured.out) > 0
@@ -148,7 +149,7 @@ class TestPlotSignals:
     def test_basic_plotting(self, sample_sigs):
         """Test basic plotting functionality."""
         fig = scitex.dsp.example.plot_signals(plt, sample_sigs, "chirp")
-        
+
         # Check figure properties
         assert isinstance(fig, plt.Figure)
         assert len(fig.axes) == len(sample_sigs.columns)
@@ -158,15 +159,15 @@ class TestPlotSignals:
     def test_axes_properties(self, sample_sigs):
         """Test axes properties are set correctly."""
         fig = scitex.dsp.example.plot_signals(plt, sample_sigs, "test_signal")
-        
+
         # Check all axes
         for ax in fig.axes:
             # Should have legend
             assert ax.get_legend() is not None
-            
+
             # Should have data
             assert len(ax.lines) > 0
-            
+
             # Should have xlim set
             xlim = ax.get_xlim()
             assert xlim[0] < xlim[1]
@@ -174,14 +175,14 @@ class TestPlotSignals:
     def test_hilbert_amp_overlay(self, sample_sigs):
         """Test that hilbert_amp axis shows original signal too."""
         fig = scitex.dsp.example.plot_signals(plt, sample_sigs, "chirp")
-        
+
         # Find hilbert_amp axis
         hilbert_ax = None
         for ax, col in zip(fig.axes, sample_sigs.columns):
             if col == "hilbert_amp":
                 hilbert_ax = ax
                 break
-        
+
         assert hilbert_ax is not None
         # Should have 2 lines (original + hilbert)
         assert len(hilbert_ax.lines) == 2
@@ -193,9 +194,9 @@ class TestPlotSignals:
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx, tt, fs, sig_type=sig_type, verbose=False
         )
-        
+
         fig = scitex.dsp.example.plot_signals(plt, sigs, sig_type)
-        
+
         assert fig._suptitle.get_text() == sig_type
         plt.close(fig)
 
@@ -217,32 +218,30 @@ class TestPlotWavelet:
 
     def test_basic_wavelet_plot(self, sample_sigs):
         """Test basic wavelet plotting functionality."""
-        fig = scitex.dsp.example.plot_wavelet(
-            plt, sample_sigs, "orig", "chirp"
-        )
-        
+        fig = scitex.dsp.example.plot_wavelet(plt, sample_sigs, "orig", "chirp")
+
         # Should have 2 subplots
         assert isinstance(fig, plt.Figure)
         assert len(fig.axes) == 2
 
     def test_wavelet_plot_structure(self, sample_sigs):
         """Test wavelet plot has correct structure."""
-        fig = scitex.dsp.example.plot_wavelet(
-            plt, sample_sigs, "z_normed", "test"
-        )
-        
+        fig = scitex.dsp.example.plot_wavelet(plt, sample_sigs, "z_normed", "test")
+
         # First axis: signal
         ax0 = fig.axes[0]
         assert len(ax0.lines) > 0
         assert ax0.get_ylabel() == "Voltage"
-        
+
         # Second axis: spectrogram
         ax1 = fig.axes[1]
         assert len(ax1.images) > 0  # Should have imshow
         assert ax1.get_ylabel() == "Frequency [Hz]"
         assert ax1.yaxis_inverted()  # Should be inverted
 
-    @pytest.mark.parametrize("sig_col", ["orig", "z_normed", "bandpass_filted (20 - 50 Hz)"])
+    @pytest.mark.parametrize(
+        "sig_col", ["orig", "z_normed", "bandpass_filted (20 - 50 Hz)"]
+    )
     def test_different_signal_columns(self, sample_sigs, sig_col):
         """Test wavelet plot with different signal columns."""
         if sig_col not in sample_sigs.columns:
@@ -251,11 +250,9 @@ class TestPlotWavelet:
                 if "bandpass" in col:
                     sig_col = col
                     break
-        
-        fig = scitex.dsp.example.plot_wavelet(
-            plt, sample_sigs, sig_col, "test"
-        )
-        
+
+        fig = scitex.dsp.example.plot_wavelet(plt, sample_sigs, sig_col, "test")
+
         assert fig is not None
         plt.close(fig)
 
@@ -277,26 +274,22 @@ class TestPlotPSD:
 
     def test_basic_psd_plot(self, sample_sigs):
         """Test basic PSD plotting functionality."""
-        fig = scitex.dsp.example.plot_psd(
-            plt, sample_sigs, "orig", "chirp"
-        )
-        
+        fig = scitex.dsp.example.plot_psd(plt, sample_sigs, "orig", "chirp")
+
         # Should have 2 subplots
         assert isinstance(fig, plt.Figure)
         assert len(fig.axes) == 2
 
     def test_psd_plot_structure(self, sample_sigs):
         """Test PSD plot has correct structure."""
-        fig = scitex.dsp.example.plot_psd(
-            plt, sample_sigs, "minmax_normed", "test"
-        )
-        
+        fig = scitex.dsp.example.plot_psd(plt, sample_sigs, "minmax_normed", "test")
+
         # First axis: signal
         ax0 = fig.axes[0]
         assert len(ax0.lines) > 0
         assert ax0.get_xlabel() == "Time [s]"
         assert ax0.get_ylabel() == "Voltage"
-        
+
         # Second axis: PSD
         ax1 = fig.axes[1]
         assert len(ax1.lines) > 0
@@ -312,13 +305,11 @@ class TestPlotPSD:
             if "filted" in col:
                 filtered_col = col
                 break
-        
+
         assert filtered_col is not None
-        
-        fig = scitex.dsp.example.plot_psd(
-            plt, sample_sigs, filtered_col, "filtered"
-        )
-        
+
+        fig = scitex.dsp.example.plot_psd(plt, sample_sigs, filtered_col, "filtered")
+
         assert fig._suptitle.get_text() == "filtered"
         plt.close(fig)
 
@@ -332,33 +323,31 @@ class TestExampleIntegration:
         T_SEC = 0.5  # Short for testing
         SIG_TYPES = ["chirp", "gauss"]
         SRC_FS = 512
-        
+
         # Configure matplotlib
-        plt.style.use('default')
+        plt.style.use("default")
         CC = {"blue": "blue", "red": "red"}  # Simple color config
-        
+
         # Run workflow
         for sig_type in SIG_TYPES:
             # Generate signal
-            xx, tt, fs = scitex.dsp.demo_sig(
-                t_sec=T_SEC, fs=SRC_FS, sig_type=sig_type
-            )
-            
+            xx, tt, fs = scitex.dsp.demo_sig(t_sec=T_SEC, fs=SRC_FS, sig_type=sig_type)
+
             # Process signal
             sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
                 xx, tt, fs, sig_type, verbose=False
             )
-            
+
             # Test plotting functions
             fig1 = scitex.dsp.example.plot_signals(plt, sigs, sig_type)
             assert fig1 is not None
             plt.close(fig1)
-            
+
             # Test wavelet and PSD for one column
             fig2 = scitex.dsp.example.plot_wavelet(plt, sigs, "orig", sig_type)
             assert fig2 is not None
             plt.close(fig2)
-            
+
             fig3 = scitex.dsp.example.plot_psd(plt, sigs, "orig", sig_type)
             assert fig3 is not None
             plt.close(fig3)
@@ -370,23 +359,24 @@ class TestExampleIntegration:
         HIGH_HZ = 50
         SIGMA = 10
         TGT_FS = 512
-        
+
         xx, tt, fs = scitex.dsp.demo_sig(t_sec=1, fs=1024)
         sigs = scitex.dsp.example.calc_norm_resample_filt_hilbert(
             xx, tt, fs, "chirp", verbose=False
         )
-        
+
         # Check resampling target
         assert sigs["resampled"][2] == TGT_FS
-        
+
         # Check filter parameters in column names
         bandpass_col = [c for c in sigs.columns if "bandpass" in c][0]
         assert str(LOW_HZ) in bandpass_col
         assert str(HIGH_HZ) in bandpass_col
-        
+
         # Check gaussian filter sigma
         gauss_col = [c for c in sigs.columns if "gauss" in c and "sigma" in c][0]
         assert str(SIGMA) in gauss_col
+
 
 if __name__ == "__main__":
     import os
@@ -400,53 +390,53 @@ if __name__ == "__main__":
 # --------------------------------------------------------------------------------
 # #!/usr/bin/env python3
 # # Time-stamp: "2024-04-06 01:36:18 (ywatanabe)"
-# 
+#
 # import matplotlib
-# 
+#
 # matplotlib.use("Agg")
 # import matplotlib.pyplot as plt
 # import pandas as pd
 # import scitex
-# 
+#
 # import scitex
-# 
+#
 # # Module-level constants (defaults for example functions)
 # TGT_FS = 512
 # LOW_HZ = 20
 # HIGH_HZ = 50
 # SIGMA = 10
-# 
+#
 # # Default color cycle
 # CC = {"blue": "#1f77b4", "red": "#d62728", "green": "#2ca02c"}
-# 
-# 
+#
+#
 # # Functions
 # def calc_norm_resample_filt_hilbert(xx, tt, fs, sig_type, verbose=True):
 #     sigs = {"index": ("signal", "time", "fs")}  # Collector
-# 
+#
 #     if sig_type == "tensorpac":
 #         xx = xx[:, :, 0]
-# 
+#
 #     sigs["orig"] = (xx, tt, fs)
-# 
+#
 #     # Normalization
 #     sigs["z_normed"] = (scitex.dsp.norm.z(xx), tt, fs)
 #     sigs["minmax_normed"] = (scitex.dsp.norm.minmax(xx), tt, fs)
-# 
+#
 #     # Resampling
 #     resampled_xx = scitex.dsp.resample(xx, fs, TGT_FS)
 #     # Create proper time vector for resampled signal
 #     import numpy as np
-# 
+#
 #     resampled_tt = np.linspace(tt[0], tt[-1], resampled_xx.shape[-1])
 #     sigs["resampled"] = (resampled_xx, resampled_tt, TGT_FS)
-# 
+#
 #     # Noise injection
 #     sigs["gaussian_noise_added"] = (scitex.dsp.add_noise.gauss(xx), tt, fs)
 #     sigs["white_noise_added"] = (scitex.dsp.add_noise.white(xx), tt, fs)
 #     sigs["pink_noise_added"] = (scitex.dsp.add_noise.pink(xx), tt, fs)
 #     sigs["brown_noise_added"] = (scitex.dsp.add_noise.brown(xx), tt, fs)
-# 
+#
 #     # Filtering (bands format is [[low_hz, high_hz]])
 #     bands = [[LOW_HZ, HIGH_HZ]]
 #     sigs[f"bandpass_filted ({LOW_HZ} - {HIGH_HZ} Hz)"] = (
@@ -454,7 +444,7 @@ if __name__ == "__main__":
 #         tt,
 #         fs,
 #     )
-# 
+#
 #     sigs[f"bandstop_filted ({LOW_HZ} - {HIGH_HZ} Hz)"] = (
 #         scitex.dsp.filt.bandstop(xx, fs, bands),
 #         tt,
@@ -465,24 +455,24 @@ if __name__ == "__main__":
 #         tt,
 #         fs,
 #     )
-# 
+#
 #     # Hilbert Transformation
 #     pha, amp = scitex.dsp.hilbert(xx)
 #     sigs["hilbert_amp"] = (amp, tt, fs)
 #     sigs["hilbert_pha"] = (pha, tt, fs)
-# 
+#
 #     sigs = pd.DataFrame(sigs).set_index("index")
-# 
+#
 #     if verbose:
 #         print(sigs.index)
 #         print(sigs.columns)
-# 
+#
 #     return sigs
-# 
-# 
+#
+#
 # def plot_signals(plt, sigs, sig_type):
 #     fig, axes = plt.subplots(nrows=len(sigs.columns), sharex=True)
-# 
+#
 #     i_batch = 0
 #     i_ch = 0
 #     for ax, (i_col, col) in zip(axes, enumerate(sigs.columns)):
@@ -494,49 +484,49 @@ if __name__ == "__main__":
 #                 _fs,
 #             ) = sigs[_col]
 #             ax.plot(_tt, _xx[i_batch, i_ch], label=_col, c=CC["blue"])
-# 
+#
 #         # Main
 #         xx, tt, fs = sigs[col]
 #         # if sig_type == "tensorpac":
 #         #     xx = xx[:, :, 0]
-# 
+#
 #         # Handle potential shape mismatches from filter operations
 #         signal = xx[i_batch, i_ch]
 #         if hasattr(signal, "squeeze"):
 #             signal = signal.squeeze()
 #         if hasattr(signal, "numpy"):
 #             signal = signal.numpy()
-# 
+#
 #         ax.plot(
 #             tt,
 #             signal,
 #             label=col,
 #             c=CC["red"] if col == "hilbert_amp" else CC["blue"],
 #         )
-# 
+#
 #         # Adjustments
 #         ax.legend(loc="upper left")
 #         ax.set_xlim(tt[0], tt[-1])
-# 
+#
 #         ax = scitex.plt.ax.set_n_ticks(ax)
-# 
+#
 #     fig.supxlabel("Time [s]")
 #     fig.supylabel("Voltage")
 #     fig.suptitle(sig_type)
 #     return fig
-# 
-# 
+#
+#
 # def plot_wavelet(plt, sigs, sig_col, sig_type):
 #     xx, tt, fs = sigs[sig_col]
 #     # if sig_type == "tensorpac":
 #     #     xx = xx[:, :, 0]
-# 
+#
 #     # Wavelet Transformation
 #     wavelet_coef, ff_ww = scitex.dsp.wavelet(xx, fs)
-# 
+#
 #     i_batch = 0
 #     i_ch = 0
-# 
+#
 #     # Main
 #     fig, axes = plt.subplots(nrows=2, sharex=True)
 #     # Signal
@@ -551,7 +541,7 @@ if __name__ == "__main__":
 #     axes[0].set_xlim(tt[0], tt[-1])
 #     axes[0].set_ylabel("Voltage")
 #     axes[0] = scitex.plt.ax.set_n_ticks(axes[0])
-# 
+#
 #     # Wavelet Spectrogram
 #     axes[1].imshow(
 #         wavelet_coef[i_batch, i_ch],
@@ -563,27 +553,27 @@ if __name__ == "__main__":
 #     axes[1].set_ylabel("Frequency [Hz]")
 #     # axes[1].legend(loc="upper left")
 #     axes[1].invert_yaxis()
-# 
+#
 #     fig.supxlabel("Time [s]")
 #     fig.suptitle(sig_type)
-# 
+#
 #     return fig
-# 
-# 
+#
+#
 # def plot_psd(plt, sigs, sig_col, sig_type):
 #     xx, tt, fs = sigs[sig_col]
-# 
+#
 #     # if sig_type == "tensorpac":
 #     #     xx = xx[:, :, 0]
-# 
+#
 #     # Power Spetrum Density
 #     psd, ff_pp = scitex.dsp.psd(xx, fs)
-# 
+#
 #     # Main
 #     i_batch = 0
 #     i_ch = 0
 #     fig, axes = plt.subplots(nrows=2, sharex=False)
-# 
+#
 #     # Signal
 #     axes[0].plot(
 #         tt,
@@ -597,18 +587,18 @@ if __name__ == "__main__":
 #     axes[0].set_xlabel("Time [s]")
 #     axes[0].set_ylabel("Voltage")
 #     axes[0] = scitex.plt.ax.set_n_ticks(axes[0])
-# 
+#
 #     # PSD
 #     axes[1].plot(ff_pp, psd[i_batch, i_ch], label="PSD")
 #     axes[1].set_yscale("log")
 #     axes[1].set_ylabel("Power [uV^2 / Hz]")
 #     axes[1].set_xlabel("Frequency [Hz]")
-# 
+#
 #     fig.suptitle(sig_type)
-# 
+#
 #     return fig
-# 
-# 
+#
+#
 # if __name__ == "__main__":
 #     # Parameters
 #     T_SEC = 4
@@ -627,36 +617,36 @@ if __name__ == "__main__":
 #     LOW_HZ = 20
 #     HIGH_HZ = 50
 #     SIGMA = 10
-# 
+#
 #     plt, CC = scitex.plt.configure_mpl(plt, fig_scale=10)
 #     sdir = "/home/ywatanabe/proj/entrance/scitex/dsp/example/"
-# 
+#
 #     for sig_type in SIG_TYPES:
 #         # Demo Signal
 #         xx, tt, fs = scitex.dsp.demo_sig(
 #             t_sec=T_SEC, fs=SRC_FS, freqs_hz=FREQS_HZ, sig_type=sig_type
 #         )
-# 
+#
 #         # Apply calculations on the original signal
 #         sigs = calc_norm_resample_filt_hilbert(xx, tt, fs, sig_type)
-# 
+#
 #         # Plots signals
 #         fig = plot_signals(plt, sigs, sig_type)
 #         scitex.io.save(fig, sdir + f"{sig_type}/1_signals.png")
-# 
+#
 #         # Plots wavelet coefficients and PSD
 #         for sig_col in sigs.columns:
 #             if "hilbert" in sig_col:
 #                 continue
-# 
+#
 #             fig = plot_wavelet(plt, sigs, sig_col, sig_type)
 #             scitex.io.save(fig, sdir + f"{sig_type}/2_wavelet_{sig_col}.png")
-# 
+#
 #             fig = plot_psd(plt, sigs, sig_col, sig_type)
 #             scitex.io.save(fig, sdir + f"{sig_type}/3_psd_{sig_col}.png")
-# 
+#
 #     # plt.show()
-# 
+#
 #     """
 #     python ./dsp/example.py
 #     """
