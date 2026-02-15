@@ -21,9 +21,9 @@ from .profiles import BaseWordProfile
 try:
     import docx
     from docx.document import Document as DocxDocument
-    from docx.shared import Inches, Pt, Cm
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
     from docx.enum.style import WD_STYLE_TYPE
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Cm, Inches, Pt
 
     DOCX_AVAILABLE = True
     _DOCX_IMPORT_ERROR = None

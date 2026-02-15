@@ -86,7 +86,7 @@ class EmacsBackend(BaseNotifyBackend):
                     NotifyLevel.CRITICAL: "#E06C75",  # red
                 }
                 color = level_colors.get(level, "#98C379")
-                elisp = f'''
+                elisp = f"""
                 (let* ((buf (get-buffer-create "*SciTeX Alert*"))
                        (timeout {int(timeout)}))
                   (with-current-buffer buf
@@ -112,7 +112,7 @@ class EmacsBackend(BaseNotifyBackend):
                         (delete-window win))
                       (kill-buffer buf)))
                   (message "[SciTeX] %s" "{msg_escaped}"))
-                '''
+                """
             elif method == "alert":
                 # Use alert.el package (if installed)
                 severity_map = {
@@ -122,14 +122,14 @@ class EmacsBackend(BaseNotifyBackend):
                     NotifyLevel.CRITICAL: "urgent",
                 }
                 severity = severity_map.get(level, "normal")
-                elisp = f'''
+                elisp = f"""
                 (if (fboundp 'alert)
                     (alert "{msg_escaped}"
                            :title "{title_escaped}"
                            :severity '{severity}
                            :timeout {int(timeout)})
                   (message "[%s] %s: %s" "{level.value.upper()}" "{title_escaped}" "{msg_escaped}"))
-                '''
+                """
             elif method == "notifications":
                 # Use notifications.el (requires D-Bus)
                 urgency_map = {
@@ -139,7 +139,7 @@ class EmacsBackend(BaseNotifyBackend):
                     NotifyLevel.CRITICAL: "critical",
                 }
                 urgency = urgency_map.get(level, "normal")
-                elisp = f'''
+                elisp = f"""
                 (if (fboundp 'notifications-notify)
                     (notifications-notify
                      :title "{title_escaped}"
@@ -147,7 +147,7 @@ class EmacsBackend(BaseNotifyBackend):
                      :urgency '{urgency}
                      :timeout {int(timeout * 1000)})
                   (message "[%s] %s: %s" "{level.value.upper()}" "{title_escaped}" "{msg_escaped}"))
-                '''
+                """
             else:
                 # Default: minibuffer message with face
                 elisp = f"""

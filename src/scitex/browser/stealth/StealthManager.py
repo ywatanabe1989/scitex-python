@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/browser/stealth/StealthManager.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/browser/stealth/StealthManager.py"

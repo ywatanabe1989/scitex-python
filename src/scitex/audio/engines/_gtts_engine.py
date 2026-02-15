@@ -136,17 +136,12 @@ class GoogleTTS(BaseTTS):
         # Apply speed adjustment
         if speed > 1.0:
             # speedup() for faster playback
-            sound = sound.speedup(
-                playback_speed=speed,
-                chunk_size=150,
-                crossfade=25
-            )
+            sound = sound.speedup(playback_speed=speed, chunk_size=150, crossfade=25)
         elif speed < 1.0:
             # For slower playback, adjust frame rate
             new_frame_rate = int(sound.frame_rate * speed)
             sound = sound._spawn(
-                sound.raw_data,
-                overrides={"frame_rate": new_frame_rate}
+                sound.raw_data, overrides={"frame_rate": new_frame_rate}
             ).set_frame_rate(sound.frame_rate)
 
         return sound

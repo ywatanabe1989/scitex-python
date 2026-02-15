@@ -7,11 +7,13 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_postgresql/_Postgre
 
 from typing import List, Optional
 
-from scitex.str import printc as _printc
-from typing import Optional
 import psycopg2
+
+from scitex.str import printc as _printc
+
 from ._PostgreSQLMixins._BackupMixin import _BackupMixin
 from ._PostgreSQLMixins._BatchMixin import _BatchMixin
+from ._PostgreSQLMixins._BlobMixin import _BlobMixin
 from ._PostgreSQLMixins._ConnectionMixin import _ConnectionMixin
 from ._PostgreSQLMixins._ImportExportMixin import _ImportExportMixin
 from ._PostgreSQLMixins._IndexMixin import _IndexMixin
@@ -21,7 +23,6 @@ from ._PostgreSQLMixins._RowMixin import _RowMixin
 from ._PostgreSQLMixins._SchemaMixin import _SchemaMixin
 from ._PostgreSQLMixins._TableMixin import _TableMixin
 from ._PostgreSQLMixins._TransactionMixin import _TransactionMixin
-from ._PostgreSQLMixins._BlobMixin import _BlobMixin
 
 
 class PostgreSQL(

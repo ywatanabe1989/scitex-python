@@ -86,10 +86,10 @@ def dev(ctx, help_recursive):
     help="Check Read the Docs build status",
 )
 @click.option(
-    "--all",
+    "--all/--no-all",
     "check_all",
-    is_flag=True,
-    help="Check all sources (hosts, remotes, RTD)",
+    default=True,
+    help="Check all sources (hosts, remotes, RTD). Default: on.",
 )
 def versions(
     check,
@@ -119,13 +119,12 @@ def versions(
 
     \b
     Examples:
-      scitex dev versions                    # List all versions
-      scitex dev versions --all              # Include hosts, remotes, RTD
+      scitex dev versions                    # List all versions (incl. hosts, remotes, RTD)
+      scitex dev versions --no-all           # Skip hosts, remotes, RTD
       scitex dev versions --check            # Check consistency
       scitex dev versions --json             # JSON output
       scitex dev versions -p scitex          # Single package
-      scitex dev versions --all-hosts        # Check all hosts
-      scitex dev versions --rtd              # Check RTD build status
+      scitex dev versions --host spartan     # Check specific host only
     """
     import json as json_module
 

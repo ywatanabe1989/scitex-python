@@ -101,9 +101,11 @@ def _get_mcp_summary(mcp_server) -> dict:
     instructions = getattr(mcp_server, "instructions", "") or ""
     total_desc = sum(len(t.description or "") for t in tools)
     total_params = sum(
-        len(json_mod.dumps(t.parameters))
-        if hasattr(t, "parameters") and t.parameters
-        else 0
+        (
+            len(json_mod.dumps(t.parameters))
+            if hasattr(t, "parameters") and t.parameters
+            else 0
+        )
         for t in tools
     )
 
@@ -206,9 +208,9 @@ def list_tools(
                 output["modules"][mod]["tools"].append(
                     {
                         "name": tool_name,
-                        "signature": _format_signature(tool_obj)
-                        if tool_obj
-                        else tool_name,
+                        "signature": (
+                            _format_signature(tool_obj) if tool_obj else tool_name
+                        ),
                         "description": tool_obj.description if tool_obj else "",
                         "parameters": schema,
                     }
@@ -477,10 +479,10 @@ def installation():
     click.echo("or %APPDATA%\\Claude\\claude_desktop_config.json (Windows):")
     click.echo()
 
-    config = f'''"scitex": {{
+    config = f""""scitex": {{
   "command": "{scitex_path or "/path/to/.venv/bin/scitex"}",
   "args": ["mcp", "start"]
-}}'''
+}}"""
     click.secho(config, fg="yellow")
 
 

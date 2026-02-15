@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/git/retry.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/git/retry.py"
@@ -17,8 +18,8 @@ Handles git index.lock conflicts when multiple processes access git.
 Shared across all scitex modules.
 """
 
-import time
 import subprocess
+import time
 from typing import Callable, TypeVar
 
 from scitex.logging import getLogger

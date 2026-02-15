@@ -4,14 +4,16 @@
 # ./src/scitex/web/_crawl.py
 
 
-import requests
-from bs4 import BeautifulSoup
+import json
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import json
-from tqdm import tqdm
-import scitex
 from pprint import pprint
+
+import requests
+from bs4 import BeautifulSoup
+from tqdm import tqdm
+
+import scitex
 
 try:
     from readability import Document
@@ -22,7 +24,6 @@ except ImportError:
         Document = None
 
 import re
-
 
 # def crawl_url(url, max_depth=1):
 #     print("\nCrawling...")
@@ -148,6 +149,7 @@ main = summarize_url
 
 if __name__ == "__main__":
     import argparse
+
     import scitex
 
     parser = argparse.ArgumentParser(description="")

@@ -53,7 +53,7 @@ Sub processTicks(dimension)
     ActiveDocument.CurrentPageItem.SetCurrentObjectAttribute(GPM_SETAXISATTR, SAA_TICSIZE, &H00000020)
     ActiveDocument.CurrentPageItem.SetCurrentObjectAttribute(GPM_SETAXISATTR, SAA_SELECTLINE, 2)
     ActiveDocument.CurrentPageItem.SetCurrentObjectAttribute(GPM_SETAXISATTR, SEA_THICKNESS, &H00000008)
-    ActiveDocument.CurrentPageItem.SetCurrentObjectAttribute(GPM_SETAXISATTR, SAA_TICSIZE, &H00000020)    
+    ActiveDocument.CurrentPageItem.SetCurrentObjectAttribute(GPM_SETAXISATTR, SAA_TICSIZE, &H00000020)
 End Sub
 
 ' Procedure to remove an axis for a given dimension
@@ -78,13 +78,13 @@ Sub Main()
     Dim OrigPageName As String
     Dim ObjectType As String
     Dim COLOR As Long
-    
+
     ' Saves the original page to jump back
     FullPATH = ActiveDocument.FullName
     OrigPageName = ActiveDocument.CurrentPageItem.Name
     ActiveDocument.NotebookItems(OrigPageName).IsCurrentBrowserEntry = True
 
-	' Code to set the figure size should be implemented here    
+	' Code to set the figure size should be implemented here
     resizeFigure
 
     ' Set the title sizes
@@ -93,7 +93,7 @@ Sub Main()
     ' Set the sizes of X/Y labels
     setLabelSize(1) ' X-axis
     setLabelSize(2) ' Y-axis
-    
+
     ' Set the sizes of X/Y tick labels
     setTickLabelSize(1) ' X-axis
     setTickLabelSize(2) ' Y-axis
@@ -101,14 +101,14 @@ Sub Main()
     ' Set tick length and width
     processTicks(1) ' X-axis
     processTicks(2) ' Y-axis
-    
+
     ' Remove right and top axes
     removeAxis(1) ' Right axis
     removeAxis(2) ' Top axis
-    
+
     ' Go back to the original page
 	Notebooks(FullPATH).NotebookItems(OrigPageName).Open
- 
+
 End Sub
     """
     )

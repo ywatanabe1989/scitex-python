@@ -41,21 +41,16 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Optional
 
-from .profiles import (
-    BaseWordProfile,
-    get_profile,
-    list_profiles,
-    register_profile,
-)
+from .profiles import BaseWordProfile, get_profile, list_profiles, register_profile
 from .reader import WordReader
-from .writer import WordWriter
 from .utils import (
+    create_post_import_hook,
     link_captions_to_images,
     link_captions_to_images_by_proximity,
     normalize_section_headings,
     validate_document,
-    create_post_import_hook,
 )
+from .writer import WordWriter
 
 
 def load_docx(

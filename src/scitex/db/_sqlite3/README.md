@@ -18,11 +18,11 @@ from scitex.db._sqlite3 import SQLite3
 with SQLite3("data.db", compress_by_default=True) as db:
     # Create table
     db.create_table("data", {"id": "INTEGER PRIMARY KEY", "array": "BLOB"})
-    
+
     # Save array
     data = np.random.random((1000, 100))
     db.save_array("data", data, additional_columns={"id": 1})
-    
+
     # Load array
     loaded = db.load_array("data", "array", where="id = 1")
 ```
@@ -102,7 +102,7 @@ loaded_obj = db.load_blob("objects", key="model_v1")
 
 For each BLOB column, these are automatically created:
 - `{column}_dtype`: Data type information
-- `{column}_shape`: Array shape information  
+- `{column}_shape`: Array shape information
 - `{column}_compressed`: Compression flag (0/1)
 
 ## Compression
@@ -133,7 +133,7 @@ Modern column management with automatic version detection:
 with SQLite3("data.db") as db:
     # Drop single column (uses native DROP COLUMN if SQLite >= 3.35.0)
     db.drop_column("table_name", "old_column")
-    
+
     # Drop multiple columns efficiently
     db.drop_columns("table_name", ["col1", "col2", "col3"])
 ```

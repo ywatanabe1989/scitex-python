@@ -5,10 +5,10 @@
 
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_MaintenanceMixin.py"
 
-import pandas as pd
 import contextlib
 from typing import ContextManager, Dict, List, Optional
 
+import pandas as pd
 import psycopg2
 
 from ..._BaseMixins._BaseMaintenanceMixin import _BaseMaintenanceMixin

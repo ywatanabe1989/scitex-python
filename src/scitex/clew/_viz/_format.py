@@ -8,12 +8,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, List
 
-from .._chain import (
-    ChainVerification,
-    RunVerification,
-    VerificationStatus,
-    verify_run,
-)
+from .._chain import ChainVerification, RunVerification, VerificationStatus, verify_run
 from ._colors import Colors, status_icon, status_text
 
 

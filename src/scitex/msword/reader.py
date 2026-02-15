@@ -14,9 +14,9 @@ from __future__ import annotations
 
 import hashlib
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime
 
 from .profiles import BaseWordProfile
 
@@ -36,13 +36,31 @@ except ImportError as exc:
 
 # Common academic section headings for heuristic detection
 COMMON_SECTION_HEADINGS = {
-    "abstract", "introduction", "background", "literature review",
-    "methods", "methodology", "materials and methods", "experimental",
-    "results", "findings", "analysis",
-    "discussion", "conclusions", "conclusion", "summary",
-    "acknowledgements", "acknowledgments", "acknowledgement",
-    "references", "bibliography", "works cited",
-    "appendix", "appendices", "supplementary", "supplementary material",
+    "abstract",
+    "introduction",
+    "background",
+    "literature review",
+    "methods",
+    "methodology",
+    "materials and methods",
+    "experimental",
+    "results",
+    "findings",
+    "analysis",
+    "discussion",
+    "conclusions",
+    "conclusion",
+    "summary",
+    "acknowledgements",
+    "acknowledgments",
+    "acknowledgement",
+    "references",
+    "bibliography",
+    "works cited",
+    "appendix",
+    "appendices",
+    "supplementary",
+    "supplementary material",
 }
 
 # Caption patterns for robust detection
@@ -199,7 +217,9 @@ class WordReader:
         # Namespace for picture detection
         pic_ns = {"pic": "http://schemas.openxmlformats.org/drawingml/2006/picture"}
         a_ns = {"a": "http://schemas.openxmlformats.org/drawingml/2006/main"}
-        r_ns = {"r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"}
+        r_ns = {
+            "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+        }
 
         for element in doc.element.body:
             tag = element.tag.split("}")[-1]  # Remove namespace
@@ -217,17 +237,17 @@ class WordReader:
                             embed_attr = qn("r:embed")
                             rel_id = blip.get(embed_attr)
                             if rel_id and rel_id in rel_to_hash:
-                                blocks.append({
-                                    "index": block_index,
-                                    "type": "image",
-                                    "image_hash": rel_to_hash[rel_id],
-                                    "rel_id": rel_id,
-                                })
+                                blocks.append(
+                                    {
+                                        "index": block_index,
+                                        "type": "image",
+                                        "image_hash": rel_to_hash[rel_id],
+                                        "rel_id": rel_id,
+                                    }
+                                )
                                 block_index += 1
 
-                block = self._process_paragraph(
-                    para, in_reference_section, block_index
-                )
+                block = self._process_paragraph(para, in_reference_section, block_index)
                 if block:
                     # Check if entering references section
                     if block["type"] == "heading" and block["text"] in (
@@ -284,7 +304,9 @@ class WordReader:
         if level is not None:
             block["type"] = "heading"
             block["level"] = level
-            block["detection_method"] = "style" if self._heading_level_from_style(style_name) else "heuristic"
+            block["detection_method"] = (
+                "style" if self._heading_level_from_style(style_name) else "heuristic"
+            )
             return block
 
         # Detect caption (improved pattern matching)
@@ -418,7 +440,9 @@ class WordReader:
         """
         try:
             # Check for oMath elements
-            omml_ns = {"m": "http://schemas.openxmlformats.org/officeDocument/2006/math"}
+            omml_ns = {
+                "m": "http://schemas.openxmlformats.org/officeDocument/2006/math"
+            }
             math_elements = para._element.findall(".//m:oMath", namespaces=omml_ns)
 
             if not math_elements:
@@ -549,7 +573,11 @@ class WordReader:
             text = para.text.strip()
             if re.match(r"^[\u2022\u2023\u25E6\u2043\u2219•‣◦⁃∙]\s", text):
                 return True
-            if re.match(r"^(\d+[\.\):]|\([a-z]\)|\([ivxlc]+\)|[a-z][\.\)])\s", text, re.IGNORECASE):
+            if re.match(
+                r"^(\d+[\.\):]|\([a-z]\)|\([ivxlc]+\)|[a-z][\.\)])\s",
+                text,
+                re.IGNORECASE,
+            ):
                 return True
 
             return False
@@ -612,8 +640,7 @@ class WordReader:
         # Check by prefix
         text_lower = text.lower()
         prefixes = (
-            self.profile.figure_caption_prefixes
-            + self.profile.table_caption_prefixes
+            self.profile.figure_caption_prefixes + self.profile.table_caption_prefixes
         )
         for prefix in prefixes:
             if text_lower.startswith(prefix.lower()):

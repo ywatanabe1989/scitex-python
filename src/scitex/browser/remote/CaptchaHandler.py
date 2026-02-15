@@ -5,6 +5,7 @@
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/browser/remote/_CaptchaHandler.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/browser/remote/_CaptchaHandler.py"
@@ -33,11 +34,12 @@ IO:
 """Imports"""
 import argparse
 import asyncio
-import time
-from typing import Optional, Dict, Any, Union
-from playwright.async_api import Page, Frame
-import aiohttp
 import json
+import time
+from typing import Any, Dict, Optional, Union
+
+import aiohttp
+from playwright.async_api import Frame, Page
 
 from scitex import logging
 from scitex.logging import ScholarError
@@ -179,10 +181,12 @@ class CaptchaHandler:
                     return False
 
                 # Inject solution
-                await page.evaluate(f"""
+                await page.evaluate(
+                    f"""
                     window.turnstile.render.solutions = window.turnstile.render.solutions || [];
                     window.turnstile.render.solutions.push('{solution}');
-                """)
+                """
+                )
 
                 # Click verify if needed
                 verify_btn = page.locator("input[type='submit'][value*='Verify']")
@@ -219,12 +223,14 @@ class CaptchaHandler:
 
         try:
             # Get site key
-            site_key = await page.evaluate("""
+            site_key = await page.evaluate(
+                """
                 () => {
                     const elem = document.querySelector('[data-sitekey]');
                     return elem ? elem.getAttribute('data-sitekey') : null;
                 }
-            """)
+            """
+            )
 
             if not site_key:
                 logger.error("Could not find reCAPTCHA site key")
@@ -241,7 +247,8 @@ class CaptchaHandler:
                 return False
 
             # Inject solution
-            await page.evaluate(f"""
+            await page.evaluate(
+                f"""
                 document.getElementById('g-recaptcha-response').innerHTML = '{solution}';
                 if (typeof ___grecaptcha_cfg !== 'undefined') {{
                     Object.entries(___grecaptcha_cfg.clients).forEach(([key, client]) => {{
@@ -250,7 +257,8 @@ class CaptchaHandler:
                         }}
                     }});
                 }}
-            """)
+            """
+            )
 
             # Submit form if present
             submit_btn = page.locator(
@@ -279,12 +287,14 @@ class CaptchaHandler:
 
         try:
             # Get site key
-            site_key = await page.evaluate("""
+            site_key = await page.evaluate(
+                """
                 () => {
                     const elem = document.querySelector('[data-sitekey]');
                     return elem ? elem.getAttribute('data-sitekey') : null;
                 }
-            """)
+            """
+            )
 
             if not site_key:
                 logger.error("Could not find hCaptcha site key")
@@ -301,13 +311,15 @@ class CaptchaHandler:
                 return False
 
             # Inject solution
-            await page.evaluate(f"""
+            await page.evaluate(
+                f"""
                 document.querySelector('[name="h-captcha-response"]').value = '{solution}';
                 document.querySelector('[name="g-recaptcha-response"]').value = '{solution}';
                 if (window.hcaptcha) {{
                     window.hcaptcha.execute();
                 }}
-            """)
+            """
+            )
 
             return True
 
@@ -319,27 +331,29 @@ class CaptchaHandler:
         """Extract Cloudflare Turnstile site key."""
         try:
             # Try different methods to get the key
-            site_key = await page.evaluate("""
+            site_key = await page.evaluate(
+                """
                 () => {
                     // Method 1: Check data attributes
                     const elem = document.querySelector('[data-sitekey]');
                     if (elem) return elem.getAttribute('data-sitekey');
-                    
+
                     // Method 2: Check Turnstile config
                     if (window.turnstile?.config?.sitekey) {
                         return window.turnstile.config.sitekey;
                     }
-                    
+
                     // Method 3: Parse from script
                     const scripts = Array.from(document.scripts);
                     for (const script of scripts) {
                         const match = script.textContent.match(/sitekey['"]\s*:\s*['"]([^'"]+)/);
                         if (match) return match[1];
                     }
-                    
+
                     return null;
                 }
-            """)
+            """
+            )
 
             return site_key
 

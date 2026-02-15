@@ -108,9 +108,9 @@ def search(
     keys_matched = list(np.array(strings)[indices_matched])
 
     if ensure_one:
-        assert len(indices_matched) == 1, (
-            f"Expected exactly one match, but found {len(indices_matched)}"
-        )
+        assert (
+            len(indices_matched) == 1
+        ), f"Expected exactly one match, but found {len(indices_matched)}"
 
     if as_bool:
         bool_matched = np.zeros(len(strings), dtype=bool)

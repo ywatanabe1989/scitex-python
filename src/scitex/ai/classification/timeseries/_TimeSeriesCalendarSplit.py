@@ -30,16 +30,18 @@ IO:
 """
 
 """Imports"""
+import argparse
 import os
 import sys
-import argparse
+from typing import Iterator, Literal, Optional, Tuple, Union
+
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from typing import Iterator, Optional, Tuple, Union, Literal
 from sklearn.model_selection import BaseCrossValidator
 from sklearn.utils.validation import _num_samples
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+
 import scitex as stx
 from scitex import logging
 
@@ -700,7 +702,9 @@ def run_main() -> None:
     global CONFIG, CC, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

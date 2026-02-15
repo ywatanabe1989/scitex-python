@@ -25,6 +25,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from scitex.config import PriorityConfig  # noqa: E402
+
 _RSYNC_EXCLUDES = [
     ".git",
     "__pycache__",
@@ -42,6 +44,16 @@ _RSYNC_EXCLUDES = [
     ".pytest-hpc-output",
 ]
 
+# HPC defaults (match figrecipe production settings)
+_HPC_DEFAULTS = {
+    "host": "spartan",
+    "cpus": 16,
+    "partition": "sapphire",
+    "time": "00:20:00",
+    "mem": "128G",
+    "remote_base": "~/proj",
+}
+
 
 @dataclass
 class TestConfig:
@@ -55,13 +67,13 @@ class TestConfig:
     pattern: str = ""
     changed: bool = False
     last_failed: bool = False
-    # HPC
-    hpc_host: str = ""
-    hpc_cpus: int = 8
-    hpc_partition: str = "sapphire"
-    hpc_time: str = "00:10:00"
-    hpc_mem: str = "16G"
-    remote_base: str = "~/proj"
+    # HPC (None = resolve via SCITEX_DEV_TEST_* env → default)
+    hpc_host: str | None = None
+    hpc_cpus: int | None = None
+    hpc_partition: str | None = None
+    hpc_time: str | None = None
+    hpc_mem: str | None = None
+    remote_base: str | None = None
 
 
 def _get_project_info() -> tuple:
@@ -85,14 +97,24 @@ def _get_project_info() -> tuple:
 
 
 def _get_hpc_config(config: TestConfig) -> dict[str, Any]:
-    """Resolve HPC config from TestConfig + env vars."""
+    """Resolve HPC config via PriorityConfig cascade.
+
+    Priority: CLI flag (direct) → SCITEX_DEV_TEST_* env → default.
+    """
+    pc = PriorityConfig(env_prefix="SCITEX_DEV_TEST_")
     return {
-        "host": config.hpc_host or os.environ.get("HPC_HOST", "spartan"),
-        "cpus": config.hpc_cpus,
-        "partition": config.hpc_partition,
-        "time": config.hpc_time,
-        "mem": config.hpc_mem,
-        "remote_base": config.remote_base,
+        "host": pc.resolve("host", config.hpc_host, default=_HPC_DEFAULTS["host"]),
+        "cpus": pc.resolve(
+            "cpus", config.hpc_cpus, default=_HPC_DEFAULTS["cpus"], type=int
+        ),
+        "partition": pc.resolve(
+            "partition", config.hpc_partition, default=_HPC_DEFAULTS["partition"]
+        ),
+        "time": pc.resolve("time", config.hpc_time, default=_HPC_DEFAULTS["time"]),
+        "mem": pc.resolve("mem", config.hpc_mem, default=_HPC_DEFAULTS["mem"]),
+        "remote_base": pc.resolve(
+            "remote_base", config.remote_base, default=_HPC_DEFAULTS["remote_base"]
+        ),
     }
 
 
@@ -347,8 +369,9 @@ def poll_hpc_job(
         {"state": str, "output": str or None, "job_id": str}
     """
     git_root, project = _get_project_info()
-    host = hpc_host or os.environ.get("HPC_HOST", "spartan")
-    remote_base = os.environ.get("REMOTE_BASE", "~/proj")
+    pc = PriorityConfig(env_prefix="SCITEX_DEV_TEST_")
+    host = pc.resolve("host", hpc_host, default=_HPC_DEFAULTS["host"])
+    remote_base = pc.resolve("remote_base", None, default=_HPC_DEFAULTS["remote_base"])
     remote_out = f"{remote_base}/{project}/.pytest-hpc-output"
 
     if not job_id:
@@ -441,8 +464,9 @@ def fetch_hpc_result(
         Full test output, or None if not found.
     """
     git_root, project = _get_project_info()
-    host = hpc_host or os.environ.get("HPC_HOST", "spartan")
-    remote_base = os.environ.get("REMOTE_BASE", "~/proj")
+    pc = PriorityConfig(env_prefix="SCITEX_DEV_TEST_")
+    host = pc.resolve("host", hpc_host, default=_HPC_DEFAULTS["host"])
+    remote_base = pc.resolve("remote_base", None, default=_HPC_DEFAULTS["remote_base"])
     remote_out = f"{remote_base}/{project}/.pytest-hpc-output"
 
     if not job_id:

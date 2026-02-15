@@ -17,7 +17,7 @@ def _cloud_savefig(fig, fname, *args, **kwargs):
     """
     Wrapper for matplotlib's savefig that emits inline image marker.
     """
-    from scitex.cloud import is_cloud_environment, emit_inline_image
+    from scitex.cloud import emit_inline_image, is_cloud_environment
 
     # Call original savefig
     result = _original_savefig(fig, fname, *args, **kwargs)
@@ -33,10 +33,12 @@ def _cloud_show(*args, **kwargs):
     """
     Wrapper for matplotlib's show that saves and displays inline in cloud.
     """
-    import matplotlib.pyplot as plt
     import os
     import time
-    from scitex.cloud import is_cloud_environment, emit_inline_image, get_project_root
+
+    import matplotlib.pyplot as plt
+
+    from scitex.cloud import emit_inline_image, get_project_root, is_cloud_environment
 
     if is_cloud_environment():
         # Get all figures

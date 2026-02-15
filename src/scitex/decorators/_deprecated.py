@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/decorators/_deprecated.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -142,14 +143,14 @@ Parameters
 ----------
 *args : tuple
     Positional arguments passed to {new_location}
-**kwargs : dict 
+**kwargs : dict
     Keyword arguments passed to {new_location}
-    
+
 Returns
 -------
 Any
     Same return value as {new_location}
-    
+
 Warns
 -----
 DeprecationWarning
@@ -158,7 +159,7 @@ DeprecationWarning
             else:
                 # Fallback if target docstring unavailable
                 forwarding_docstring = f"""**DEPRECATED: Use {new_location} instead**
-    
+
 This function provides backward compatibility for existing code that uses
 {original_name}(). It forwards all calls to the new {new_location}
 function while displaying a deprecation warning.
@@ -167,14 +168,14 @@ Parameters
 ----------
 *args : tuple
     Positional arguments passed to {new_location}
-**kwargs : dict 
+**kwargs : dict
     Keyword arguments passed to {new_location}
-    
+
 Returns
 -------
 Any
     Same return value as {new_location}
-    
+
 Warns
 -----
 DeprecationWarning

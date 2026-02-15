@@ -224,9 +224,7 @@ def violin_swarm(ax, groups, positions, var_names):
     # would force alpha=1.0 on violin bodies and add a duplicate boxplot.
     mpl_ax = getattr(ax, "_axes_mpl", ax)
 
-    from figrecipe._wrappers._axes_plots import (
-        _add_violin_inner_elements,
-    )
+    from figrecipe._wrappers._axes_plots import _add_violin_inner_elements
     from figrecipe._wrappers._violin_kde import draw_kde_violins
     from figrecipe.styles._internal import get_style
 

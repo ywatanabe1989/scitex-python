@@ -10,9 +10,7 @@ from sklearn.linear_model import LogisticRegression, RidgeClassifierCV
 from sklearn.pipeline import make_pipeline
 from sklearn.svm import SVC, LinearSVC
 from sktime.classification.deep_learning.cnn import CNNClassifier
-from sktime.classification.deep_learning.inceptiontime import (
-    InceptionTimeClassifier,
-)
+from sktime.classification.deep_learning.inceptiontime import InceptionTimeClassifier
 from sktime.classification.deep_learning.lstmfcn import LSTMFCNClassifier
 from sktime.classification.dummy import DummyClassifier
 from sktime.classification.feature_based import TSFreshClassifier

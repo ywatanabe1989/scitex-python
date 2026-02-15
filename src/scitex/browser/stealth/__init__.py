@@ -1,7 +1,7 @@
 """Stealth and anti-detection components."""
 
-from .StealthManager import StealthManager
 from .HumanBehavior import HumanBehavior
+from .StealthManager import StealthManager
 
 __all__ = [
     "StealthManager",

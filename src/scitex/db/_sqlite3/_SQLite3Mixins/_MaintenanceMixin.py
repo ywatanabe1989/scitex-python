@@ -10,8 +10,8 @@ THIS_FILE = (
 import contextlib
 import os
 import sqlite3
-from typing import Callable
-from typing import ContextManager, Dict, List, Optional
+from typing import Callable, ContextManager, Dict, List, Optional
+
 import pandas as pd
 
 from ..._BaseMixins._BaseMaintenanceMixin import _BaseMaintenanceMixin

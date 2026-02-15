@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/plt/plot_learning_curve.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -16,6 +17,7 @@ import re
 
 import numpy as np
 import pandas as pd
+
 import scitex
 from scitex.plt.color import str2hex
 
@@ -299,6 +301,7 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

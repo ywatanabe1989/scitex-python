@@ -22,39 +22,14 @@ Example
 
 # I/O
 # Drawing
-from ._draw import (
-    arrow,
-    circle,
-    line,
-    polylines,
-    rectangle,
-    text,
-)
+from ._draw import arrow, circle, line, polylines, rectangle, text
 
 # Filters
-from ._filters import (
-    blur,
-    denoise,
-    edge_detect,
-    sharpen,
-    threshold,
-)
-from ._io import (
-    load,
-    save,
-    to_bgr,
-    to_gray,
-    to_rgb,
-)
+from ._filters import blur, denoise, edge_detect, sharpen, threshold
+from ._io import load, save, to_bgr, to_gray, to_rgb
 
 # Transforms
-from ._transform import (
-    crop,
-    flip,
-    pad,
-    resize,
-    rotate,
-)
+from ._transform import crop, flip, pad, resize, rotate
 
 __all__ = [
     # I/O

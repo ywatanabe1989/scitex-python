@@ -33,11 +33,10 @@ Design Principles:
 - Traces are semantic (boxplot, heatmap) not decomposed (line segments)
 """
 
-from dataclasses import dataclass, field, asdict
-from typing import Dict, Any, List, Optional, Literal, Union
-from datetime import datetime
 import json
-
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from typing import Any, Dict, List, Literal, Optional, Union
 
 # Schema versions
 PLOT_SPEC_VERSION = "1.0.0"
@@ -56,21 +55,41 @@ DPI_FALLBACK = 300
 
 TraceType = Literal[
     # Line-based
-    "line", "step", "stem",
+    "line",
+    "step",
+    "stem",
     # Scatter-based
-    "scatter", "hexbin",
+    "scatter",
+    "hexbin",
     # Distribution
-    "histogram", "kde", "ecdf", "boxplot", "violinplot", "joyplot",
+    "histogram",
+    "kde",
+    "ecdf",
+    "boxplot",
+    "violinplot",
+    "joyplot",
     # Categorical
-    "bar", "barh",
+    "bar",
+    "barh",
     # 2D/Grid
-    "heatmap", "imshow", "contour", "contourf", "pcolormesh",
+    "heatmap",
+    "imshow",
+    "contour",
+    "contourf",
+    "pcolormesh",
     # Statistical
-    "errorbar", "fill_between", "mean_std", "mean_ci", "median_iqr",
+    "errorbar",
+    "fill_between",
+    "mean_std",
+    "mean_ci",
+    "median_iqr",
     # Vector
-    "quiver", "streamplot",
+    "quiver",
+    "streamplot",
     # Special
-    "pie", "raster", "rectangle",
+    "pie",
+    "raster",
+    "rectangle",
     # Generic fallback
     "unknown",
 ]
@@ -90,6 +109,7 @@ class BboxRatio:
 
     This is the CANONICAL representation for axes position within a panel.
     """
+
     x0: float
     y0: float
     width: float
@@ -122,7 +142,13 @@ class BboxRatio:
             data["height"] = data["y1"] - data["y0"]
             data.pop("x1", None)
             data.pop("y1", None)
-        return cls(**{k: v for k, v in data.items() if k in ["x0", "y0", "width", "height", "space"]})
+        return cls(
+            **{
+                k: v
+                for k, v in data.items()
+                if k in ["x0", "y0", "width", "height", "space"]
+            }
+        )
 
 
 @dataclass
@@ -132,6 +158,7 @@ class BboxPx:
 
     This is DERIVED/CACHED, not canonical.
     """
+
     x0: float
     y0: float
     width: float
@@ -216,6 +243,7 @@ class TraceSpec:
     >>> # Quiver (vector field)
     >>> TraceSpec(id="quiv-0", type="quiver", x_col="x", y_col="y", u_col="u", v_col="v")
     """
+
     id: str
     type: TraceType
 
@@ -275,6 +303,7 @@ class TraceSpec:
 @dataclass
 class AxesLimits:
     """Axis limits specification."""
+
     x: Optional[List[float]] = None  # [xmin, xmax]
     y: Optional[List[float]] = None  # [ymin, ymax]
 
@@ -294,6 +323,7 @@ class AxesLimits:
 @dataclass
 class AxesLabels:
     """Axes labels specification."""
+
     xlabel: Optional[str] = None
     ylabel: Optional[str] = None
     title: Optional[str] = None
@@ -310,7 +340,9 @@ class AxesLabels:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "AxesLabels":
-        return cls(**{k: v for k, v in data.items() if k in ["xlabel", "ylabel", "title"]})
+        return cls(
+            **{k: v for k, v in data.items() if k in ["xlabel", "ylabel", "title"]}
+        )
 
 
 @dataclass
@@ -333,6 +365,7 @@ class AxesSpecItem:
     linked_to : str, optional
         ID of axes this is linked to (e.g., colorbar linked to heatmap axes)
     """
+
     id: str
     bbox: BboxRatio
     labels: AxesLabels = field(default_factory=AxesLabels)
@@ -365,7 +398,9 @@ class AxesSpecItem:
             data_copy["labels"] = AxesLabels.from_dict(data_copy["labels"])
         if "limits" in data_copy and data_copy["limits"]:
             data_copy["limits"] = AxesLimits.from_dict(data_copy["limits"])
-        return cls(**{k: v for k, v in data_copy.items() if k in cls.__dataclass_fields__})
+        return cls(
+            **{k: v for k, v in data_copy.items() if k in cls.__dataclass_fields__}
+        )
 
 
 # =============================================================================
@@ -387,6 +422,7 @@ class DataSourceSpec:
     hash : str, optional
         Content hash for integrity verification
     """
+
     csv: str
     format: str = "wide"
     hash: Optional[str] = None
@@ -442,6 +478,7 @@ class PlotSpec:
     ... )
     >>> spec.to_json()
     """
+
     plot_id: str
     data: DataSourceSpec
     axes: List[AxesSpecItem] = field(default_factory=list)
@@ -491,6 +528,7 @@ class PlotSpec:
 @dataclass
 class TraceStyleSpec:
     """Style overrides for a specific trace."""
+
     trace_id: str
     color: Optional[str] = None
     linewidth: Optional[float] = None
@@ -502,7 +540,14 @@ class TraceStyleSpec:
 
     def to_dict(self) -> Dict[str, Any]:
         result = {"trace_id": self.trace_id}
-        for field_name in ["color", "linewidth", "linestyle", "marker", "markersize", "alpha"]:
+        for field_name in [
+            "color",
+            "linewidth",
+            "linestyle",
+            "marker",
+            "markersize",
+            "alpha",
+        ]:
             val = getattr(self, field_name)
             if val is not None:
                 result[field_name] = val
@@ -518,14 +563,17 @@ class TraceStyleSpec:
 @dataclass
 class ThemeSpec:
     """Theme specification."""
+
     mode: str = "light"  # "light", "dark", "auto"
-    colors: Dict[str, str] = field(default_factory=lambda: {
-        "background": "transparent",
-        "axes_bg": "white",
-        "text": "black",
-        "spine": "black",
-        "tick": "black",
-    })
+    colors: Dict[str, str] = field(
+        default_factory=lambda: {
+            "background": "transparent",
+            "axes_bg": "white",
+            "text": "black",
+            "spine": "black",
+            "tick": "black",
+        }
+    )
     palette: Optional[str] = None  # Color palette name
 
     def to_dict(self) -> Dict[str, Any]:
@@ -546,6 +594,7 @@ class ThemeSpec:
 @dataclass
 class FontSpec:
     """Font specification."""
+
     family: str = "sans-serif"
     size_pt: float = 7.0
     title_size_pt: float = 8.0
@@ -563,6 +612,7 @@ class FontSpec:
 @dataclass
 class SizeSpec:
     """Panel size specification (canonical in mm)."""
+
     width_mm: float = 80.0
     height_mm: float = 68.0
 
@@ -579,8 +629,16 @@ class SizeSpec:
 
 # Valid matplotlib legend location strings
 LegendLocation = Literal[
-    "best", "upper right", "upper left", "lower left", "lower right",
-    "right", "center left", "center right", "lower center", "upper center",
+    "best",
+    "upper right",
+    "upper left",
+    "lower left",
+    "lower right",
+    "right",
+    "center left",
+    "center right",
+    "lower center",
+    "upper center",
     "center",
 ]
 
@@ -609,6 +667,7 @@ class LegendSpec:
     title : str, optional
         Legend title
     """
+
     visible: bool = True
     location: str = "best"
     frameon: bool = True
@@ -660,6 +719,7 @@ class PlotStyle:
     grid : bool
         Whether to show grid lines
     """
+
     theme: ThemeSpec = field(default_factory=ThemeSpec)
     size: SizeSpec = field(default_factory=SizeSpec)
     font: FontSpec = field(default_factory=FontSpec)
@@ -727,6 +787,7 @@ class RenderedArtist:
 
     This is DERIVED from PlotSpec + PlotStyle, not source of truth.
     """
+
     id: str
     type: str
     axes_index: int
@@ -756,12 +817,15 @@ class RenderedArtist:
         data_copy = data.copy()
         if "bbox_px" in data_copy and data_copy["bbox_px"]:
             data_copy["bbox_px"] = BboxPx.from_dict(data_copy["bbox_px"])
-        return cls(**{k: v for k, v in data_copy.items() if k in cls.__dataclass_fields__})
+        return cls(
+            **{k: v for k, v in data_copy.items() if k in cls.__dataclass_fields__}
+        )
 
 
 @dataclass
 class RenderedAxes:
     """Cached pixel-level data for rendered axes."""
+
     id: str
     xlim: List[float]
     ylim: List[float]
@@ -781,13 +845,16 @@ class RenderedAxes:
             id=data.get("id", "ax0"),
             xlim=data.get("xlim", [0, 1]),
             ylim=data.get("ylim", [0, 1]),
-            bbox_px=BboxPx.from_dict(data.get("bbox_px", {"x0": 0, "y0": 0, "width": 100, "height": 100})),
+            bbox_px=BboxPx.from_dict(
+                data.get("bbox_px", {"x0": 0, "y0": 0, "width": 100, "height": 100})
+            ),
         )
 
 
 @dataclass
 class HitRegionEntry:
     """Entry in the hit region color map."""
+
     id: int
     type: str
     label: str
@@ -807,6 +874,7 @@ class HitRegionEntry:
 @dataclass
 class SelectableRegion:
     """Selectable region for GUI interaction."""
+
     bbox_px: List[float]  # [x0, y0, x1, y1]
     text: Optional[str] = None
     fontsize: Optional[float] = None
@@ -852,6 +920,7 @@ class PlotGeometry:
     selectable_regions : dict
         GUI-selectable regions
     """
+
     source_hash: str
     figure_px: List[int]  # [width, height]
     dpi: int
@@ -915,6 +984,7 @@ class RenderManifest:
     Stored in cache/render_manifest.json.
     Contains metadata about how the render was produced.
     """
+
     source_hash: str  # Hash of spec + style
     panel_size_mm: List[float]  # [width, height]
 
@@ -925,7 +995,9 @@ class RenderManifest:
     hitmap_svg: Optional[str] = None
 
     # Render settings
-    dpi: int = DPI_FALLBACK  # Use scitex.plt.styles.get_default_dpi() for dynamic resolution
+    dpi: int = (
+        DPI_FALLBACK  # Use scitex.plt.styles.get_default_dpi() for dynamic resolution
+    )
     render_px: Optional[List[int]] = None  # [width, height]
     crop_margin_mm: float = 1.0
 
@@ -963,8 +1035,15 @@ class RenderManifest:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "RenderManifest":
-        return cls(**{k: v for k, v in data.items()
-                     if k in cls.__dataclass_fields__ and k != "scitex_schema" and k != "scitex_schema_version"})
+        return cls(
+            **{
+                k: v
+                for k, v in data.items()
+                if k in cls.__dataclass_fields__
+                and k != "scitex_schema"
+                and k != "scitex_schema_version"
+            }
+        )
 
     @classmethod
     def from_json(cls, json_str: str) -> "RenderManifest":

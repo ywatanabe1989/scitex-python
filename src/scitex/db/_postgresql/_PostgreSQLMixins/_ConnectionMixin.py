@@ -6,6 +6,7 @@
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_ConnectionMixin.py"
 
 from typing import Any, Tuple
+
 import psycopg2
 
 from ..._BaseMixins._BaseConnectionMixin import _BaseConnectionMixin

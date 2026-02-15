@@ -7,7 +7,8 @@ THIS_FILE = (
     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_SchemaMixin.py"
 )
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from ..._BaseMixins._BaseSchemaMixin import _BaseSchemaMixin
 
 

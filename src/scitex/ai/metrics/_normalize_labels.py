@@ -8,6 +8,7 @@
 __FILE__ = __file__
 
 from typing import List, Optional, Tuple
+
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 

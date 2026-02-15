@@ -13,24 +13,21 @@ Structure:
 """
 
 # Public dataclasses
-from ._dataclasses import (
+from ._dataclasses import (  # Type aliases; GUI classes; Core classes
     STATS_VERSION,
-    Stats,
-    # Type aliases
-    PositionMode,
-    UnitType,
-    SymbolStyle,
-    # GUI classes
-    Position,
-    StatStyling,
-    StatPositioning,
-    # Core classes
+    Analysis,
     DataRef,
     EffectSize,
-    StatMethod,
-    StatResult,
+    Position,
+    PositionMode,
     StatDisplay,
-    Analysis,
+    StatMethod,
+    StatPositioning,
+    StatResult,
+    Stats,
+    StatStyling,
+    SymbolStyle,
+    UnitType,
 )
 
 __all__ = [

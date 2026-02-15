@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/db/_sqlite3/_SQLite3Mixins/_ArrayMixin.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -17,6 +18,7 @@ from typing import Any as _Any
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+
 from scitex import logging
 
 logger = logging.getLogger(__name__)

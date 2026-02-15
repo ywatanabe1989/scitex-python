@@ -17,10 +17,11 @@
 # changes 8/31/19 - fix references to *self*.N_sma_threshold;
 # changed eps to 1e-5 as better default than 1e-8.
 
+import itertools as it
 import math
+
 import torch
 from torch.optim.optimizer import Optimizer, required
-import itertools as it
 
 
 class RangerVA(Optimizer):

@@ -13,18 +13,17 @@ Provides @stx.session decorator that automatically:
 - Organizes outputs
 """
 
+import argparse
 import functools
 import inspect
-import argparse
-from pathlib import Path
-from typing import Callable
-from typing import Any, get_type_hints
 import sys as sys_module
+from pathlib import Path
+from typing import Any, Callable, get_type_hints
 
-from ._lifecycle import start
-from ._lifecycle import close
 from scitex.logging import getLogger
+
 from . import INJECTED  # Use local INJECTED from session module
+from ._lifecycle import close, start
 
 # Internal logger for the decorator itself
 _decorator_logger = getLogger(__name__)
@@ -160,11 +159,7 @@ def _run_with_session(
 
     # Clean up INJECTED sentinels from args before passing to session
     cleaned_args = argparse.Namespace(
-        **{
-            k: v
-            for k, v in vars(args).items()
-            if not isinstance(v, type(INJECTED))
-        }
+        **{k: v for k, v in vars(args).items() if not isinstance(v, type(INJECTED))}
     )
 
     # Start session
@@ -200,19 +195,11 @@ def _run_with_session(
         )
         _decorator_logger.info("  • CONFIG - Session configuration dict")
         _decorator_logger.info(f"      - CONFIG['ID']: {CONFIG['ID']}")
-        _decorator_logger.info(
-            f"      - CONFIG['SDIR_RUN']: {CONFIG['SDIR_RUN']}"
-        )
+        _decorator_logger.info(f"      - CONFIG['SDIR_RUN']: {CONFIG['SDIR_RUN']}")
         _decorator_logger.info(f"      - CONFIG['PID']: {CONFIG['PID']}")
-        _decorator_logger.info(
-            "  • plt - matplotlib.pyplot (configured for session)"
-        )
-        _decorator_logger.info(
-            "  • COLORS - CustomColors (for consistent plotting)"
-        )
-        _decorator_logger.info(
-            "  • rngg - RandomStateManager (for reproducibility)"
-        )
+        _decorator_logger.info("  • plt - matplotlib.pyplot (configured for session)")
+        _decorator_logger.info("  • COLORS - CustomColors (for consistent plotting)")
+        _decorator_logger.info("  • rngg - RandomStateManager (for reproducibility)")
         _decorator_logger.info(
             "  • logger - SciTeX logger (configured for your script)"
         )
@@ -257,12 +244,8 @@ def _run_with_session(
 
         # Log injected arguments summary (only in verbose mode)
         if verbose:
-            args_summary = {
-                k: type(v).__name__ for k, v in filtered_kwargs.items()
-            }
-            _decorator_logger.info(
-                f"Running {func.__name__} with injected parameters:"
-            )
+            args_summary = {k: type(v).__name__ for k, v in filtered_kwargs.items()}
+            _decorator_logger.info(f"Running {func.__name__} with injected parameters:")
             _decorator_logger.info(args_summary, pprint=True, indent=2)
 
         # Execute function
@@ -275,9 +258,7 @@ def _run_with_session(
             exit_status = 0
 
     except Exception as e:
-        _decorator_logger.error(
-            f"Error in {func.__name__}: {e}", exc_info=True
-        )
+        _decorator_logger.error(f"Error in {func.__name__}: {e}", exc_info=True)
         exit_status = 1
         raise
 
@@ -384,16 +365,21 @@ def _create_parser(func: Callable) -> argparse.ArgumentParser:
                     # If we can't load the YAML files, just show error
                     config_status = "        CONFIG from YAML files:\n        (unable to load at help-time, will be available at runtime)"
             else:
-                config_status = "        CONFIG from YAML files:\n        (no .yaml files found)"
+                config_status = (
+                    "        CONFIG from YAML files:\n        (no .yaml files found)"
+                )
         else:
             config_status = "        CONFIG from YAML files:\n        (./config/ directory not found)"
     except:
-        config_status = "        CONFIG from YAML files:\n        (unable to check at help-time)"
+        config_status = (
+            "        CONFIG from YAML files:\n        (unable to check at help-time)"
+        )
 
     # Get available color keys
     try:
-        from scitex.plt.utils._configure_mpl import configure_mpl
         import matplotlib.pyplot as plt_temp
+
+        from scitex.plt.utils._configure_mpl import configure_mpl
 
         _, colors_dict = configure_mpl(plt_temp)
         # Show all color keys
@@ -401,9 +387,7 @@ def _create_parser(func: Callable) -> argparse.ArgumentParser:
         color_keys = ", ".join(f"'{k}'" for k in sorted_keys)
     except Exception as e:
         # Fallback if configure_mpl fails
-        color_keys = (
-            "'blue', 'red', 'green', 'yellow', 'purple', 'orange', ..."
-        )
+        color_keys = "'blue', 'red', 'green', 'yellow', 'purple', 'orange', ..."
 
     # Create parser with epilog documenting injected globals with actual values
     epilog = f"""
@@ -528,7 +512,7 @@ def _add_argument(
         type_hints: Type hints dictionary
         short_form: Optional short form (e.g., 'a' for -a)
     """
-    from typing import get_origin, get_args, Literal
+    from typing import Literal, get_args, get_origin
 
     # Get type
     param_type = type_hints.get(param_name, param.annotation)
@@ -651,5 +635,6 @@ def run(func: Callable, parse_args: Callable = None, **session_kwargs) -> Any:
         )
 
     return exit_status
+
 
 # EOF

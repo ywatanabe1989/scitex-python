@@ -4,36 +4,36 @@
 # File: ./src/scitex/vis/editor/_qt_editor.py
 """Qt-based figure editor with rich desktop UI."""
 
-from pathlib import Path
-from typing import Dict, Any, Optional
 import copy
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 
 def _get_qt():
     """Get Qt bindings (PyQt6, PyQt5, PySide6, or PySide2)."""
     try:
-        from PyQt6 import QtWidgets, QtCore, QtGui
+        from PyQt6 import QtCore, QtGui, QtWidgets
 
         return QtWidgets, QtCore, QtGui, "PyQt6"
     except ImportError:
         pass
 
     try:
-        from PyQt5 import QtWidgets, QtCore, QtGui
+        from PyQt5 import QtCore, QtGui, QtWidgets
 
         return QtWidgets, QtCore, QtGui, "PyQt5"
     except ImportError:
         pass
 
     try:
-        from PySide6 import QtWidgets, QtCore, QtGui
+        from PySide6 import QtCore, QtGui, QtWidgets
 
         return QtWidgets, QtCore, QtGui, "PySide6"
     except ImportError:
         pass
 
     try:
-        from PySide2 import QtWidgets, QtCore, QtGui
+        from PySide2 import QtCore, QtGui, QtWidgets
 
         return QtWidgets, QtCore, QtGui, "PySide2"
     except ImportError:
@@ -81,20 +81,21 @@ class QtEditor:
         self.hitmap_array = None
         if self.hitmap_path and self.hitmap_path.exists():
             try:
-                from PIL import Image
                 import numpy as np
-                hitmap_img = Image.open(self.hitmap_path).convert('RGB')
+                from PIL import Image
+
+                hitmap_img = Image.open(self.hitmap_path).convert("RGB")
                 self.hitmap_array = np.array(hitmap_img)
             except Exception:
                 pass
 
         # Extract hit_regions and selectable_regions from spec
-        self.hit_regions = self.bundle_spec.get('hit_regions', {})
-        self.selectable_regions = self.bundle_spec.get('selectable_regions', {})
-        self.color_map = self.hit_regions.get('color_map', {})
+        self.hit_regions = self.bundle_spec.get("hit_regions", {})
+        self.selectable_regions = self.bundle_spec.get("selectable_regions", {})
+        self.color_map = self.hit_regions.get("color_map", {})
 
         # Get SciTeX defaults and merge with metadata
-        from ._defaults import get_scitex_defaults, extract_defaults_from_metadata
+        from ._defaults import extract_defaults_from_metadata, get_scitex_defaults
 
         self.scitex_defaults = get_scitex_defaults()
         self.metadata_defaults = extract_defaults_from_metadata(metadata)
@@ -186,8 +187,10 @@ class QtEditorWindow:
 
     def _create_canvas_panel(self, parent):
         """Create the matplotlib canvas panel with hitmap-based selection."""
-        from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-        from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
+        from matplotlib.backends.backend_qtagg import (
+            FigureCanvasQTAgg,
+            NavigationToolbar2QT,
+        )
         from matplotlib.figure import Figure
 
         canvas_widget = self.QtWidgets.QWidget()
@@ -206,11 +209,15 @@ class QtEditorWindow:
         canvas_layout.addWidget(toolbar)
 
         # Connect click event for hitmap-based selection
-        self.canvas.mpl_connect('button_press_event', self._on_canvas_click)
+        self.canvas.mpl_connect("button_press_event", self._on_canvas_click)
 
         # Selection info label
-        self.selection_label = self.QtWidgets.QLabel("Click on figure to select element")
-        self.selection_label.setStyleSheet("padding: 5px; background: #f0f0f0; border-radius: 3px;")
+        self.selection_label = self.QtWidgets.QLabel(
+            "Click on figure to select element"
+        )
+        self.selection_label.setStyleSheet(
+            "padding: 5px; background: #f0f0f0; border-radius: 3px;"
+        )
         canvas_layout.addWidget(self.selection_label)
 
         parent.addWidget(canvas_widget)
@@ -238,73 +245,83 @@ class QtEditorWindow:
             self.selection_label.setText(f"No element at ({x_px}, {y_px})")
             self.status_bar.showMessage(f"Click at ({x_px}, {y_px}) - no element found")
 
-    def _check_selectable_regions(self, x_px: int, y_px: int) -> Optional[Dict[str, Any]]:
+    def _check_selectable_regions(
+        self, x_px: int, y_px: int
+    ) -> Optional[Dict[str, Any]]:
         """Check if click is within any selectable_region bounding box."""
         regions = self.editor.selectable_regions
-        if not regions or 'axes' not in regions:
+        if not regions or "axes" not in regions:
             return None
 
-        for ax_info in regions['axes']:
-            ax_idx = ax_info.get('index', 0)
+        for ax_info in regions["axes"]:
+            ax_idx = ax_info.get("index", 0)
 
             # Check title
-            if 'title' in ax_info:
-                bbox = ax_info['title'].get('bbox_px', [])
+            if "title" in ax_info:
+                bbox = ax_info["title"].get("bbox_px", [])
                 if len(bbox) == 4 and self._point_in_bbox(x_px, y_px, bbox):
                     return {
-                        'type': 'title',
-                        'axes_index': ax_idx,
-                        'text': ax_info['title'].get('text', ''),
-                        'element': 'title',
+                        "type": "title",
+                        "axes_index": ax_idx,
+                        "text": ax_info["title"].get("text", ""),
+                        "element": "title",
                     }
 
             # Check xlabel
-            if 'xlabel' in ax_info:
-                bbox = ax_info['xlabel'].get('bbox_px', [])
+            if "xlabel" in ax_info:
+                bbox = ax_info["xlabel"].get("bbox_px", [])
                 if len(bbox) == 4 and self._point_in_bbox(x_px, y_px, bbox):
                     return {
-                        'type': 'xlabel',
-                        'axes_index': ax_idx,
-                        'text': ax_info['xlabel'].get('text', ''),
-                        'element': 'xlabel',
+                        "type": "xlabel",
+                        "axes_index": ax_idx,
+                        "text": ax_info["xlabel"].get("text", ""),
+                        "element": "xlabel",
                     }
 
             # Check ylabel
-            if 'ylabel' in ax_info:
-                bbox = ax_info['ylabel'].get('bbox_px', [])
+            if "ylabel" in ax_info:
+                bbox = ax_info["ylabel"].get("bbox_px", [])
                 if len(bbox) == 4 and self._point_in_bbox(x_px, y_px, bbox):
                     return {
-                        'type': 'ylabel',
-                        'axes_index': ax_idx,
-                        'text': ax_info['ylabel'].get('text', ''),
-                        'element': 'ylabel',
+                        "type": "ylabel",
+                        "axes_index": ax_idx,
+                        "text": ax_info["ylabel"].get("text", ""),
+                        "element": "ylabel",
                     }
 
             # Check legend
-            if 'legend' in ax_info:
-                bbox = ax_info['legend'].get('bbox_px', [])
+            if "legend" in ax_info:
+                bbox = ax_info["legend"].get("bbox_px", [])
                 if len(bbox) == 4 and self._point_in_bbox(x_px, y_px, bbox):
                     return {
-                        'type': 'legend',
-                        'axes_index': ax_idx,
-                        'element': 'legend',
+                        "type": "legend",
+                        "axes_index": ax_idx,
+                        "element": "legend",
                     }
 
             # Check xaxis elements
-            if 'xaxis' in ax_info:
-                xaxis = ax_info['xaxis']
-                if 'spine' in xaxis and xaxis['spine']:
-                    bbox = xaxis['spine'].get('bbox_px', [])
+            if "xaxis" in ax_info:
+                xaxis = ax_info["xaxis"]
+                if "spine" in xaxis and xaxis["spine"]:
+                    bbox = xaxis["spine"].get("bbox_px", [])
                     if len(bbox) == 4 and self._point_in_bbox(x_px, y_px, bbox):
-                        return {'type': 'xaxis_spine', 'axes_index': ax_idx, 'element': 'xaxis'}
+                        return {
+                            "type": "xaxis_spine",
+                            "axes_index": ax_idx,
+                            "element": "xaxis",
+                        }
 
             # Check yaxis elements
-            if 'yaxis' in ax_info:
-                yaxis = ax_info['yaxis']
-                if 'spine' in yaxis and yaxis['spine']:
-                    bbox = yaxis['spine'].get('bbox_px', [])
+            if "yaxis" in ax_info:
+                yaxis = ax_info["yaxis"]
+                if "spine" in yaxis and yaxis["spine"]:
+                    bbox = yaxis["spine"].get("bbox_px", [])
                     if len(bbox) == 4 and self._point_in_bbox(x_px, y_px, bbox):
-                        return {'type': 'yaxis_spine', 'axes_index': ax_idx, 'element': 'yaxis'}
+                        return {
+                            "type": "yaxis_spine",
+                            "axes_index": ax_idx,
+                            "element": "yaxis",
+                        }
 
         return None
 
@@ -337,12 +354,12 @@ class QtEditorWindow:
         if str(element_id) in color_map:
             info = color_map[str(element_id)]
             return {
-                'type': 'data_element',
-                'element_id': element_id,
-                'element_type': info.get('type', 'unknown'),
-                'label': info.get('label', ''),
-                'axes_index': info.get('axes_index', 0),
-                'rgb': [r, g, b],
+                "type": "data_element",
+                "element_id": element_id,
+                "element_type": info.get("type", "unknown"),
+                "label": info.get("label", ""),
+                "axes_index": info.get("axes_index", 0),
+                "rgb": [r, g, b],
             }
 
         return None
@@ -354,12 +371,12 @@ class QtEditorWindow:
 
     def _show_selection(self, info: Dict[str, Any]):
         """Display selection info in UI."""
-        if info['type'] == 'data_element':
+        if info["type"] == "data_element":
             text = f"Selected: {info['element_type']} - {info.get('label', 'unnamed')}"
             detail = f"ID: {info['element_id']}, Axes: {info['axes_index']}"
         else:
             text = f"Selected: {info['type']}"
-            if 'text' in info:
+            if "text" in info:
                 text += f" - \"{info['text']}\""
             detail = f"Axes: {info.get('axes_index', 0)}"
 
@@ -1039,10 +1056,12 @@ class QtEditorWindow:
             self.window,
             "Reset",
             "Reset all changes to original values?",
-            self.QtWidgets.QMessageBox.StandardButton.Yes
-            | self.QtWidgets.QMessageBox.StandardButton.No
-            if hasattr(self.QtWidgets.QMessageBox, "StandardButton")
-            else self.QtWidgets.QMessageBox.Yes | self.QtWidgets.QMessageBox.No,
+            (
+                self.QtWidgets.QMessageBox.StandardButton.Yes
+                | self.QtWidgets.QMessageBox.StandardButton.No
+                if hasattr(self.QtWidgets.QMessageBox, "StandardButton")
+                else self.QtWidgets.QMessageBox.Yes | self.QtWidgets.QMessageBox.No
+            ),
         )
 
         yes_val = (

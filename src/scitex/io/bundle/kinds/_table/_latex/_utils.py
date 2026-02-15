@@ -7,7 +7,6 @@
 import re
 from typing import Any, Optional
 
-
 # Characters that need escaping in LaTeX
 LATEX_SPECIAL_CHARS = {
     "&": r"\&",

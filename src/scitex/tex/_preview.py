@@ -20,7 +20,7 @@ Prerequisites:
 import numpy as np
 
 try:
-    from scitex.str._latex_fallback import safe_latex_render, latex_fallback_decorator
+    from scitex.str._latex_fallback import latex_fallback_decorator, safe_latex_render
 
     FALLBACK_AVAILABLE = True
 except ImportError:

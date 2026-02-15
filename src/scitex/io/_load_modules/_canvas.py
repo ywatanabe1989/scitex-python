@@ -125,8 +125,8 @@ def _load_panel_images(
     containing the loaded numpy array.
     """
     try:
-        from PIL import Image
         import numpy as np
+        from PIL import Image
     except ImportError:
         if verbose:
             print("PIL/numpy not available, skipping panel image loading")

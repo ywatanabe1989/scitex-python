@@ -15,16 +15,16 @@ See _metadata_modules/ for format-specific implementations:
 
 from ._metadata_modules import (
     embed_metadata,
-    read_metadata,
-    has_metadata,
-    embed_metadata_png,
     embed_metadata_jpeg,
-    embed_metadata_svg,
     embed_metadata_pdf,
-    read_metadata_png,
+    embed_metadata_png,
+    embed_metadata_svg,
+    has_metadata,
+    read_metadata,
     read_metadata_jpeg,
-    read_metadata_svg,
     read_metadata_pdf,
+    read_metadata_png,
+    read_metadata_svg,
 )
 
 # Backwards compatibility alias

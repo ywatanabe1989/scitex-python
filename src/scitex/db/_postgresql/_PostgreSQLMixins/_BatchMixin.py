@@ -7,8 +7,10 @@ THIS_FILE = (
     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_BatchMixin.py"
 )
 
-from typing import List, Any, Optional, Dict, Union
+from typing import Any, Dict, List, Optional, Union
+
 import pandas as pd
+
 from ..._BaseMixins._BaseBatchMixin import _BaseBatchMixin
 
 

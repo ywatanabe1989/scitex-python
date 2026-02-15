@@ -154,7 +154,9 @@ TEMPLATES = {
 def get_template(name: str, **kwargs) -> Dict[str, Any]:
     """Get a figure template by name."""
     if name not in TEMPLATES:
-        raise ValueError(f"Unknown template: {name}. Available: {list(TEMPLATES.keys())}")
+        raise ValueError(
+            f"Unknown template: {name}. Available: {list(TEMPLATES.keys())}"
+        )
     return TEMPLATES[name](**kwargs)
 
 

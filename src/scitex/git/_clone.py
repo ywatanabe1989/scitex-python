@@ -7,9 +7,11 @@ Git clone operations.
 """
 
 from pathlib import Path
+
 from scitex.logging import getLogger
 from scitex.sh import sh
-from ._constants import EXIT_SUCCESS, EXIT_FAILURE
+
+from ._constants import EXIT_FAILURE, EXIT_SUCCESS
 
 logger = getLogger(__name__)
 

@@ -101,7 +101,12 @@ def render_composite(
             "child": child_name,
             "child_id": panel_info.get("child_id"),
             "label": label,
-            "position": {"row": row, "col": col, "row_span": row_span, "col_span": col_span},
+            "position": {
+                "row": row,
+                "col": col,
+                "row_span": row_span,
+                "col_span": col_span,
+            },
             "bbox_figure": _get_axes_bbox(ax, fig),
             "child_elements": child_geometry.get("elements", []),
         }
@@ -175,10 +180,12 @@ def _render_leaf_in_axes(
             ax.set_ylim(0, 1)
             ax.axis("off")
 
-            geometry["elements"].append({
-                "type": "embedded_image",
-                "source": "artifacts/exports/figure.png",
-            })
+            geometry["elements"].append(
+                {
+                    "type": "embedded_image",
+                    "source": "artifacts/exports/figure.png",
+                }
+            )
             return geometry
 
     except Exception as e:
@@ -306,8 +313,8 @@ def check_cache_valid(
     Returns:
         True if cache is valid and can be used
     """
-    from .._bundle._storage import get_storage
     from .._bundle._saver import compute_canonical_hash
+    from .._bundle._storage import get_storage
 
     storage = get_storage(child.path)
 

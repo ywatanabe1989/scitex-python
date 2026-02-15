@@ -8,9 +8,9 @@ Methods for conducting multiple pairwise comparisons with appropriate
 error rate control.
 """
 
-from ._tukey_hsd import posthoc_tukey
-from ._games_howell import posthoc_games_howell
 from ._dunnett import posthoc_dunnett
+from ._games_howell import posthoc_games_howell
+from ._tukey_hsd import posthoc_tukey
 
 __all__ = [
     "posthoc_tukey",

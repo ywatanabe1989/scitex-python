@@ -35,14 +35,14 @@ prevents common errors from incorrect decorator stacking.
 """
 
 from functools import wraps
-from typing import Callable, List, Tuple, Any
+from typing import Any, Callable, List, Tuple
+
+from ._batch_fn import batch_fn as _orig_batch_fn
+from ._numpy_fn import numpy_fn as _orig_numpy_fn
+from ._pandas_fn import pandas_fn as _orig_pandas_fn
 
 # Import original decorators
 from ._torch_fn import torch_fn as _orig_torch_fn
-from ._numpy_fn import numpy_fn as _orig_numpy_fn
-from ._pandas_fn import pandas_fn as _orig_pandas_fn
-from ._batch_fn import batch_fn as _orig_batch_fn
-
 
 # Decorator priority (higher = inner/applied first)
 DECORATOR_PRIORITY = {

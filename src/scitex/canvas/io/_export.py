@@ -9,7 +9,7 @@ Handles composing and exporting canvas to various formats (PNG, PDF, SVG).
 """
 
 from pathlib import Path
-from typing import List, Union, Optional, Dict, Any
+from typing import Any, Dict, List, Optional, Union
 
 
 def export_canvas_to_file(
@@ -42,8 +42,8 @@ def export_canvas_to_file(
     Path
         Path to exported file in exports/ directory
     """
-    from ._directory import get_canvas_directory_path
     from ._canvas import load_canvas_json
+    from ._directory import get_canvas_directory_path
 
     canvas_dir = get_canvas_directory_path(project_dir, canvas_name)
     canvas_json = load_canvas_json(project_dir, canvas_name, verify_data_hashes=False)
@@ -155,9 +155,9 @@ def _compose_and_export(
     Uses matplotlib for composition.
     """
     import matplotlib.pyplot as plt
+    import numpy as np
     from matplotlib.figure import Figure
     from PIL import Image
-    import numpy as np
 
     # Canvas size in mm
     width_mm = canvas_json["size"]["width_mm"]
@@ -243,8 +243,8 @@ def _place_panel(
     canvas_height_mm: float,
 ) -> None:
     """Place a single panel on the figure."""
-    from PIL import Image
     import numpy as np
+    from PIL import Image
 
     panel_name = panel.get("name", "")
     panel_type = panel.get("type", "image")

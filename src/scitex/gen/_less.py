@@ -14,6 +14,7 @@ This script does XYZ.
 import sys
 
 import matplotlib.pyplot as plt
+
 import scitex
 
 # Imports

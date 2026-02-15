@@ -311,10 +311,12 @@ def take_screenshot_cmd(url, output, message, quality, full_page):
                         path=str(output_file),
                         full_page=full_page,
                         type="png" if str(output_file).endswith(".png") else "jpeg",
-                        quality=quality
-                        if str(output_file).endswith(".jpg")
-                        or str(output_file).endswith(".jpeg")
-                        else None,
+                        quality=(
+                            quality
+                            if str(output_file).endswith(".jpg")
+                            or str(output_file).endswith(".jpeg")
+                            else None
+                        ),
                     )
                     await browser.close()
 

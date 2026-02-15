@@ -8,6 +8,7 @@ THIS_FILE = (
 )
 
 from typing import List, Optional
+
 import pandas as pd
 import psycopg2
 

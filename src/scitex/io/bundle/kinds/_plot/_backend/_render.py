@@ -518,10 +518,14 @@ def render_traces(ax, trace, data, theme=None):
     y_col = _find_column(data, y_col_name)
 
     if x_col is None:
-        logger.warning(f"Column '{x_col_name}' not found in data for trace '{trace.trace_id}'. Available: {list(data.columns)[:5]}...")
+        logger.warning(
+            f"Column '{x_col_name}' not found in data for trace '{trace.trace_id}'. Available: {list(data.columns)[:5]}..."
+        )
         return
     if y_col is None:
-        logger.warning(f"Column '{y_col_name}' not found in data for trace '{trace.trace_id}'. Available: {list(data.columns)[:5]}...")
+        logger.warning(
+            f"Column '{y_col_name}' not found in data for trace '{trace.trace_id}'. Available: {list(data.columns)[:5]}..."
+        )
         return
 
     # Plot the data

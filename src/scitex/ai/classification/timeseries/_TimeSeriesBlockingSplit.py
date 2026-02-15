@@ -29,14 +29,16 @@ IO:
 """
 
 """Imports"""
+import argparse
 import os
 import sys
-import argparse
-import numpy as np
 from typing import Iterator, Optional, Tuple
-from sklearn.model_selection import BaseCrossValidator
-import matplotlib.pyplot as plt
+
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.model_selection import BaseCrossValidator
+
 import scitex as stx
 from scitex import logging
 
@@ -405,9 +407,11 @@ class TimeSeriesBlockingSplit(BaseCrossValidator):
                         s=15,
                         alpha=0.6,
                         marker="o",
-                        label="Train points"
-                        if fold == 0 and group == np.unique(groups[train_idx])[0]
-                        else "",
+                        label=(
+                            "Train points"
+                            if fold == 0 and group == np.unique(groups[train_idx])[0]
+                            else ""
+                        ),
                         zorder=3,
                     )
 
@@ -426,9 +430,11 @@ class TimeSeriesBlockingSplit(BaseCrossValidator):
                         s=15,
                         alpha=0.6,
                         marker="s",
-                        label="Test points"
-                        if fold == 0 and group == np.unique(groups[test_idx])[0]
-                        else "",
+                        label=(
+                            "Test points"
+                            if fold == 0 and group == np.unique(groups[test_idx])[0]
+                            else ""
+                        ),
                         zorder=3,
                     )
 
@@ -611,7 +617,9 @@ def run_main() -> None:
     global CONFIG, CC, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

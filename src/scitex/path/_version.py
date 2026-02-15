@@ -81,8 +81,9 @@ def increment_version(dirname, fname, ext, version_prefix="_v"):
 
 
 if __name__ == "__main__":
-    import scitex
     import matplotlib.pyplot as plt
+
+    import scitex
 
     # Start
     CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt)

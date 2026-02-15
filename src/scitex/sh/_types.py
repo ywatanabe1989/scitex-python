@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/sh/_types.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/sh/_types.py"

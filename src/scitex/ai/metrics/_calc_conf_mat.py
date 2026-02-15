@@ -8,9 +8,11 @@
 __FILE__ = __file__
 
 from typing import Any, Dict, List, Optional
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
+
 from ._normalize_labels import normalize_labels
 
 

@@ -23,7 +23,8 @@ AI can:
 import json
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from playwright.async_api import Page
 
 
@@ -78,7 +79,8 @@ class InteractivePanel:
 
     async def initialize(self):
         """Inject interactive panel into browser."""
-        await self.page.evaluate("""
+        await self.page.evaluate(
+            """
             () => {
                 // Create panel container
                 const panel = document.createElement('div');
@@ -323,7 +325,8 @@ class InteractivePanel:
 
                 console.log('✅ Interactive panel initialized');
             }
-        """)
+        """
+        )
 
         print("✅ Interactive panel initialized in browser")
 
@@ -358,9 +361,11 @@ class InteractivePanel:
             return self.session_memory[key]
 
         # Ask user
-        value = await self.page.evaluate(f"""
+        value = await self.page.evaluate(
+            f"""
             window.scitexPanel?.askInput('{key}', '{label}', '{input_type}', {str(remember).lower()})
-        """)
+        """
+        )
 
         # Store in memory
         if value and remember:
@@ -371,9 +376,11 @@ class InteractivePanel:
 
     async def ask_confirm(self, message: str) -> bool:
         """Ask user for confirmation via panel."""
-        result = await self.page.evaluate(f"""
+        result = await self.page.evaluate(
+            f"""
             window.scitexPanel?.askConfirm('{message}')
-        """)
+        """
+        )
         return result if result is not None else False
 
     async def clear(self):

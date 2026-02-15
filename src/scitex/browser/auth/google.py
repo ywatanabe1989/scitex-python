@@ -23,6 +23,7 @@ Example:
 import os
 import sys
 from typing import Optional
+
 from playwright.async_api import Page
 
 

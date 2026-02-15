@@ -187,7 +187,7 @@ When you create a RandomStateManager, it automatically:
 1. **OS Level**: Sets `PYTHONHASHSEED` environment variable
 2. **Python**: Calls `random.seed()` for built-in random module
 3. **NumPy**: Sets both `np.random.seed()` and creates `default_rng()`
-4. **PyTorch**: 
+4. **PyTorch**:
    - Sets `torch.manual_seed()`
    - Sets `torch.cuda.manual_seed_all()` if CUDA available
    - Enables `torch.backends.cudnn.deterministic = True`

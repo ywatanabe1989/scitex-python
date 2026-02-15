@@ -13,8 +13,8 @@ Structure:
 - canonical/theme.json: Visual styling
 """
 
-from ._dataclasses import Encoding, Theme
 from ._backend._render import render_traces
+from ._dataclasses import Encoding, Theme
 
 __all__ = [
     "Encoding",

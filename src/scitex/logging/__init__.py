@@ -87,42 +87,20 @@ from ._errors import (
     check_path,
     check_shape_compatibility,
 )
-from ._formatters import (
-    SciTeXConsoleFormatter as _SciTeXConsoleFormatter,
-)
-from ._formatters import (
-    SciTeXFileFormatter as _SciTeXFileFormatter,
-)
-from ._handlers import (
-    create_console_handler as _create_console_handler,
-)
-from ._handlers import (
-    create_file_handler as _create_file_handler,
-)
-from ._handlers import (
-    get_default_log_path as _get_default_log_path,
-)
+from ._formatters import SciTeXConsoleFormatter as _SciTeXConsoleFormatter
+from ._formatters import SciTeXFileFormatter as _SciTeXFileFormatter
+from ._handlers import create_console_handler as _create_console_handler
+from ._handlers import create_file_handler as _create_file_handler
+from ._handlers import get_default_log_path as _get_default_log_path
 
 # Import modular components
 from ._levels import CRITICAL, DEBUG, ERROR, FAIL, INFO, SUCCESS, WARNING
-from ._logger import (
-    SciTeXLogger as _SciTeXLogger,
-)
-from ._logger import (
-    setup_logger_class as _setup_logger_class,
-)
-from ._print_capture import (
-    PrintCapture as _PrintCapture,
-)
-from ._print_capture import (
-    disable_print_capture as _disable_print_capture,
-)
-from ._print_capture import (
-    enable_print_capture as _enable_print_capture,
-)
-from ._print_capture import (
-    is_print_capture_enabled as _is_print_capture_enabled,
-)
+from ._logger import SciTeXLogger as _SciTeXLogger
+from ._logger import setup_logger_class as _setup_logger_class
+from ._print_capture import PrintCapture as _PrintCapture
+from ._print_capture import disable_print_capture as _disable_print_capture
+from ._print_capture import enable_print_capture as _enable_print_capture
+from ._print_capture import is_print_capture_enabled as _is_print_capture_enabled
 from ._Tee import Tee, tee
 
 # Warnings (like Python's warnings module)

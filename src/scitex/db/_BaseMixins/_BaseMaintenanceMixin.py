@@ -5,7 +5,7 @@
 
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_Basemodules/_BaseMaintenanceMixin.py"
 
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 
 class _BaseMaintenanceMixin:

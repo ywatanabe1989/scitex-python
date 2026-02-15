@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/utils/_verify_scitex_format.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/utils/_verify_scitex_format.py"

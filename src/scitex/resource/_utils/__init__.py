@@ -3,9 +3,9 @@
 # Time-stamp: "2024-11-04 14:13:44 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/resource/_utils/__init__.py
 
-import os
 import importlib
 import inspect
+import os
 
 # Get the current directory
 current_dir = os.path.dirname(__file__)

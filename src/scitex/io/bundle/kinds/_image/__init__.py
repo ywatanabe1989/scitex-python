@@ -13,12 +13,12 @@ Structure:
 """
 
 from pathlib import Path
-from typing import Any, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 if TYPE_CHECKING:
+    import numpy as np
     from matplotlib.axes import Axes
     from matplotlib.image import AxesImage
-    import numpy as np
 
 
 def render_image(

@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/ml/plt/plot_optuna_study.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -58,9 +59,10 @@ def plot_optuna_study(lpath, value_str, sort=False):
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    import scitex
     import optuna
     import pandas as pd
+
+    import scitex
 
     plt, CC = scitex.plt.configure_mpl(plt, fig_scale=3)
 
@@ -191,6 +193,7 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

@@ -6,12 +6,12 @@
 # FUnctions
 
 if __name__ == "__main__":
-    import scitex
     import sys
 
     import matplotlib.pyplot as plt
-
     import torch
+
+    import scitex
 
     # Start
     CONFIG, sys.stdout, sys.stderr, plt, cc = scitex.session.start(sys, plt)

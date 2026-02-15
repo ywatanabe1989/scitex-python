@@ -67,7 +67,7 @@ SIG_TYPES = [
 xx, tt, fs = scitex.dsp.demo_sig(
     t_sec=T_SEC, fs=SRC_FS, freqs_hz=FREQS_HZ, sig_type="chirp"
 )
-# xx.shape (batch_size, n_chs, seq_len) 
+# xx.shape (batch_size, n_chs, seq_len)
 # xx.shape (batch_size, n_chs, n_segments, seq_len) # when sig_type is "tensorpac" or "pac"
 
 

@@ -19,12 +19,12 @@ def register_introspect_tools(mcp) -> None:
     # IPython-style tools (primary)
 
     @mcp.tool()
-    async def introspect_q(
+    async def introspect_signature(
         dotted_path: str,
         include_defaults: bool = True,
         include_annotations: bool = True,
     ) -> str:
-        """[introspect] Get function/class signature (like IPython's func?)."""
+        """[introspect] Get function/class signature with parameters and types."""
         from scitex.introspect._mcp.handlers import q_handler
 
         result = await q_handler(
@@ -35,12 +35,12 @@ def register_introspect_tools(mcp) -> None:
         return _json(result)
 
     @mcp.tool()
-    async def introspect_qq(
+    async def introspect_source(
         dotted_path: str,
         max_lines: Optional[int] = None,
         include_decorators: bool = True,
     ) -> str:
-        """[introspect] Get source code of a Python object (like IPython's func??)."""
+        """[introspect] Get source code of a Python object."""
         from scitex.introspect._mcp.handlers import qq_handler
 
         result = await qq_handler(

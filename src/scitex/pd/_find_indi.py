@@ -7,7 +7,6 @@ from typing import Dict, List, Union
 
 import pandas as pd
 
-
 # def find_indi(df: pd.DataFrame, conditions: Dict[str, Union[str, int, float, List]]) -> pd.Series:
 #     """Finds indices of rows that satisfy all given conditions in a DataFrame.
 

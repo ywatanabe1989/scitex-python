@@ -22,12 +22,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from sklearn.feature_selection import (
-    SelectKBest,
-    chi2,
-    f_classif,
-    mutual_info_classif,
-)
+from sklearn.feature_selection import SelectKBest, chi2, f_classif, mutual_info_classif
 from sklearn.impute import SimpleImputer
 
 

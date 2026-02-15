@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/template/_git_strategy.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/template/_git_strategy.py"
@@ -24,8 +25,8 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
-from scitex.logging import getLogger
 import scitex.git
+from scitex.logging import getLogger
 
 from ._logging_helpers import log_group
 

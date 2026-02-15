@@ -7,7 +7,8 @@ THIS_FILE = (
     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_QueryMixin.py"
 )
 
-from typing import List, Dict, Any, Optional, Union, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 from ..._BaseMixins._BaseQueryMixin import _BaseQueryMixin
 
 

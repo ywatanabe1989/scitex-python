@@ -22,6 +22,7 @@ Remote Setup:
 from __future__ import annotations
 
 import json
+import warnings
 
 # Load environment variables from SCITEX_ENV_SRC early
 from scitex._env_loader import load_scitex_env
@@ -35,6 +36,13 @@ try:
 except ImportError:
     FASTMCP_AVAILABLE = False
     FastMCP = None  # type: ignore
+
+# Suppress httplib2 deprecation warnings from system pyparsing (old API methods)
+# Must be AFTER fastmcp import (fastmcp.__init__ calls simplefilter("default", DeprecationWarning))
+# Must be BEFORE register_all_tools (which imports socialia → google.auth → httplib2)
+warnings.filterwarnings(
+    "ignore", category=DeprecationWarning, message=".*deprecated.*use.*"
+)
 
 __all__ = ["mcp", "run_server", "main", "FASTMCP_AVAILABLE"]
 
@@ -100,15 +108,14 @@ result = stx.stats.test_anova(*groups, return_as="latex")
 - [plt] plot, reproduce, compose, crop
   **PRIORITY**: Use CSV column spec (data_file + column names) over inline arrays!
   Workflow: Python writes CSV → plt_plot reads columns → Creates figure
-- [audio] speak, generate_audio, list_backends
-- [capture] screenshot, start_monitoring, create_gif
+- [audio] speak
+- [capture] screenshot
 - [stats] recommend_tests, run_test, format_results, power_analysis
-- [scholar] search_papers, enrich_bibtex, download_pdf, fetch_papers
-- [diagram] create_diagram, compile_mermaid, compile_graphviz
-- [canvas] create_canvas, add_panel, export_canvas
-- [template] list_templates, clone_template, get_code_template, list_code_templates
-- [ui] notify, list_notification_backends
-- [writer] usage (LaTeX manuscript compilation)
+- [scholar] search_papers, enrich_bibtex, fetch_papers, parse_pdf_content
+- [diagram] create, compile_mermaid, compile_graphviz, render, split
+- [template] clone_template, get_code_template, list_code_templates
+- [ui] notify
+- [writer] compile, figures, tables, bibliography (LaTeX manuscript)
 - [introspect] signature, docstring, source, members (like IPython's ? and ??)
 
 ## MCP Resources (Read for detailed docs):

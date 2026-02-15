@@ -19,6 +19,7 @@ import numpy as np
 
 class SummaryStatsDict(TypedDict, total=False):
     """Summary statistics for a single group."""
+
     group: str
     n: int
     mean: Optional[float]
@@ -30,8 +31,6 @@ class SummaryStatsDict(TypedDict, total=False):
     q3: Optional[float]
     minimum: Optional[float]
     maximum: Optional[float]
-
-
 
 
 def compute_summary_stats(

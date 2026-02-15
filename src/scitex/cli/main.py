@@ -2,20 +2,15 @@
 """SciTeX CLI Main Entry Point."""
 
 # Suppress httplib2/pyparsing deprecation warnings BEFORE any imports
-# These are from system packages using old pyparsing API
+# These come from system httplib2 using old pyparsing API (not our code)
 import warnings
 
-# Filter pyparsing-related deprecation warnings from httplib2
-for msg in [
-    "setName",
-    "leaveWhitespace",
-    "setParseAction",
-    "addParseAction",
-    "delimitedList",
-]:
-    warnings.filterwarnings(
-        "ignore", message=f".*{msg}.*deprecated.*", category=DeprecationWarning
-    )
+warnings.filterwarnings(
+    "ignore",
+    message=".*deprecated.*use.*",
+    category=DeprecationWarning,
+    module=r"httplib2\..*",
+)
 
 import os
 import sys

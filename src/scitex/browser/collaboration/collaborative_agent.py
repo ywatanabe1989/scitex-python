@@ -17,10 +17,12 @@ This is the "watching agent" pattern for true collaboration!
 
 import asyncio
 import signal
-from typing import Optional, Callable, Dict
+from typing import Callable, Dict, Optional
+
 from playwright.async_api import Page
 
 from scitex.browser.debugging import browser_logger
+
 from .interactive_panel import InteractivePanel
 
 

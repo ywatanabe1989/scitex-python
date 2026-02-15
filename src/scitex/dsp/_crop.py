@@ -109,6 +109,7 @@ if __name__ == "__main__":
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex
 
     # parser.add_argument('--var', '-v', type=int, default=1, help='')

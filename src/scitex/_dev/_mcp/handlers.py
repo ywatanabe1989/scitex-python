@@ -137,8 +137,9 @@ async def get_config_handler() -> dict[str, Any]:
 
 async def get_full_versions_handler(
     packages: list[str] | None = None,
-    include_hosts: bool = False,
-    include_remotes: bool = False,
+    include_hosts: bool = True,
+    include_remotes: bool = True,
+    include_rtd: bool = True,
 ) -> dict[str, Any]:
     """Get comprehensive version data from all sources.
 
@@ -150,11 +151,13 @@ async def get_full_versions_handler(
         Include SSH host version checks.
     include_remotes : bool
         Include GitHub remote version checks.
+    include_rtd : bool
+        Include Read the Docs build status.
 
     Returns
     -------
     dict
-        Combined version data from local, hosts, and remotes.
+        Combined version data from local, hosts, remotes, and RTD.
     """
     from scitex._dev import check_all_hosts, check_all_remotes, list_versions
 
@@ -162,6 +165,7 @@ async def get_full_versions_handler(
         "packages": list_versions(packages),
         "hosts": {},
         "remotes": {},
+        "rtd": {},
     }
 
     if include_hosts:
@@ -175,6 +179,14 @@ async def get_full_versions_handler(
             result["remotes"] = check_all_remotes(packages=packages)
         except Exception as e:
             result["remotes"] = {"error": str(e)}
+
+    if include_rtd:
+        try:
+            from scitex._dev._rtd import check_all_rtd
+
+            result["rtd"] = check_all_rtd(packages=packages, versions=["latest"])
+        except Exception as e:
+            result["rtd"] = {"error": str(e)}
 
     return result
 

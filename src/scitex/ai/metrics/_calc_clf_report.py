@@ -8,8 +8,10 @@
 __FILE__ = __file__
 
 from typing import Any, Dict, List, Optional
+
 import pandas as pd
 from sklearn.metrics import classification_report
+
 from ._normalize_labels import normalize_labels
 
 

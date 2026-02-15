@@ -9,9 +9,7 @@ try:
     from figrecipe._integrations._scitex_stats import (
         annotate_from_stats as _fr_annotate,
     )
-    from figrecipe._integrations._scitex_stats import (
-        from_scitex_stats as _fr_convert,
-    )
+    from figrecipe._integrations._scitex_stats import from_scitex_stats as _fr_convert
     from figrecipe._integrations._scitex_stats import (
         load_stats_bundle as _fr_load_bundle,
     )

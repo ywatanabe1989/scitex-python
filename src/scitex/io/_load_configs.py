@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_configs.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/io/_load_configs.py"
@@ -14,6 +15,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from scitex.dict import DotDict
+
 from ._glob import glob
 from ._load import load
 

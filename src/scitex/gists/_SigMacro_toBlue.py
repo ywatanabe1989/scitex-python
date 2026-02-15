@@ -21,37 +21,37 @@ Function getColor(colorName As String) As Long
         Case "Black"
             getColor = RGB(0, 0, 0)
         Case "Gray"
-            getColor = RGB(128, 128, 128)            
+            getColor = RGB(128, 128, 128)
         Case "White"
-            getColor = RGB(255, 255, 255)    
-    
-    
+            getColor = RGB(255, 255, 255)
+
+
         Case "Blue"
             getColor = RGB(0, 128, 192)
         Case "Green"
-            getColor = RGB(20, 180, 20)            
+            getColor = RGB(20, 180, 20)
         Case "Red"
             getColor = RGB(255, 70, 50)
-    
-    
+
+
         Case "Yellow"
             getColor = RGB(230, 160, 20)
         Case "Purple"
             getColor = RGB(200, 50, 255)
-    
-    
+
+
         Case "Pink"
-            getColor = RGB(255, 150, 200)            
+            getColor = RGB(255, 150, 200)
         Case "LightBlue"
             getColor = RGB(20, 200, 200)
-    
-    
+
+
         Case "DarkBlue"
             getColor = RGB(0, 0, 100)
         Case "Dan"
             getColor = RGB(228, 94, 50)
         Case "Brown"
-            getColor = RGB(128, 0, 0)            
+            getColor = RGB(128, 0, 0)
 
         Case Else
             ' Default or error handling
@@ -87,8 +87,8 @@ Function findObjectType() As String
     On Error GoTo ErrorHandler
 
     Dim ObjectType As Variant
-    Dim object_type As Variant 
-	object_type = ActiveDocument.CurrentPageItem.GraphPages(0).CurrentPageObject(GPT_GRAPH).Plots(0).GetAttribute(SLA_TYPE, ObjectType)	
+    Dim object_type As Variant
+	object_type = ActiveDocument.CurrentPageItem.GraphPages(0).CurrentPageObject(GPT_GRAPH).Plots(0).GetAttribute(SLA_TYPE, ObjectType)
 
     If object_type = False Then
         findObjectType = "Error: Failed to get object type."
@@ -123,7 +123,7 @@ Sub Main()
     Dim OrigPageName As String
     Dim ObjectType As String
     Dim COLOR As Long
-    
+
     ' Remember the original page
     FullPATH = ActiveDocument.FullName
     OrigPageName = ActiveDocument.CurrentPageItem.Name
@@ -131,10 +131,10 @@ Sub Main()
 
     ' Get the color value for blue
     COLOR = getColor("Blue")
-    
+
     ' Find the type of the object
     ObjectType = findObjectType()
-    
+
     ' Check the object type and call the corresponding update function
     If ObjectType = "Scatter/Line" Or ObjectType = "3D Scatter/Line" Then
         updatePlot COLOR
@@ -145,10 +145,10 @@ Sub Main()
         ' Raise a custom error
         Err.Raise vbObjectError + 513, "Main", "Unknown or unsupported object type: " & ObjectType
     End If
-    
+
     ' Go back to the original page
 	Notebooks(FullPATH).NotebookItems(OrigPageName).Open
-	
+
     Exit Sub
 
 ErrorHandler:

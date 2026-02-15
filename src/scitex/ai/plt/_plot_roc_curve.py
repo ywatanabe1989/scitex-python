@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/plt/plot_roc_curve.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -13,9 +14,10 @@ __DIR__ = os.path.dirname(__FILE__)
 import argparse
 
 import numpy as np
+from sklearn.metrics import roc_auc_score, roc_curve
+
 import scitex
 from scitex.plt.color import get_colors_from_conf_matap
-from sklearn.metrics import roc_auc_score, roc_curve
 
 
 def _to_onehot(class_indices, n_classes):
@@ -218,6 +220,7 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

@@ -74,12 +74,12 @@ reporter = SingleClassificationReporter(
 for fold in range(n_folds):
     # Train model and get predictions
     y_pred, y_proba = train_and_predict(...)
-    
+
     # Calculate and save metrics (automatically organized)
     reporter.calc_bacc(y_true, y_pred, fold)
     reporter.calc_mcc(y_true, y_pred, fold)
     reporter.calc_conf_mat(y_true, y_pred, fold)
-    
+
     # Add custom objects with path-based API
     reporter.add(fig, f"plots/roc_curve_fold_{fold:02d}.jpg")
     reporter.add(model_params, f"models/params_fold_{fold:02d}.json")

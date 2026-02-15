@@ -11,17 +11,15 @@ of SciTeX functions.
 """
 
 from .benchmark import (
-    benchmark_function,
-    benchmark_module,
     BenchmarkResult,
     BenchmarkSuite,
-    run_all_benchmarks,
+    benchmark_function,
+    benchmark_module,
     compare_implementations,
+    run_all_benchmarks,
 )
-
-from .profiler import profile_function, profile_module, get_profile_report
-
-from .monitor import PerformanceMonitor, track_performance, get_performance_stats
+from .monitor import PerformanceMonitor, get_performance_stats, track_performance
+from .profiler import get_profile_report, profile_function, profile_module
 
 __all__ = [
     # Benchmarking

@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/browser/interaction/fill_with_fallbacks.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/browser/interaction/fill_with_fallbacks.py"
@@ -119,7 +120,9 @@ async def _fill_with_js(page: Page, selector: str, value: str) -> bool:
 def main(args):
     """Demonstrate fill_with_fallbacks functionality."""
     import asyncio
+
     from playwright.async_api import async_playwright
+
     from ..debugging import browser_logger
 
     async def demo():

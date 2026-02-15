@@ -10,10 +10,7 @@ __DIR__ = os.path.dirname(__FILE__)
 # Time-stamp: "2024-11-11 14:16:58 (ywatanabe)"
 
 import sqlite3
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Union
+from typing import List, Optional, Tuple, Union
 
 import pandas as pd
 

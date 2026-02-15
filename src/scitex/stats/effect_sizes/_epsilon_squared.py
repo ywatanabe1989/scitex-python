@@ -4,6 +4,7 @@
 # File: ./src/scitex/stats/effect_sizes/_epsilon_squared.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/stats/effect_sizes/_epsilon_squared.py"
@@ -31,8 +32,9 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-import scitex as stx
 from scipy import stats
+
+import scitex as stx
 from scitex.logging import getLogger
 
 logger = getLogger(__name__)
@@ -284,6 +286,7 @@ def run_main():
     global CONFIG, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
 
     args = parse_args()

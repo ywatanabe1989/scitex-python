@@ -7,9 +7,7 @@ from __future__ import annotations
 
 import os
 
-__FILE__ = (
-    "./src/scitex/sh/test_sh.py"
-)
+__FILE__ = "./src/scitex/sh/test_sh.py"
 __DIR__ = os.path.dirname(__FILE__)
 # ----------------------------------------
 
@@ -21,9 +19,7 @@ import matplotlib.pyplot as plt
 
 import scitex
 
-CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(
-    sys, plt, verbose=False
-)
+CONFIG, sys.stdout, sys.stderr, plt, CC = scitex.session.start(sys, plt, verbose=False)
 
 # Test 1: Basic list command
 print("Test 1: Basic list command")

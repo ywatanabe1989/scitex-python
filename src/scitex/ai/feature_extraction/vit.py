@@ -19,9 +19,9 @@ Prerequisites:
 import os as _os
 from typing import Tuple, Union
 
+import numpy as np
 import torch
 import torch as _torch
-import numpy as np
 from pytorch_pretrained_vit import ViT
 from torchvision import transforms as _transforms
 

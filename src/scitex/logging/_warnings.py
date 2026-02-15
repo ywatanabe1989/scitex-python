@@ -19,7 +19,7 @@ Usage:
 """
 
 import logging as _logging
-from typing import Dict, Optional, Type, Set
+from typing import Dict, Optional, Set, Type
 
 # =============================================================================
 # Warning Categories (similar to Python's warning classes)

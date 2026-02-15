@@ -18,9 +18,7 @@ environment variables. This follows the Scholar module's CascadeConfig pattern.
 
 import os
 from pathlib import Path
-from typing import Dict
-from typing import List
-from typing import Optional, Type, Any
+from typing import Any, Dict, List, Optional, Type
 
 
 def load_dotenv(dotenv_path: Optional[str] = None) -> bool:

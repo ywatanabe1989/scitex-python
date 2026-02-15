@@ -10,8 +10,8 @@ This module provides functions to detect and retrieve the path
 of the currently running Jupyter notebook.
 """
 
-import os
 import json
+import os
 from typing import Optional
 
 __all__ = ["get_notebook_path", "get_notebook_name"]

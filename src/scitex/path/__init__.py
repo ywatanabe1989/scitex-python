@@ -11,14 +11,14 @@ from ._mk_spath import mk_spath
 from ._path import get_this_path, this_path
 from ._split import split
 from ._symlink import (
-    symlink,
+    create_relative_symlink,
+    fix_broken_symlinks,
     is_symlink,
+    list_symlinks,
     readlink,
     resolve_symlinks,
-    create_relative_symlink,
+    symlink,
     unlink_symlink,
-    list_symlinks,
-    fix_broken_symlinks,
 )
 from ._this_path import get_this_path, this_path
 from ._version import find_latest, increment_version

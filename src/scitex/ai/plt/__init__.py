@@ -6,28 +6,28 @@ but re-exported here for backward compatibility. New code should import directly
 from scitex.ai.metrics instead.
 """
 
-from ._stx_conf_mat import (
-    calc_bACC_from_conf_mat,
-    calc_bacc_from_conf_mat,
-    stx_conf_mat,
-    conf_mat,
-)
-from ._plot_learning_curve import (
-    plot_learning_curve,
-    _prepare_metrics_df,
-    _configure_accuracy_axis,
-    _plot_training_data,
-    _plot_validation_data,
-    _plot_test_data,
-    _add_epoch_vlines,
-    _select_epoch_ticks,
-)
-from ._plot_optuna_study import optuna_study, plot_optuna_study
-from ._plot_roc_curve import plot_roc_curve
-from ._plot_pre_rec_curve import plot_pre_rec_curve
 from ._plot_feature_importance import (
     plot_feature_importance,
     plot_feature_importance_cv_summary,
+)
+from ._plot_learning_curve import (
+    _add_epoch_vlines,
+    _configure_accuracy_axis,
+    _plot_test_data,
+    _plot_training_data,
+    _plot_validation_data,
+    _prepare_metrics_df,
+    _select_epoch_ticks,
+    plot_learning_curve,
+)
+from ._plot_optuna_study import optuna_study, plot_optuna_study
+from ._plot_pre_rec_curve import plot_pre_rec_curve
+from ._plot_roc_curve import plot_roc_curve
+from ._stx_conf_mat import (
+    calc_bACC_from_conf_mat,
+    calc_bacc_from_conf_mat,
+    conf_mat,
+    stx_conf_mat,
 )
 
 # Backward compatibility aliases

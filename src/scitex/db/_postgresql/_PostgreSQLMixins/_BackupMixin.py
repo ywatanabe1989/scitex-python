@@ -7,9 +7,10 @@ THIS_FILE = (
     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_PostgreSQLMixins/_BackupMixin.py"
 )
 
-import subprocess
 import os
-from typing import Optional, List
+import subprocess
+from typing import List, Optional
+
 from ..._BaseMixins._BaseBackupMixin import _BaseBackupMixin
 
 

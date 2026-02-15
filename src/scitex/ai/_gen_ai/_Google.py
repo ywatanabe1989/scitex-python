@@ -28,6 +28,7 @@ from pprint import pprint
 from typing import Any, Dict, Generator, List, Optional
 
 import matplotlib.pyplot as plt
+
 import scitex
 
 try:

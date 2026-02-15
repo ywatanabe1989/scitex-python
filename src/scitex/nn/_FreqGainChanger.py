@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 # Time-stamp: "2023-04-23 11:02:34 (ywatanabe)"
 
+import julius
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
+
 import scitex
-import numpy as np
-import julius
 
 # BANDS_LIM_HZ_DICT = {
 #     "delta": [0.5, 4],

@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/capture/cli.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/capture/cli.py"
@@ -168,6 +169,7 @@ Examples:
 
             # Start MCP server
             import asyncio
+
             from .mcp_server import main as mcp_main
 
             asyncio.run(mcp_main())

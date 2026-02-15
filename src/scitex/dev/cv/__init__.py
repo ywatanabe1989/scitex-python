@@ -35,16 +35,8 @@ Example
 ... )
 """
 
-from ._compose import (
-    compose,
-    concatenate_videos,
-    image_to_video,
-)
-from ._title_card import (
-    create_closing,
-    create_opening,
-    create_title_card,
-)
+from ._compose import compose, concatenate_videos, image_to_video
+from ._title_card import create_closing, create_opening, create_title_card
 
 __all__ = [
     # Title cards

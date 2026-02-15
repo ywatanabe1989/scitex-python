@@ -8,12 +8,12 @@ Canvas JSON operations for scitex.canvas.
 Handles saving, loading, and updating canvas.json files.
 """
 
-from pathlib import Path
-from typing import Dict, Any, Union, Optional
-from datetime import datetime
 import json
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
-from ._directory import get_canvas_directory_path, SCHEMA_VERSION
+from ._directory import SCHEMA_VERSION, get_canvas_directory_path
 
 
 def _get_empty_canvas_template(canvas_name: str) -> Dict[str, Any]:

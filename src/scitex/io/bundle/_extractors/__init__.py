@@ -7,14 +7,14 @@
 Each extractor handles data extraction and encoding building for a specific plot type.
 """
 
+# Bar charts (Rectangle patches)
+from ._extract_bar import build_bar_traces, count_valid_bars, extract_bar_data
+
 # Line plots
 from ._extract_line import build_line_traces, extract_line_data
 
 # Scatter plots (PathCollection)
 from ._extract_scatter import build_scatter_traces, extract_scatter_data
-
-# Bar charts (Rectangle patches)
-from ._extract_bar import build_bar_traces, count_valid_bars, extract_bar_data
 
 __all__ = [
     # Line

@@ -32,18 +32,25 @@ import click
 @click.option("--job-id", default="", help="Job ID for --poll/--result")
 @click.option(
     "--hpc-cpus",
-    default=8,
+    default=None,
     type=int,
-    show_default=True,
-    help="HPC CPUs per task",
+    help="HPC CPUs per task [env: SCITEX_DEV_TEST_CPUS, default: 16]",
 )
 @click.option(
-    "--hpc-partition", default="sapphire", show_default=True, help="Slurm partition"
+    "--hpc-partition",
+    default=None,
+    help="Slurm partition [env: SCITEX_DEV_TEST_PARTITION, default: sapphire]",
 )
 @click.option(
-    "--hpc-time", default="00:10:00", show_default=True, help="Slurm time limit"
+    "--hpc-time",
+    default=None,
+    help="Slurm time limit [env: SCITEX_DEV_TEST_TIME, default: 00:20:00]",
 )
-@click.option("--hpc-mem", default="16G", show_default=True, help="Slurm memory limit")
+@click.option(
+    "--hpc-mem",
+    default=None,
+    help="Slurm memory limit [env: SCITEX_DEV_TEST_MEM, default: 128G]",
+)
 @click.option(
     "--watch-interval",
     default=15,

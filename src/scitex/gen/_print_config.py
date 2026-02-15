@@ -17,11 +17,10 @@ Example:
     python _print_config.py PATH.TITAN.MAT
 """
 
-import sys
-import os
 import argparse
-from pprint import pprint
+import os
 import sys
+from pprint import pprint
 
 
 def print_config(key):

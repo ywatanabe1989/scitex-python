@@ -113,8 +113,8 @@ def to_torch(
 
     def _to_torch(data: _Any) -> _Any:
         """Internal conversion function for various data types."""
-        import torch
         import pandas as pd
+        import torch
 
         # Check for None
         if data is None:
@@ -206,8 +206,8 @@ def to_numpy(*args: _Any, return_fn: Callable = _return_if, **kwargs: _Any) -> _
 
     def _to_numpy(data: _Any) -> _Any:
         """Internal conversion function for various data types."""
-        import torch
         import pandas as pd
+        import torch
 
         # Check for None
         if data is None:

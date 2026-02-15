@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 from .audio import register_audio_tools
-from .canvas import register_canvas_tools
 from .capture import register_capture_tools
 from .clew import register_clew_tools
 from .dataset import register_dataset_tools
@@ -29,7 +28,7 @@ __all__ = ["register_all_tools"]
 def register_all_tools(mcp) -> None:
     """Register all module tools with the FastMCP server."""
     register_audio_tools(mcp)
-    register_canvas_tools(mcp)
+    # canvas tools removed (deprecated since v2.16.0, use plt_compose)
     register_capture_tools(mcp)
     register_dataset_tools(mcp)
     register_dev_tools(mcp)

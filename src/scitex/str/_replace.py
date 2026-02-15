@@ -12,7 +12,8 @@ THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/str/_replace.py"
 
 THIS_FILE = "/home/ywatanabe/proj/scitex_repo/src/scitex/str/_replace.py"
 
-from typing import Union, Dict, Optional
+from typing import Dict, Optional, Union
+
 from scitex.dict import DotDict as _DotDict
 
 

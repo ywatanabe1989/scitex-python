@@ -21,7 +21,6 @@ def gauss(x, sigma, t=None):
 @signal_fn
 def bandpass(x, fs, bands, t=None):
     import torch
-    from scitex.nn._Filters import BandPassFilter
 
     from scitex.nn._Filters import BandPassFilter
 

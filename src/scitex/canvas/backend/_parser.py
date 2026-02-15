@@ -3,14 +3,9 @@
 # File: ./src/scitex/vis/backend/parser.py
 """Parse figure JSON to Python object models."""
 
-from typing import Dict, Any
-from ..model import (
-    FigureModel,
-    AxesModel,
-    PlotModel,
-    GuideModel,
-    AnnotationModel,
-)
+from typing import Any, Dict
+
+from ..model import AnnotationModel, AxesModel, FigureModel, GuideModel, PlotModel
 
 
 def parse_figure_json(fig_json: Dict[str, Any]) -> FigureModel:
@@ -166,7 +161,7 @@ def validate_figure_json(fig_json: Dict[str, Any]) -> bool:
     >>> validate_figure_json(fig_json)
     True
     """
-    from ..utils import validate_json_structure, validate_axes_layout
+    from ..utils import validate_axes_layout, validate_json_structure
 
     # Step 1: Validate basic JSON structure
     validate_json_structure(fig_json)

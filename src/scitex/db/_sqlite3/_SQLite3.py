@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/db/_sqlite3/_SQLite3.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -14,6 +15,7 @@ import warnings
 from typing import List, Optional
 
 from scitex.str import printc as _printc
+
 from ._SQLite3Mixins._ArrayMixin import _ArrayMixin
 from ._SQLite3Mixins._BatchMixin import _BatchMixin
 from ._SQLite3Mixins._BlobMixin import _BlobMixin

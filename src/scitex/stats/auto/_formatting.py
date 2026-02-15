@@ -18,14 +18,17 @@ All formatting respects journal style presets (APA, Nature, Cell, Elsevier).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Any, TypedDict, Union
+from typing import Any, Dict, List, Optional, TypedDict, Union
 
 import numpy as np
 
 from ._styles import StatStyle, get_stat_style
+from ._summary import (
+    SummaryStatsDict,
+    compute_summary_from_groups,
+    compute_summary_stats,
+)
 from ._symbols import get_stat_symbol
-from ._summary import compute_summary_stats, compute_summary_from_groups, SummaryStatsDict
-
 
 # =============================================================================
 # Type Definitions
@@ -61,6 +64,7 @@ class SummaryStatsDict(TypedDict, total=False):
     maximum : float or None
         Maximum value.
     """
+
     group: str
     n: int
     mean: Optional[float]
@@ -97,6 +101,7 @@ class TestResultDict(TypedDict, total=False):
     details : dict
         Additional test-specific information.
     """
+
     test_name: str
     p_raw: Optional[float]
     p_adj: Optional[float]
@@ -126,6 +131,7 @@ class EffectResultDict(TypedDict, total=False):
     note : str or None
         Interpretation note (e.g., "small", "medium", "large").
     """
+
     name: str
     label: str
     value: float
@@ -416,10 +422,7 @@ def apply_multiple_correction(
         return results
 
     # Get valid p-values
-    valid_indices = [
-        i for i, r in enumerate(results)
-        if r.get("p_raw") is not None
-    ]
+    valid_indices = [i for i, r in enumerate(results) if r.get("p_raw") is not None]
 
     if not valid_indices:
         return results

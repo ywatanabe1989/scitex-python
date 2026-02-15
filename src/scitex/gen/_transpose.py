@@ -3,8 +3,9 @@
 # Time-stamp: "2024-08-24 09:47:16 (ywatanabe)"
 # ./src/scitex/gen/_transpose.py
 
-from scitex.decorators import numpy_fn
 import numpy as np
+
+from scitex.decorators import numpy_fn
 
 
 @numpy_fn
@@ -31,7 +32,7 @@ def transpose(arr_like, src_dims, tgt_dims):
     AssertionError
         If source and target dimensions don't contain the same elements.
     """
-    assert set(src_dims) == set(tgt_dims), (
-        "Source and target dimensions must contain the same elements"
-    )
+    assert set(src_dims) == set(
+        tgt_dims
+    ), "Source and target dimensions must contain the same elements"
     return arr_like.transpose(*[np.where(src_dims == dim)[0][0] for dim in tgt_dims])

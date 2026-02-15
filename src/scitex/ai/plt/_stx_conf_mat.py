@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/plt/stx_conf_mat.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -15,12 +16,13 @@ import argparse
 import matplotlib
 import numpy as np
 import pandas as pd
-import scitex
 import seaborn as sns
 from matplotlib import ticker
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import confusion_matrix as sklearn_confusion_matrix
+
+import scitex
 
 # Import metric calculation from centralized location (SoC: metrics in scitex.ai.metrics)
 from scitex.ai.metrics import calc_bacc_from_conf_mat
@@ -193,6 +195,7 @@ def stx_conf_mat(
     # Use stx.plt.subplots() for CSV export functionality
     # The AxisWrapper provides export_as_csv method for automatic data export
     import matplotlib.pyplot as mpl_plt
+
     import scitex as stx
 
     if ax is None:
@@ -331,7 +334,9 @@ def run_main() -> None:
     global CONFIG, CC, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()
@@ -474,6 +479,7 @@ if __name__ == "__main__":
     #     # Main
     #     # Use stx.plt.subplots for advanced CSV export and SciTeX Viz integration
     import matplotlib.pyplot as mpl_plt
+
     import scitex as stx
 
     fig, ax = stx.plt.subplots()

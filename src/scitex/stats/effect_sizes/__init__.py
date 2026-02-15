@@ -18,11 +18,11 @@ Each effect size comes with an interpretation function following standard
 guidelines (Cohen, 1988; McGraw & Wong, 1992).
 """
 
-from ._cohens_d import cohens_d, interpret_cohens_d
 from ._cliffs_delta import cliffs_delta, interpret_cliffs_delta
-from ._prob_superiority import prob_superiority, interpret_prob_superiority
-from ._eta_squared import eta_squared, interpret_eta_squared
+from ._cohens_d import cohens_d, interpret_cohens_d
 from ._epsilon_squared import epsilon_squared, interpret_epsilon_squared
+from ._eta_squared import eta_squared, interpret_eta_squared
+from ._prob_superiority import interpret_prob_superiority, prob_superiority
 
 __all__ = [
     # Parametric

@@ -3,8 +3,8 @@
 # Time-stamp: "2024-11-14 07:41:33 (ywatanabe)"
 # File: ./scitex_repo/src/scitex/io/_load_modules/_pickle.py
 
-import pickle
 import gzip
+import pickle
 
 
 def _load_pickle(lpath, **kwargs):

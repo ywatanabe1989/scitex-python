@@ -19,7 +19,6 @@ import warnings
 from bisect import bisect_left
 from functools import wraps
 
-
 import numpy as np
 import pandas as pd
 import readchar

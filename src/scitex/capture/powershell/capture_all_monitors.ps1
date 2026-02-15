@@ -47,7 +47,7 @@ if ($OutputFormat -eq "base64") {
     # Save to file (for testing/debugging)
     $file = "$env:TEMP\screenshot_all_$(Get-Date -Format 'yyyyMMdd_HHmmss').png"
     $bitmap.Save($file, [System.Drawing.Imaging.ImageFormat]::Png)
-    
+
     # Get monitor info for display
     $screens = [System.Windows.Forms.Screen]::AllScreens
     Write-Host "Captured $($screens.Count) monitor(s):"

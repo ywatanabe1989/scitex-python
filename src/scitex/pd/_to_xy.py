@@ -3,9 +3,10 @@
 # Time-stamp: "2024-09-03 07:01:31 (ywatanabe)"
 # ./src/scitex/pd/_to_xy.py
 
-import scitex
 import numpy as np
 import pandas as pd
+
+import scitex
 
 
 def to_xy(data_frame):

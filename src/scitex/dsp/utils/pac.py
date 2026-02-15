@@ -21,9 +21,10 @@ This script does XYZ.
 import sys
 
 import matplotlib.pyplot as plt
-import scitex
 import numpy as np
 import tensorpac
+
+import scitex
 
 
 # Functions

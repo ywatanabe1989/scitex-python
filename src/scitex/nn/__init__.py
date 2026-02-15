@@ -2,12 +2,12 @@
 """Scitex nn module."""
 
 from ._AxiswiseDropout import AxiswiseDropout
-from ._BNet import BHead as BHead_v1, BNet as BNet_v1, BNet_config as BNet_config_v1
-from ._BNet_Res import (
-    BHead as BHead_Res,
-    BNet as BNet_Res,
-    BNet_config as BNet_config_Res,
-)
+from ._BNet import BHead as BHead_v1
+from ._BNet import BNet as BNet_v1
+from ._BNet import BNet_config as BNet_config_v1
+from ._BNet_Res import BHead as BHead_Res
+from ._BNet_Res import BNet as BNet_Res
+from ._BNet_Res import BNet_config as BNet_config_Res
 from ._ChannelGainChanger import ChannelGainChanger
 from ._DropoutChannels import DropoutChannels
 from ._Filters import (

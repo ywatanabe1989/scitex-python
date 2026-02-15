@@ -10,9 +10,10 @@ Safe, clear communication with user.
 Multiple input methods: env vars, terminal, browser.
 """
 
-import os
 import getpass
-from typing import Optional, Dict
+import os
+from typing import Dict, Optional
+
 from playwright.async_api import Page
 
 
@@ -137,12 +138,14 @@ class CredentialManager:
         except:
             pass  # Continue anyway
 
-        value = await page.evaluate(f"""
+        value = await page.evaluate(
+            f"""
             () => {{
                 const response = prompt('🔑 Credential needed: {prompt_text}\\n\\n(You can also set ${name.upper()} environment variable)');
                 return response;
             }}
-        """)
+        """
+        )
 
         return value if value else None
 

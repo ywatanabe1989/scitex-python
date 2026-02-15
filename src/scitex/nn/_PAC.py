@@ -10,9 +10,10 @@ import sys
 import warnings
 
 import matplotlib.pyplot as plt
-import scitex
 import torch
 import torch.nn as nn
+
+import scitex
 
 
 # Functions

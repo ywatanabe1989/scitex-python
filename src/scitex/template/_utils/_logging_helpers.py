@@ -8,6 +8,7 @@ Provides utilities for grouped operations with visual hierarchy.
 
 from contextlib import contextmanager
 from typing import Optional
+
 from scitex.logging import getLogger
 
 logger = getLogger(__name__)

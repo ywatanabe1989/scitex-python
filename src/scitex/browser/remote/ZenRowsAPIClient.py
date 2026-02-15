@@ -5,6 +5,7 @@
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/browser/remote/_ZenRowsAPIBrowser.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/browser/remote/_ZenRowsAPIBrowser.py"
@@ -16,11 +17,12 @@ ZenRows API-based browser for reliable page rendering and screenshot capture.
 This uses the ZenRows API directly instead of WebSocket for better reliability.
 """
 
-import json
-import base64
 import asyncio
-from typing import Optional, Dict, Any, List
+import base64
+import json
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 
 from scitex import logging

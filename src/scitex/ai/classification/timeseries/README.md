@@ -24,7 +24,7 @@ Fold 0: [TTTTTTTTTT]    [SSS]   Fold 0: [TTTTTTTT]  [VV]  [SSS]
 Fold 1: [TTTTTTTTTTTT]  [SSS]   Fold 1: [TTTTTTTTTT][VV]  [SSS]
 Fold 2: [TTTTTTTTTTTTTT][SSS]   Fold 2: [TTTTTTTTTTTT][VV][SSS]
         └─ Expanding ─┘  Test            └─Expanding─┘ Val  Test
-        
+
 Legend: T=Train, V=Validation, S=teSt
 ```
 
@@ -38,7 +38,7 @@ Fold 0: [TTTT]  [SS]            Fold 0: [TTT][V]  [SS]
 Fold 1:    [TTTT]  [SS]         Fold 1:    [TTT][V]  [SS]
 Fold 2:       [TTTT]  [SS]      Fold 2:       [TTT][V]  [SS]
         └─Win─┘ Gap └Test┘              └Train┘Val Gap└Test┘
-        
+
 Legend: T=Train, V=Validation, S=teSt, Gap=temporal separation
 ```
 
@@ -53,7 +53,7 @@ Subject B: [TTTT][SS]                 Subject B: [TTT][V][S]
 Subject C: [TTTT][SS]                 Subject C: [TTT][V][S]
 Subject D: [TTTT][SS]                 Subject D: [TTT][V][S]
            └Train┘Test                           └Trn┘Val│Test
-        
+
 Legend: T=Train, V=Validation, S=teSt (per subject)
 ```
 
@@ -68,7 +68,7 @@ Fold 0: [TTTTTT]   [S]                Fold 0: [TTTTT]   [V]    [S]
 Fold 1:    [TTTTTT]   [S]             Fold 1:    [TTTTT]   [V]    [S]
 Fold 2:       [TTTTTT]   [S]          Fold 2:       [TTTTT]   [V]    [S]
         └─6 months─┘  └1mo┘                   └─5 months─┘ └1mo┘ └1mo┘
-        
+
 Legend: T=Train intervals, V=Validation intervals, S=teSt intervals
 ```
 
@@ -94,14 +94,14 @@ for train_idx, val_idx, test_idx in splitter.split_with_val(X, y, timestamps):
     pass
 ```
 
-### TimeSeriesBlockingSplit  
+### TimeSeriesBlockingSplit
 Multiple independent time series (e.g., different patients/subjects) with optional validation set.
 
 ```python
 from scitex.ai.classification.timeseries import TimeSeriesBlockingSplit
 
 splitter = TimeSeriesBlockingSplit(
-    n_splits=3, 
+    n_splits=3,
     test_ratio=0.2,
     val_ratio=0.15  # Optional validation set
 )
@@ -216,13 +216,13 @@ for fold, (train_idx, val_idx, test_idx) in enumerate(splitter.split_with_val(X,
     # Train model
     model = RandomForestClassifier()
     model.fit(X[train_idx], y[train_idx])
-    
+
     # Validate for hyperparameter tuning
     val_score = model.score(X[val_idx], y[val_idx])
-    
+
     # Final test evaluation
     test_score = model.score(X[test_idx], y[test_idx])
-    
+
     print(f"Fold {fold}: Val={val_score:.3f}, Test={test_score:.3f}")
 ```
 
@@ -234,7 +234,7 @@ All splitters automatically detect and visualize validation sets when present:
 # Visualize splits (automatically shows train/val/test if val_ratio > 0)
 fig = splitter.plot_splits(X, y, timestamps)
 # Blue rectangles/dots: Training set
-# Green rectangles/dots: Validation set  
+# Green rectangles/dots: Validation set
 # Red rectangles/dots: Test set
 ```
 
@@ -261,11 +261,11 @@ for fold, (train_idx, test_idx) in enumerate(splitter.split(X, y, timestamps=dat
     # Train model
     model = RandomForestClassifier()
     model.fit(X[train_idx], y[train_idx])
-    
+
     # Evaluate
     y_pred = model.predict(X[test_idx])
     y_proba = model.predict_proba(X[test_idx])
-    
+
     # Report metrics
     reporter.calculate_metrics(
         y_true=y[test_idx],

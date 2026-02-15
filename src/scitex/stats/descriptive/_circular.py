@@ -41,9 +41,9 @@ def _normalize_axis(axis, dim):
 def _ensure_more_than_2d(data) -> None:
     """Ensure data has at least 2 dimensions."""
     ndim = data.ndim if hasattr(data, "ndim") else np.asarray(data).ndim
-    assert ndim >= 2, (
-        f"Input must be at least 2 dimensional with batch dimension as first axis, got {ndim}"
-    )
+    assert (
+        ndim >= 2
+    ), f"Input must be at least 2 dimensional with batch dimension as first axis, got {ndim}"
 
 
 def _check_angle_units(angles) -> None:
@@ -163,9 +163,9 @@ def circular_mean(
     dim = _normalize_axis(axis, dim)
 
     if _is_torch_tensor(angles):
-        assert angles.shape == values.shape, (
-            f"angles shape {angles.shape} must match values shape {values.shape}"
-        )
+        assert (
+            angles.shape == values.shape
+        ), f"angles shape {angles.shape} must match values shape {values.shape}"
         cos_angles = torch.cos(angles)
         sin_angles = torch.sin(angles)
 
@@ -181,9 +181,9 @@ def circular_mean(
     else:
         angles = np.asarray(angles)
         values = np.asarray(values)
-        assert angles.shape == values.shape, (
-            f"angles shape {angles.shape} must match values shape {values.shape}"
-        )
+        assert (
+            angles.shape == values.shape
+        ), f"angles shape {angles.shape} must match values shape {values.shape}"
 
         cos_angles = np.cos(angles)
         sin_angles = np.sin(angles)

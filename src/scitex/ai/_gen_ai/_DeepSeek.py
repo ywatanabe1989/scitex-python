@@ -21,8 +21,9 @@ import os
 import sys
 from typing import Dict, Generator, List, Optional
 
-import scitex
 import requests
+
+import scitex
 
 from ._BaseGenAI import BaseGenAI
 

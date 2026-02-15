@@ -29,18 +29,12 @@ Advanced Introspection:
 - get_function_calls: Simple outgoing calls list
 """
 
-from ._core import (
-    # IPython-style names
+from ._core import (  # IPython-style names; Basic; Advanced - Call graph; Advanced - Type hints; Advanced - Class hierarchy; Advanced - Imports
     dir,
-    # Basic
     find_examples,
-    # Advanced - Call graph
     get_call_graph,
-    # Advanced - Type hints
     get_class_annotations,
-    # Advanced - Class hierarchy
     get_class_hierarchy,
-    # Advanced - Imports
     get_dependencies,
     get_docstring,
     get_exports,

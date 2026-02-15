@@ -4,13 +4,7 @@
 
 from typing import Any, Dict
 
-from .._models import (
-    AnnotationModel,
-    AxesModel,
-    FigureModel,
-    GuideModel,
-    PlotModel,
-)
+from .._models import AnnotationModel, AxesModel, FigureModel, GuideModel, PlotModel
 
 
 def parse_figure_json(fig_json: Dict[str, Any]) -> FigureModel:

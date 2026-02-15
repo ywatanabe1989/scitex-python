@@ -23,7 +23,9 @@ Clinical Targets (FDA guidelines):
 """
 
 from __future__ import annotations
+
 from typing import Dict
+
 import numpy as np
 import pandas as pd
 
@@ -473,7 +475,9 @@ def run_main():
     global CONFIG, CC, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

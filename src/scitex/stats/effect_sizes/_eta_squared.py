@@ -4,6 +4,7 @@
 # File: ./src/scitex/stats/effect_sizes/_eta_squared.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/stats/effect_sizes/_eta_squared.py"
@@ -31,6 +32,7 @@ from typing import List, Union
 
 import numpy as np
 import pandas as pd
+
 import scitex as stx
 from scitex.logging import getLogger
 
@@ -270,6 +272,7 @@ def run_main():
     global CONFIG, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
 
     args = parse_args()

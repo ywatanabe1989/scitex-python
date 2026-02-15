@@ -3,8 +3,9 @@
 
 import os
 
-import scitex
 import numpy as np
+
+import scitex
 
 
 class EarlyStopping:

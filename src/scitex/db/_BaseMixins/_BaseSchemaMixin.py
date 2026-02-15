@@ -7,7 +7,7 @@ THIS_FILE = (
     "/home/ywatanabe/proj/scitex_repo/src/scitex/db/_Basemodules/_BaseSchemaMixin.py"
 )
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 class _BaseSchemaMixin:

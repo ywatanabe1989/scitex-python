@@ -24,13 +24,14 @@ from multiprocessing import Process
 from typing import Union
 
 import matplotlib.pyplot as plt
-import scitex
 import pandas as pd
 
-from scitex.sh import sh
+import scitex
 from scitex.io._load import load
 from scitex.io._save import save
+from scitex.sh import sh
 from scitex.str import printc
+
 from ._get_processor_usages import get_processor_usages
 
 """Functions & Classes"""

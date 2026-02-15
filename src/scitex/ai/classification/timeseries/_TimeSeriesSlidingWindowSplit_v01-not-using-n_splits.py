@@ -4,6 +4,7 @@
 # File: /ssh:sp:/home/ywatanabe/proj/scitex_repo/src/scitex/ml/classification/timeseries/_TimeSeriesSlidingWindowSplit.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/ml/classification/timeseries/_TimeSeriesSlidingWindowSplit.py"
@@ -40,10 +41,11 @@ from typing import Iterator, Optional, Tuple
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
-import scitex as stx
-from scitex import logging
 from sklearn.model_selection import BaseCrossValidator
 from sklearn.utils.validation import _num_samples
+
+import scitex as stx
+from scitex import logging
 
 logger = logging.getLogger(__name__)
 
@@ -852,9 +854,11 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         train_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"]
-                            if y[idx] == 0
-                            else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
+                            (
+                                stx.plt.color.PARAMS["RGBA_NORM"]["blue"]
+                                if y[idx] == 0
+                                else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
+                            )
                             for idx in train_idx
                         ]
                         ax.plot_scatter(
@@ -886,9 +890,11 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         val_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["yellow"]
-                            if y[idx] == 0
-                            else stx.plt.color.PARAMS["RGBA_NORM"]["orange"]
+                            (
+                                stx.plt.color.PARAMS["RGBA_NORM"]["yellow"]
+                                if y[idx] == 0
+                                else stx.plt.color.PARAMS["RGBA_NORM"]["orange"]
+                            )
                             for idx in val_idx
                         ]
                         ax.plot_scatter(
@@ -920,9 +926,11 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         test_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["red"]
-                            if y[idx] == 0
-                            else stx.plt.color.PARAMS["RGBA_NORM"]["brown"]
+                            (
+                                stx.plt.color.PARAMS["RGBA_NORM"]["red"]
+                                if y[idx] == 0
+                                else stx.plt.color.PARAMS["RGBA_NORM"]["brown"]
+                            )
                             for idx in test_idx
                         ]
                         ax.plot_scatter(
@@ -977,9 +985,11 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         train_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["blue"]
-                            if y[idx] == 0
-                            else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
+                            (
+                                stx.plt.color.PARAMS["RGBA_NORM"]["blue"]
+                                if y[idx] == 0
+                                else stx.plt.color.PARAMS["RGBA_NORM"]["lightblue"]
+                            )
                             for idx in train_idx
                         ]
                         ax.plot_scatter(
@@ -1011,9 +1021,11 @@ class TimeSeriesSlidingWindowSplit(BaseCrossValidator):
                     # Color by class if y is provided
                     if y is not None:
                         test_colors = [
-                            stx.plt.color.PARAMS["RGBA_NORM"]["red"]
-                            if y[idx] == 0
-                            else stx.plt.color.PARAMS["RGBA_NORM"]["brown"]
+                            (
+                                stx.plt.color.PARAMS["RGBA_NORM"]["red"]
+                                if y[idx] == 0
+                                else stx.plt.color.PARAMS["RGBA_NORM"]["brown"]
+                            )
                             for idx in test_idx
                         ]
                         ax.plot_scatter(
@@ -1578,6 +1590,7 @@ def run_main() -> None:
     import sys
 
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

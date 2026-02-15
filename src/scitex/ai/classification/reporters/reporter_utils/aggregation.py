@@ -5,12 +5,13 @@ Metric aggregation utilities for cross-fold analysis.
 Provides functions to aggregate metrics across folds and create summary tables.
 """
 
-import numpy as np
-import pandas as pd
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
 import json
 from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import numpy as np
+import pandas as pd
 
 
 def aggregate_fold_metrics(

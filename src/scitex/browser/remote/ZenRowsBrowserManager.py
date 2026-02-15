@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/browser/remote/_ZenRowsRemoteScholarBrowserManager.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -14,12 +15,13 @@ __DIR__ = os.path.dirname(__FILE__)
 Browser manager specifically for the ZenRows Scraping Browser service.
 This provides cloud-based Chrome instances with built-in anti-bot bypass.
 """
-from typing import Any, Optional, Dict
+from typing import Any, Dict, Optional
 
-from playwright.async_api import Browser, BrowserContext, async_playwright, Page
+from playwright.async_api import Browser, BrowserContext, Page, async_playwright
 
 from scitex import logging
 from scitex.scholar.browser.local.utils._CookieAutoAcceptor import CookieAutoAcceptor
+
 from ._ZenRowsAPIBrowser import ZenRowsAPIBrowser
 
 logger = logging.getLogger(__name__)
@@ -285,8 +287,8 @@ if __name__ == "__main__":
     async def main():
         """Comprehensive test of ZenRowsRemoteScholarBrowserManager with comparisons."""
         import json
-        from pathlib import Path
         from datetime import datetime
+        from pathlib import Path
 
         # Create screenshots directory
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -326,7 +328,9 @@ if __name__ == "__main__":
                     (
                         browser,
                         context,
-                    ) = await browser_manager.get_authenticated_browser_and_context_async()
+                    ) = (
+                        await browser_manager.get_authenticated_browser_and_context_async()
+                    )
                     pages_via_context = True
                 else:
                     # Direct browser access

@@ -28,15 +28,17 @@ IO:
 """
 
 """Imports"""
+import argparse
 import os
 import sys
-import argparse
-import numpy as np
 from typing import Iterator, Optional, Tuple
+
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.model_selection import BaseCrossValidator
 from sklearn.utils.validation import _num_samples
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+
 import scitex as stx
 from scitex import logging
 
@@ -388,9 +390,11 @@ class TimeSeriesStratifiedSplit(BaseCrossValidator):
                             edgecolor="blue",
                             facecolor="lightblue",
                             alpha=0.7,
-                            label="Train"
-                            if fold == 0 and start_idx == train_segments[0][0]
-                            else "",
+                            label=(
+                                "Train"
+                                if fold == 0 and start_idx == train_segments[0][0]
+                                else ""
+                            ),
                         )
                         ax.add_patch(train_rect)
 
@@ -406,9 +410,11 @@ class TimeSeriesStratifiedSplit(BaseCrossValidator):
                             edgecolor="green",
                             facecolor="lightgreen",
                             alpha=0.7,
-                            label="Validation"
-                            if fold == 0 and start_idx == val_segments[0][0]
-                            else "",
+                            label=(
+                                "Validation"
+                                if fold == 0 and start_idx == val_segments[0][0]
+                                else ""
+                            ),
                         )
                         ax.add_patch(val_rect)
 
@@ -424,9 +430,11 @@ class TimeSeriesStratifiedSplit(BaseCrossValidator):
                             edgecolor="red",
                             facecolor="lightcoral",
                             alpha=0.7,
-                            label="Test"
-                            if fold == 0 and start_idx == test_segments[0][0]
-                            else "",
+                            label=(
+                                "Test"
+                                if fold == 0 and start_idx == test_segments[0][0]
+                                else ""
+                            ),
                         )
                         ax.add_patch(test_rect)
 
@@ -445,9 +453,11 @@ class TimeSeriesStratifiedSplit(BaseCrossValidator):
                             edgecolor="blue",
                             facecolor="lightblue",
                             alpha=0.7,
-                            label="Train"
-                            if fold == 0 and start_idx == train_segments[0][0]
-                            else "",
+                            label=(
+                                "Train"
+                                if fold == 0 and start_idx == train_segments[0][0]
+                                else ""
+                            ),
                         )
                         ax.add_patch(train_rect)
 
@@ -463,9 +473,11 @@ class TimeSeriesStratifiedSplit(BaseCrossValidator):
                             edgecolor="red",
                             facecolor="lightcoral",
                             alpha=0.7,
-                            label="Test"
-                            if fold == 0 and start_idx == test_segments[0][0]
-                            else "",
+                            label=(
+                                "Test"
+                                if fold == 0 and start_idx == test_segments[0][0]
+                                else ""
+                            ),
                         )
                         ax.add_patch(test_rect)
 
@@ -665,7 +677,9 @@ def run_main() -> None:
     global CONFIG, CC, sys, plt, rng
 
     import sys
+
     import matplotlib.pyplot as plt
+
     import scitex as stx
 
     args = parse_args()

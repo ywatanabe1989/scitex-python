@@ -3,8 +3,8 @@
 # Timestamp: "2025-05-16 12:21:07 (ywatanabe)"
 # File: /data/gpfs/projects/punim2354/ywatanabe/scitex_repo/src/scitex/io/_save_modules/_pickle.py
 
-import pickle
 import gzip
+import pickle
 
 
 def _save_pickle(obj, spath):

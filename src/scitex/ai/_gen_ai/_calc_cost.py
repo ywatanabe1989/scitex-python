@@ -17,7 +17,8 @@ Prerequisites:
     - pandas package
 """
 
-from typing import Union, Any
+from typing import Any, Union
+
 import pandas as pd
 
 from ._PARAMS import MODELS

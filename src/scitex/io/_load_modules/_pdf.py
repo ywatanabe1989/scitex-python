@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/io/_load_modules/_pdf.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -444,8 +445,9 @@ def _extract_images(
                     if save_as_jpg and original_ext not in ["jpg", "jpeg"]:
                         # Convert to JPG using PIL
                         try:
-                            from PIL import Image
                             import io
+
+                            from PIL import Image
 
                             # Open image from bytes
                             img_pil = Image.open(io.BytesIO(image_bytes))
@@ -460,9 +462,11 @@ def _extract_images(
                                     img_pil = img_pil.convert("RGBA")
                                 background.paste(
                                     img_pil,
-                                    mask=img_pil.split()[-1]
-                                    if img_pil.mode == "RGBA"
-                                    else None,
+                                    mask=(
+                                        img_pil.split()[-1]
+                                        if img_pil.mode == "RGBA"
+                                        else None
+                                    ),
                                 )
                                 img_pil = background
                             elif img_pil.mode != "RGB":

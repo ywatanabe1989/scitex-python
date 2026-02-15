@@ -4,14 +4,11 @@
 
 """MCP tools for introspection."""
 
-from .handlers import (
-    # Advanced
+from .handlers import (  # Advanced; IPython-style names; Basic
     call_graph_handler,
     class_hierarchy_handler,
     dependencies_handler,
-    # IPython-style names
     dir_handler,
-    # Basic
     docstring_handler,
     examples_handler,
     exports_handler,

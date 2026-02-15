@@ -8,10 +8,12 @@ Git remote operations.
 
 from pathlib import Path
 from typing import Optional
+
 from scitex.logging import getLogger
 from scitex.sh import sh
+
+from ._constants import EXIT_FAILURE, EXIT_SUCCESS
 from ._utils import _in_directory
-from ._constants import EXIT_SUCCESS, EXIT_FAILURE
 
 logger = getLogger(__name__)
 

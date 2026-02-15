@@ -15,7 +15,7 @@ All validation functions follow the pattern:
 - Raise ValidationError with detailed message if invalid
 """
 
-from typing import Dict, Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 
 class ValidationError(Exception):
@@ -474,7 +474,9 @@ def validate_color(color: Any) -> bool:
         )
 
     if not color:
-        raise ValidationError("Color cannot be empty string", field="color", value=color)
+        raise ValidationError(
+            "Color cannot be empty string", field="color", value=color
+        )
 
     return True
 

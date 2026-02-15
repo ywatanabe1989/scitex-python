@@ -7,15 +7,15 @@
 Real-time performance monitoring for SciTeX.
 """
 
-import time
+import json
 import threading
-from collections import deque, defaultdict
-from typing import Dict, List, Optional, Callable, Any
+import time
+import warnings
+from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime
-import json
 from pathlib import Path
-import warnings
+from typing import Any, Callable, Dict, List, Optional
 
 
 @dataclass
@@ -245,8 +245,8 @@ def track_performance(func: Callable) -> Callable:
     ... def my_function(x):
     ...     return x ** 2
     """
-    from functools import wraps
     import sys
+    from functools import wraps
 
     @wraps(func)
     def wrapper(*args, **kwargs):

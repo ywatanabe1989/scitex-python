@@ -78,9 +78,9 @@ class DimHandler:
         Returns:
             x_flattened (numpy.ndarray): The reshaped array with kept dimensions moved to the end.
         """
-        assert len(keepdims) <= len(x.shape), (
-            "keepdims cannot have more dimensions than the array itself."
-        )
+        assert len(keepdims) <= len(
+            x.shape
+        ), "keepdims cannot have more dimensions than the array itself."
 
         # Normalize negative indices to positive indices
         total_dims = len(x.shape)
@@ -117,9 +117,9 @@ class DimHandler:
         Note:
             This method modifies the `orig_shape`, `keepdims`, `n_non_keepdims`, and `n_keepdims` attributes based on the input.
         """
-        assert len(keepdims) <= len(x.shape), (
-            "keepdims cannot have more dimensions than the tensor itself."
-        )
+        assert len(keepdims) <= len(
+            x.shape
+        ), "keepdims cannot have more dimensions than the tensor itself."
 
         keepdims = torch.tensor(keepdims).clone().detach().cpu().int()
         # Normalize negative indices to positive indices

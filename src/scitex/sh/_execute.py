@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/sh/_execute.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/sh/_execute.py"
@@ -12,15 +13,15 @@ __DIR__ = os.path.dirname(__FILE__)
 
 __FILE__ = __file__
 
+import select
 import subprocess
 import sys
-import select
 import time
 
 import scitex
-from ._types import CommandInput
-from ._types import ShellResult
+
 from ._security import validate_command
+from ._types import CommandInput, ShellResult
 
 
 def execute(

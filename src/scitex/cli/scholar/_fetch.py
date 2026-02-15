@@ -241,9 +241,11 @@ def _add_single(
             "success_pdf": has_pdf,
             "success_content": has_content,
             "pdf_method": pdf_method,
-            "message": "Paper fetched"
-            if has_pdf
-            else "Metadata fetched but PDF not downloaded",
+            "message": (
+                "Paper fetched"
+                if has_pdf
+                else "Metadata fetched but PDF not downloaded"
+            ),
             "doi": paper.metadata.id.doi if paper else None,
             "title": paper.metadata.basic.title if paper else None,
             "path": str(symlink_path) if symlink_path else None,

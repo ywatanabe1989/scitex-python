@@ -10,6 +10,7 @@ import sys
 from typing import List, Optional
 
 import matplotlib.pyplot as plt
+
 import scitex
 
 try:

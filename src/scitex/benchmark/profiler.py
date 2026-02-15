@@ -8,12 +8,12 @@ Profiling tools for SciTeX performance analysis.
 """
 
 import cProfile
-import pstats
 import io
-from typing import Callable, Optional, Dict, Any
-from functools import wraps
+import pstats
 import time
 from contextlib import contextmanager
+from functools import wraps
+from typing import Any, Callable, Dict, Optional
 
 
 class FunctionProfiler:
@@ -187,8 +187,8 @@ def profile_module(module_name: str, pattern: str = "*") -> Dict[str, Any]:
     dict
         Profiling results
     """
-    import importlib
     import fnmatch
+    import importlib
 
     module = importlib.import_module(module_name)
     profiler = FunctionProfiler()

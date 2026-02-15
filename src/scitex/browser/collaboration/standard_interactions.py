@@ -10,7 +10,8 @@ Provides consistent, reusable interaction patterns.
 """
 
 from enum import Enum
-from typing import Optional, Any
+from typing import Any, Optional
+
 from playwright.async_api import Page
 
 
@@ -47,7 +48,8 @@ class StandardInteractions:
         if self.initialized:
             return
 
-        await self.page.add_init_script("""
+        await self.page.add_init_script(
+            """
             () => {
                 window.scitexStandard = {
                     // Show choice dialog with standard options
@@ -181,7 +183,8 @@ class StandardInteractions:
 
                 console.log('✅ Standard interactions initialized');
             }
-        """)
+        """
+        )
 
         self.initialized = True
         print("✅ Standard interactions initialized")

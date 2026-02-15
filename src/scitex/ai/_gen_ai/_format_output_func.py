@@ -26,6 +26,7 @@ from typing import List, Optional
 
 import markdown2
 import matplotlib.pyplot as plt
+
 import scitex
 
 """Functions & Classes"""

@@ -46,6 +46,7 @@ from . import engines as _engines_module
 from .engines import ElevenLabsTTS, GoogleTTS, SystemTTS
 from .engines._base import BaseTTS as _BaseTTS
 from .engines._base import TTSBackend as _TTSBackend
+
 del _engines_module
 
 
@@ -126,11 +127,11 @@ def check_wsl_audio() -> dict:
     return result
 
 
-# Keep legacy TTS import for backwards compatibility
-from ._tts import TTS
-
 # Import audio availability check
 from ._audio_check import check_local_audio_available
+
+# Keep legacy TTS import for backwards compatibility
+from ._tts import TTS
 
 __all__ = [
     "speak",
@@ -241,10 +242,12 @@ def start_mcp_server():
 # Clean up internal imports from public namespace
 def _cleanup_namespace():
     import sys
+
     _module = sys.modules[__name__]
     for _name in ["annotations", "engines"]:
         if hasattr(_module, _name):
             delattr(_module, _name)
+
 
 _cleanup_namespace()
 del _cleanup_namespace

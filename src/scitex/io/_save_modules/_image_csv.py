@@ -79,6 +79,21 @@ def handle_image_with_csv(
             dry_run,
         )
 
+    # Delegate to figrecipe: recipe + hitmap (all logic lives in figrecipe)
+    if not dry_run:
+        try:
+            from pathlib import Path
+
+            from scitex.bridge._figrecipe import _save_recipe_to_path
+
+            recipe_path = Path(spath).with_suffix(".yaml")
+            _save_recipe_to_path(obj, recipe_path)
+        except Exception:
+            pass
+        from ._figrecipe_hitmap import try_figrecipe_hitmap
+
+        try_figrecipe_hitmap(obj, spath, kwargs)
+
 
 def _collect_metadata(obj, kwargs, verbose, json_schema, metadata_extra):  # noqa: C901
     """Auto-collect metadata from scitex figures."""

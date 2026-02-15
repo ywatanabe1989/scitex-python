@@ -23,9 +23,9 @@
 
 ## Emacs —more than an editor—
 - #### Install [Emacs](https://www.gnu.org/software/emacs/)
-  - Open Emacs. Try ‘M-x help-with-tutorial RET’ (hold down Alt (Meta) key while hitting ‘x’, then type ‘help-with-tutorial’, then hit Enter). 
+  - Open Emacs. Try ‘M-x help-with-tutorial RET’ (hold down Alt (Meta) key while hitting ‘x’, then type ‘help-with-tutorial’, then hit Enter).
 - #### Create shortcuts
-  Define shortcut keys by writing Elisp code. Regularly update the configuration files. 
+  Define shortcut keys by writing Elisp code. Regularly update the configuration files.
   [my .emacs.d](https://github.com/ywatanabe1989/.emacs.d)
 
 
@@ -35,7 +35,7 @@
 - #### Googlability
   If you have any comments or queries, feel free to visit [Google.com](https://www.google.com/) or press "Ctrl + K" on your browser. Finding suitable information on the Internet is a critical skill.
 - #### ChatGPT
-  Incorporate ChatGPT for your editor. 
+  Incorporate ChatGPT for your editor.
   [my emacs-gpt](https://github.com/ywatanabe1989/emacs-gpt)
 - #### Avoid Comments
   Code itself should be descriptive. Comments should help readers to understand "why" instead of "what".
