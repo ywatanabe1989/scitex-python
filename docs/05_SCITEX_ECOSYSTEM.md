@@ -6,6 +6,10 @@
 
 # SciTeX Ecosystem
 
+<p align="center">
+    <img src="../scripts/assets/workflow_out/workflow.png" alt="SciTeX Ecosystem" width="800">
+</p>
+
 SciTeX integrates standalone packages that can be used independently or through the unified `scitex` interface.
 
 ## Packages

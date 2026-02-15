@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <a href="https://scitex.ai">scitex.ai</a> · <code>pip install scitex</code>
+  <a href="https://scitex.ai">scitex.ai</a> · <a href="https://scitex-python.readthedocs.io">Read the Docs</a> · <code>pip install scitex</code>
 </p>
 
 ---

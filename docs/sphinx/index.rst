@@ -5,6 +5,11 @@ SciTeX
 
 A Python framework for reproducible scientific research.
 
+.. image:: _static/workflow.png
+   :alt: SciTeX Ecosystem
+   :align: center
+   :width: 800px
+
 .. code-block:: python
 
    import scitex as stx

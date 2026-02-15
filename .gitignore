@@ -50,6 +50,7 @@ script_out/
 
 ## Notebook outputs and temporary files
 *_out/
+!scripts/assets/workflow_out/
 *_executed.ipynb
 executed/
 indentation_fix_report_*.txt
