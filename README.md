@@ -1,5 +1,5 @@
 <!-- ---
-!-- Timestamp: 2026-02-16 10:04:19
+!-- Timestamp: 2026-02-16 10:11:28
 !-- Author: ywatanabe
 !-- File: /home/ywatanabe/proj/scitex-python/README.md
 !-- --- -->
@@ -23,14 +23,7 @@
 
 ---
 
-**Modular Python toolkit for Scientific Research Automation in the AI Era**
-
-> **SciTeX is fully modular; every module is opt-in.**
-
-
-<p align="center">
-    <img src="scripts/assets/workflow_out/workflow.png" alt="SciTeX Ecosystem" width="800">
-</p>
+# SciTeX — Modular Python Toolkit for Researchers and AI Agents
 
 >Four Freedoms for Research
 >
@@ -40,6 +33,11 @@
 >3. The freedom to **modify** any module and share improvements with the community.
 >
 >AGPL-3.0 — because research infrastructure deserves the same freedoms as the software it runs on.
+
+
+<p align="center">
+    <img src="scripts/assets/workflow_out/workflow.png" alt="SciTeX Ecosystem" width="800">
+</p>
 
 ## 🎬 Demo
 
