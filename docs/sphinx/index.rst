@@ -1,7 +1,7 @@
 .. SciTeX documentation master file
 
-SciTeX
-======
+SciTeX — Modular Python Toolkit for Researchers and AI Agents
+=============================================================
 
 A Python framework for reproducible scientific research.
 
@@ -9,6 +9,16 @@ A Python framework for reproducible scientific research.
    :alt: SciTeX Ecosystem
    :align: center
    :width: 800px
+
+Four Freedoms for Research
+--------------------------
+
+0. The freedom to **run** your research anywhere — your machine, your terms.
+1. The freedom to **study** how every step works — from raw data to final manuscript.
+2. The freedom to **redistribute** your workflows, not just your papers.
+3. The freedom to **modify** any module and share improvements with the community.
+
+AGPL-3.0 — because research infrastructure deserves the same freedoms as the software it runs on.
 
 .. code-block:: python
 
