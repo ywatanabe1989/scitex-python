@@ -34,6 +34,15 @@ Empowers both human researchers and AI agents. Each module works independently a
     <img src="scripts/assets/workflow_out/workflow.png" alt="SciTeX Ecosystem" width="800">
 </p>
 
+### Four Freedoms for Research
+
+0. **Run** your research anywhere — your machine, your terms.
+1. **Inspect** every step — from raw data to final manuscript.
+2. **Share** your workflows, not just your papers.
+3. **Modify** any module to fit your science.
+
+AGPL-3.0 — because research infrastructure deserves the same freedoms as the software it runs on.
+
 ## 🎬 Demo
 
 **40 min, zero human intervention** — AI agent conducts full research pipeline:
