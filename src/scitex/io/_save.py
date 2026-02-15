@@ -74,39 +74,24 @@ def save(
     track: bool = True,
     **kwargs,
 ) -> None:
-    """
-    Save an object to a file with the specified format.
+    """Save an object to a file with the specified format.
 
     Parameters
     ----------
-    obj : Any
-        The object to be saved.
-    specified_path : Union[str, Path]
-        The file path where the object should be saved.
-    makedirs : bool, optional
-        If True, create the directory path if it does not exist. Default is True.
-    verbose : bool, optional
-        If True, print a message upon successful saving. Default is True.
-    symlink_from_cwd : bool, optional
-        If True, create a symlink from the current working directory. Default is False.
-    symlink_to : Union[str, Path], optional
-        If specified, create a symlink at this path. Default is None.
-    dry_run : bool, optional
-        If True, simulate the saving process. Default is False.
-    auto_crop : bool, optional
-        If True, automatically crop saved images. Default is True.
-    crop_margin_mm : float, optional
-        Margin in millimeters for auto_crop. Default is 1.0mm.
-    use_caller_path : bool, optional
-        If True, determine script path by skipping internal library frames.
-    metadata_extra : dict, optional
-        Additional metadata to merge with auto-collected metadata.
-    json_schema : str, optional
-        Schema type for JSON metadata output. Default is "editable".
-    track : bool, optional
-        If True, track this file in verification system. Default is True.
-    **kwargs
-        Additional keyword arguments for the underlying save function.
+    obj : Any -- The object to be saved.
+    specified_path : Union[str, Path] -- Target file path.
+    makedirs : bool -- Create parent directories if missing.
+    verbose : bool -- Log success message after saving.
+    symlink_from_cwd : bool -- Create symlink from cwd.
+    symlink_to : Union[str, Path] -- Create symlink at this path.
+    dry_run : bool -- Simulate without writing.
+    auto_crop : bool -- Auto-crop saved images.
+    crop_margin_mm : float -- Crop margin in mm.
+    use_caller_path : bool -- Resolve path via caller frame.
+    metadata_extra : dict -- Extra metadata to merge.
+    json_schema : str -- JSON metadata schema type.
+    track : bool -- Track file in verification system.
+    **kwargs -- Passed to underlying save function.
     """
     try:
         # Handle file-like objects (BytesIO) directly
@@ -330,7 +315,16 @@ def _save(
             rel_path = _os.path.relpath(spath, _os.getcwd())
         except ValueError:
             rel_path = spath
-        logger.success(f"Saved to: ./{rel_path} ({file_size})")
+        dim = ""
+        try:
+            from PIL import Image
+
+            w, h = Image.open(spath).size
+            d = kwargs.get("dpi", 300)
+            dim = f" [W: {w / d * 25.4:.1f}mm, H: {h / d * 25.4:.1f}mm]"
+        except Exception:
+            pass
+        logger.success(f"Saved to: ./{rel_path} ({file_size}){dim}")
 
 
 def _is_matplotlib_figure(obj):

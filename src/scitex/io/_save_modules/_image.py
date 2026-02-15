@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Timestamp: "2025-12-01 12:23:32 (ywatanabe)"
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/io/_save_modules/_image.py
 
-import os
 
 __FILE__ = __file__
 

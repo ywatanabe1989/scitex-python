@@ -38,18 +38,21 @@ def handle_image_with_csv(
     """Handle image file saving with optional CSV export and auto-cropping."""
     if dry_run:
         return
-
-    # Auto-collect metadata from scitex figures if not explicitly provided
+    watermark = kwargs.pop("watermark", False)
     collected_metadata = _collect_metadata(
         obj, kwargs, verbose, json_schema, metadata_extra
     )
-
     save_image(obj, spath, verbose=verbose, **kwargs)
-
-    # Auto-crop if requested (only for raster formats)
     _auto_crop_image(
         spath, auto_crop, crop_margin_mm, collected_metadata, kwargs, verbose
     )
+    if watermark:
+        try:
+            from figrecipe._diagram._diagram._io import _add_watermark
+
+            _add_watermark(str(spath), dpi=kwargs.get("dpi", 300))
+        except Exception as e:
+            logger.warning("watermark failed: %s", e)
 
     # Handle separate legend saving
     save_separate_legends(
@@ -79,7 +82,6 @@ def handle_image_with_csv(
             dry_run,
         )
 
-    # Delegate to figrecipe: recipe + hitmap (all logic lives in figrecipe)
     if not dry_run:
         try:
             from pathlib import Path
@@ -506,6 +508,3 @@ def _create_json_symlinks(
         else:
             json_cwd = os.getcwd() + "/" + os.path.basename(json_path)
             symlink(json_path, json_cwd, True, True)
-
-
-# EOF
