@@ -73,41 +73,41 @@ graph TB
         CLI[Command Line]
         WEB[Web Browser]
     end
-    
+
     subgraph "SciTeX Modules with Unique Strengths"
         FILES["📁 Files Hub<br/>└─ Central Integration<br/>└─ Version Control<br/>└─ User/Project Structure"]
-        
+
         WRITER["✍️ Writer<br/><b>Strengths:</b><br/>• Section-Separated Writing<br/>• Collaborative Editing<br/>• AI-Native (Auto Files)<br/>• Stats Integration<br/>• Context-Aware"]
-        
+
         SCHOLAR["📚 Scholar<br/><b>Strength:</b><br/>• Abstract Appended<br/>  (AI-Native)<br/>• Citation Enrichment<br/>• Auto-metadata"]
-        
+
         VIS["📊 Vis<br/><b>Strengths:</b><br/>• Reproducibility<br/>  - Metadata Embedded<br/>  - CSV + JSON Export<br/>  - Plot ↔ Text<br/>• Flexibility<br/>  - Style Change<br/>  - mm-level Precision<br/>• GUI Layout/Style"]
-        
+
         CODE["💻 Code<br/><b>Strengths:</b><br/>• Work Anywhere<br/>  (Local/Cloud/Self-host)<br/>• Reusable Modules<br/>• Reproducible<br/>  by Default"]
     end
-    
+
     subgraph "Infrastructure"
         CLOUD[SciTeX Cloud<br/>scitex.ai]
         DB[(Database)]
     end
-    
+
     PY --> FILES & WRITER & SCHOLAR & CODE & VIS
     CLI --> FILES & WRITER & SCHOLAR & CODE & VIS
     WEB --> CLOUD
-    
+
     FILES <-->|LaTeX, PDF<br/>Sections| WRITER
     FILES <-->|BibTeX, PDFs<br/>Abstracts| SCHOLAR
     FILES <-->|Scripts, Data<br/>Outputs| CODE
     FILES <-->|Data Files<br/>Figures| VIS
-    
+
     WRITER <-.->|Auto-Citations| SCHOLAR
     WRITER <-.->|Embed Stats| CODE
     WRITER <-.->|Include Figs| VIS
     CODE <-.->|Generate Plots| VIS
-    
+
     WRITER & SCHOLAR & CODE & VIS & FILES --> CLOUD
     CLOUD --> DB
-    
+
     style FILES fill:#ffd700,stroke:#ff8c00,stroke-width:4px,color:#000
     style WRITER fill:#90EE90,stroke:#228B22,stroke-width:3px,color:#000
     style SCHOLAR fill:#87CEEB,stroke:#4682B4,stroke-width:3px,color:#000

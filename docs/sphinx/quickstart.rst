@@ -78,7 +78,7 @@ CLI Commands
    scitex audio speak "Done"            # Text-to-speech
    scitex capture snap                  # Screenshot
 
-MCP Tools (161 tools for AI agents)
+MCP Tools (120+ tools for AI agents)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Turn AI agents into autonomous scientific researchers.

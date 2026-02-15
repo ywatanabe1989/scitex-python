@@ -15,6 +15,7 @@ author = "Yusuke Watanabe"
 # Version from package
 try:
     from scitex import __version__
+
     version = __version__
     release = __version__
 except ImportError:

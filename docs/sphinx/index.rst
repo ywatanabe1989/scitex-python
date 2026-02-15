@@ -25,7 +25,7 @@ A Python framework for reproducible scientific research.
 - ``stx.plt`` -- Publication figures with auto CSV data export
 - ``stx.stats`` -- 23 statistical tests with effect sizes and CI
 - ``stx.scholar`` -- Search, download, and enrich papers
-- 161 MCP tools for AI-assisted research workflows
+- 120+ MCP tools for AI-assisted research workflows
 
 .. toctree::
    :maxdepth: 2

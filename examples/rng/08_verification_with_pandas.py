@@ -19,12 +19,12 @@ def generate_small_hash_table_wrong(n_samples=10):
     """
     data = {
         'patient_id': ['P001'] * 20 + ['P002'] * 20,
-        'seizure_type': ['seizure'] * 10 + ['interictal_control'] * 10 + 
+        'seizure_type': ['seizure'] * 10 + ['interictal_control'] * 10 +
                        ['seizure'] * 10 + ['interictal_control'] * 10,
         'value': np.random.random(40)  # WRONG: Uses global numpy random
     }
     df = pd.DataFrame(data)
-    
+
     # WRONG: Uses np.random.permutation directly
     rand_indices = np.random.permutation(len(df))[:n_samples]
     return df.iloc[rand_indices]
@@ -37,16 +37,16 @@ def generate_small_hash_table_correct(rng, n_samples=10):
     # Get a named generator for this specific task
     data_gen = rng("data_generation")
     sample_gen = rng("sampling")
-    
+
     # Generate data using RNG
     data = {
         'patient_id': ['P001'] * 20 + ['P002'] * 20,
-        'seizure_type': ['seizure'] * 10 + ['interictal_control'] * 10 + 
+        'seizure_type': ['seizure'] * 10 + ['interictal_control'] * 10 +
                        ['seizure'] * 10 + ['interictal_control'] * 10,
         'value': data_gen.random(40)  # CORRECT: Uses RNG generator
     }
     df = pd.DataFrame(data)
-    
+
     # CORRECT: Use RNG for sampling
     rand_indices = sample_gen.permutation(len(df))[:n_samples]
     return df.iloc[rand_indices]
@@ -54,14 +54,14 @@ def generate_small_hash_table_correct(rng, n_samples=10):
 
 def main():
     """Demonstrate correct vs incorrect usage."""
-    
+
     print("=" * 60)
     print("WRONG WAY - Using np.random directly")
     print("=" * 60)
-    
+
     # Even with RNG initialized, using np.random directly breaks reproducibility
     rng1 = stx.rng.RandomStateManager(seed=42, verbose=True)
-    
+
     # First run
     df_wrong1 = generate_small_hash_table_wrong(n_samples=5)
     print("\nFirst run - caching:")
@@ -69,7 +69,7 @@ def main():
         rng1.verify(df_wrong1, "wrong_method", verbose=True)
     except ValueError as e:
         print(f"Error (expected on second run): {e}")
-    
+
     # Second run - will likely fail
     print("\nSecond run - likely to fail:")
     df_wrong2 = generate_small_hash_table_wrong(n_samples=5)
@@ -78,31 +78,31 @@ def main():
         print(f"Result: {result}")
     except ValueError as e:
         print(f"❌ Failed as expected: Reproducibility broken!")
-    
+
     print("\n" + "=" * 60)
     print("CORRECT WAY - Using RNG instance")
     print("=" * 60)
-    
+
     # Create new RNG for correct method
     rng2 = stx.rng.RandomStateManager(seed=42, verbose=True)
-    
+
     # First run
     print("\nFirst run - caching:")
     df_correct1 = generate_small_hash_table_correct(rng2, n_samples=5)
     result1 = rng2.verify(df_correct1, "correct_method", verbose=True)
     print(f"Result: {result1}")
     print(f"Sample data:\n{df_correct1.head()}")
-    
+
     # Create fresh RNG with same seed
     print("\nSecond run with fresh RNG (same seed):")
     rng3 = stx.rng.RandomStateManager(seed=42, verbose=False)
     df_correct2 = generate_small_hash_table_correct(rng3, n_samples=5)
     result2 = rng2.verify(df_correct2, "correct_method", verbose=True)
     print(f"Result: {result2}")
-    
+
     # Verify data is identical
     print(f"\nDataFrames are identical: {df_correct1.equals(df_correct2)}")
-    
+
     print("\n" + "=" * 60)
     print("KEY LESSONS:")
     print("=" * 60)

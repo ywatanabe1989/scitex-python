@@ -23,26 +23,26 @@ Submodules
    {module_path}
 """
 
+
 def create_api_doc(module_name, module_path, output_file):
     """Create an API documentation file for a module."""
     title = f"scitex.{module_name}"
     underline = "=" * len(title + " API Reference")
-    
+
     content = API_TEMPLATE.format(
-        module_name=title,
-        module_path=module_path,
-        underline=underline
+        module_name=title, module_path=module_path, underline=underline
     )
-    
-    with open(output_file, 'w') as f:
+
+    with open(output_file, "w") as f:
         f.write(content)
     print(f"Created: {output_file}")
+
 
 def main():
     # Create API directory
     api_dir = Path(__file__).parent / "api"
     api_dir.mkdir(exist_ok=True)
-    
+
     # Define modules
     modules = [
         ("gen", "scitex.gen"),
@@ -59,11 +59,12 @@ def main():
         ("str", "scitex.str"),
         ("dict", "scitex.dict"),
     ]
-    
+
     # Create API documentation files
     for module_name, module_path in modules:
         output_file = api_dir / f"scitex.{module_name}.rst"
         create_api_doc(module_name, module_path, output_file)
+
 
 if __name__ == "__main__":
     main()

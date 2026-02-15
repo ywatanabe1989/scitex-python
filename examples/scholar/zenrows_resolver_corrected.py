@@ -23,14 +23,14 @@ auth_manager = AuthenticationManager(
 # Choose your resolver
 # Standard browser-based resolver (RECOMMENDED for authenticated access)
 # resolver = OpenURLResolver(
-#     auth_manager, 
+#     auth_manager,
 #     os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL")
 # )
 
 # OR: ZenRows cloud browser resolver (for anti-bot bypass)
 # NOTE: ZenRows has limitations with JavaScript redirects that require authentication
 resolver = ZenRowsOpenURLResolver(
-    auth_manager, 
+    auth_manager,
     os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL"),
     os.getenv("SCITEX_SCHOLAR_ZENROWS_API_KEY")
 )
@@ -53,16 +53,16 @@ print(f"Result: {result}")
 async def resolve_async():
     """Async resolution example."""
     print("\n=== Method 2: Async Resolution ===")
-    
+
     # Resolve single DOI
     result = await resolver._resolve_single_async(doi=dois[0])
     print(f"Single result: {result}")
-    
+
     # Resolve multiple DOIs
     print("\n=== Resolving multiple DOIs ===")
     tasks = [resolver._resolve_single_async(doi=doi) for doi in dois]
     results = await asyncio.gather(*tasks)
-    
+
     for doi, result in zip(dois, results):
         print(f"\nDOI: {doi}")
         print(f"  Success: {result.get('success', False)}")
@@ -78,7 +78,7 @@ asyncio.run(resolve_async())
 async def resolve_high_level():
     """High-level async resolution."""
     print("\n=== Method 3: High-level Resolution ===")
-    
+
     # This method includes retry logic and better error handling
     result = await resolver.resolve_async(doi=dois[0])
     print(f"High-level result: {result}")

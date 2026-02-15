@@ -26,13 +26,13 @@ auth_manager = AuthenticationManager(
 # Choose your resolver
 # Standard browser-based resolver (for authenticated access)
 # resolver = OpenURLResolver(
-#     auth_manager, 
+#     auth_manager,
 #     os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL")
 # )
 
 # OR: ZenRows cloud browser resolver with 2Captcha (for anti-bot bypass)
 resolver = ZenRowsOpenURLResolver(
-    auth_manager, 
+    auth_manager,
     os.getenv("SCITEX_SCHOLAR_OPENURL_RESOLVER_URL"),
     os.getenv("SCITEX_SCHOLAR_ZENROWS_API_KEY"),
     enable_captcha_solving=True  # Enable 2Captcha integration
@@ -57,23 +57,23 @@ print(f"Result: {result}")
 async def resolve_with_details():
     """Resolve DOIs with full result details."""
     print("\n=== Asynchronous Resolution with Details ===")
-    
+
     for doi in dois:
         print(f"\nResolving: {doi}")
-        
+
         # Use _resolve_single_async for detailed results
         result = await resolver._resolve_single_async(doi=doi)
-        
+
         if result:
             print(f"  Success: {result.get('success', False)}")
             print(f"  Final URL: {result.get('final_url', 'Not found')}")
             print(f"  Access type: {result.get('access_type', 'Unknown')}")
-            
+
             # The Zr-Final-Url header tracks the final destination
             # even through CAPTCHAs and redirects
             if result.get('final_url') != result.get('resolver_url'):
                 print(f"  ✅ Followed redirects to final URL")
-            
+
             if result.get('note'):
                 print(f"  Note: {result['note']}")
         else:

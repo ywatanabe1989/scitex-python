@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 async def main():
     """Demonstrate full paywalled access with ZenRows Scraping Browser."""
-    
+
     print("="*70)
     print("🚀 ZenRows Scraping Browser - Paywalled Journal Access Demo")
     print("="*70)
-    
+
     # Ensure environment variables are set
     required_vars = {
         "SCITEX_SCHOLAR_ZENROWS_API_KEY": "ZenRows API key",
@@ -30,28 +30,28 @@ async def main():
         "SCITEX_SCHOLAR_OPENURL_RESOLVER_URL": "Resolver URL",
         "SCITEX_SCHOLAR_2CAPTCHA_API_KEY": "2Captcha key"
     }
-    
+
     missing = []
     for var, desc in required_vars.items():
         if not os.getenv(var):
             missing.append(f"  - {var} ({desc})")
-    
+
     if missing:
         print("\n❌ Missing required environment variables:")
         print("\n".join(missing))
         print("\nSet these before running the demo.")
         return
-    
+
     # Set 2Captcha if not already set
     os.environ["SCITEX_SCHOLAR_2CAPTCHA_API_KEY"] = "36d184fbba134f828cdd314f01dc7f18"
-    
+
     print("\n✅ All environment variables configured")
-    
+
     # Initialize authentication manager
     auth_manager = AuthenticationManager(
         email_openathens=os.getenv("SCITEX_SCHOLAR_OPENATHENS_EMAIL")
     )
-    
+
     # Create resolver with ZenRows Scraping Browser
     print("\n🌐 Initializing ZenRows Scraping Browser resolver...")
     resolver = OpenURLResolverWithScrapingBrowser(
@@ -60,11 +60,11 @@ async def main():
         proxy_country="us",  # Use US residential IP
         enable_captcha_solving=True
     )
-    
+
     print("   ✓ Connected to remote browser")
     print("   ✓ Using US residential IP")
     print("   ✓ 2Captcha integration enabled")
-    
+
     # Test with paywalled papers
     paywalled_dois = [
         {
@@ -86,13 +86,13 @@ async def main():
             "year": 2021
         }
     ]
-    
+
     print("\n🔐 Authenticating in remote browser...")
     print("   (This happens entirely on ZenRows servers)")
-    
+
     # Authenticate - this now works in the remote browser!
     auth_success = await resolver.authenticate_async()
-    
+
     if auth_success:
         print("   ✅ Authentication successful!")
         print("   → Session maintained in remote browser")
@@ -102,20 +102,20 @@ async def main():
         print("   → Check your credentials")
         await resolver.close()
         return
-    
+
     print("\n📚 Resolving paywalled papers...")
     print("-"*50)
-    
+
     successful = 0
     for paper_info in paywalled_dois:
         doi = paper_info["doi"]
         print(f"\n🔍 Resolving: {doi}")
         print(f"   Journal: {paper_info['journal']}")
-        
+
         try:
             # Resolve in the authenticated remote browser
             result = await resolver._resolve_single_async(**paper_info)
-            
+
             if result and result.get('success'):
                 successful += 1
                 print(f"   ✅ SUCCESS! Resolved to PDF")
@@ -126,13 +126,13 @@ async def main():
                 print(f"   ❌ Failed: {result.get('access_type', 'Unknown error')}")
                 if result.get('note'):
                     print(f"   → Note: {result['note']}")
-        
+
         except Exception as e:
             print(f"   ❌ Error: {str(e)}")
-    
+
     print("\n" + "="*50)
     print(f"📊 Results: {successful}/{len(paywalled_dois)} papers successfully resolved")
-    
+
     # Compare with traditional approaches
     print("\n📋 Why This Works (Scraping Browser vs Traditional):")
     print("-"*50)
@@ -145,7 +145,7 @@ async def main():
     print("  ✅ Authentication maintained")
     print("  ✅ Access to paywalled content")
     print("  ✅ Appears as legitimate traffic")
-    
+
     # Clean up
     print("\n🧹 Cleaning up...")
     await resolver.close()
@@ -155,23 +155,23 @@ async def simple_example():
     """Simplified example for quick testing."""
     print("\n🎯 Simple Example: Download One Paywalled Paper")
     print("-"*50)
-    
+
     # Setup
     from scitex.scholar import Scholar
-    
+
     # Configure to use ZenRows Scraping Browser
     os.environ["SCITEX_SCHOLAR_USE_ZENROWS_BROWSER"] = "true"
     os.environ["SCITEX_SCHOLAR_2CAPTCHA_API_KEY"] = "36d184fbba134f828cdd314f01dc7f18"
-    
+
     # Initialize Scholar (will use Scraping Browser automatically)
     scholar = Scholar()
-    
+
     # Download a paywalled paper
     doi = "10.1038/nature12373"
     print(f"Downloading: {doi}")
-    
+
     results = scholar.download_pdfs([doi])
-    
+
     if results.papers and hasattr(results.papers[0], 'pdf_path'):
         print(f"✅ Success! Downloaded to: {results.papers[0].pdf_path}")
     else:
@@ -182,9 +182,9 @@ if __name__ == "__main__":
     print("="*70)
     print("\nThis demo shows how ZenRows Scraping Browser enables")
     print("authenticated access to paywalled journals.\n")
-    
+
     # Run the main demo
     asyncio.run(main())
-    
+
     # Optional: Run simple example
     # asyncio.run(simple_example())

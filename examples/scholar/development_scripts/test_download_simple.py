@@ -12,13 +12,13 @@ async def test_download():
         use_scihub=True,
         acknowledge_ethical_usage=True
     )
-    
+
     # Test DOIs
     test_dois = [
         "10.1371/journal.pone.0029609",  # Known open access
         "10.1038/s41586-023-06670-9",     # Nature paper (likely paywalled)
     ]
-    
+
     print("Testing PDF downloads...")
     for doi in test_dois:
         print(f"\nTrying DOI: {doi}")
