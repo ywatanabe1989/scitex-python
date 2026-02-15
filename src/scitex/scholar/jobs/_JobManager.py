@@ -209,9 +209,11 @@ class JobManager:
 
         return {
             "job_id": job.job_id,
-            "job_type": job.job_type.value
-            if isinstance(job.job_type, JobType)
-            else job.job_type,
+            "job_type": (
+                job.job_type.value
+                if isinstance(job.job_type, JobType)
+                else job.job_type
+            ),
             "status": job.status.value,
             "progress": job.progress.to_dict(),
             "created_at": job.created_at,

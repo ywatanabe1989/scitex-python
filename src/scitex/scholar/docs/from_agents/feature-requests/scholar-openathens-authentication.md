@@ -20,14 +20,14 @@ Add OpenAthens configuration to `ScholarConfig`:
 @dataclass
 class ScholarConfig:
     # ... existing fields ...
-    
+
     # OpenAthens authentication
     openathens_enabled: bool = False
     openathens_org_id: Optional[str] = None  # Organization identifier
     openathens_idp_url: Optional[str] = None  # Identity provider URL
     openathens_username: Optional[str] = None  # Can be prompted if not set
     openathens_password: Optional[str] = None  # Should be stored securely
-    
+
     # Environment variable support
     # SCITEX_SCHOLAR_OPENATHENS_ENABLED=true
     # SCITEX_SCHOLAR_OPENATHENS_ORG_ID=unimelb
@@ -40,10 +40,10 @@ Create `_OpenAthensAuthenticator.py`:
 ```python
 class OpenAthensAuthenticator:
     """Handles OpenAthens authentication for institutional access."""
-    
+
     async def authenticate_async(self, username: str, password: str) -> Session:
         """Authenticate and return session with auth cookies."""
-        
+
     async def download_with_auth_async(self, url: str, session: Session) -> bytes:
         """Download PDF using authenticate_async session."""
 ```

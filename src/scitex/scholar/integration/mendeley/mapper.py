@@ -4,11 +4,12 @@
 Mendeley ↔ Scholar data mapping.
 """
 
-from typing import Any, Dict, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 from scitex import logging
 from scitex.scholar.core.Paper import Paper
+
 from ..base import BaseMapper
 
 logger = logging.getLogger(__name__)

@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/url_finder/ScholarURLFinder.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/url_finder/ScholarURLFinder.py"
@@ -17,23 +18,22 @@ Simple, focused responsibility: Given a page or URL, find PDF URLs.
 """
 
 from contextlib import asynccontextmanager
-from typing import Dict
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 
-from playwright.async_api import BrowserContext
-from playwright.async_api import Page
+from playwright.async_api import BrowserContext, Page
 
 from scitex import logging
 from scitex.browser.debugging import browser_logger
 from scitex.scholar.auth.gateway import OpenURLResolver
-from scitex.scholar.config import PublisherRules
-from scitex.scholar.config import ScholarConfig
+from scitex.scholar.config import PublisherRules, ScholarConfig
 
 # Import strategies
-from .strategies import find_pdf_urls_by_direct_links
-from .strategies import find_pdf_urls_by_navigation
-from .strategies import find_pdf_urls_by_publisher_patterns
-from .strategies import find_pdf_urls_by_zotero_translators
+from .strategies import (
+    find_pdf_urls_by_direct_links,
+    find_pdf_urls_by_navigation,
+    find_pdf_urls_by_publisher_patterns,
+    find_pdf_urls_by_zotero_translators,
+)
 
 # Strategy execution order (priority order)
 STRATEGIES = [

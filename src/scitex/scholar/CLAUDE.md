@@ -78,11 +78,11 @@ Planned workflow is:
    ~/.scitex/scholar/library/<project>/8-DIGITS-ID/attachments/<original-name-from-the-journal>.pdf
    ~/.scitex/scholar/library/<project>/8-DIGITS-ID/metadata.json
    ~/.scitex/scholar/library/<project>/8-DIGITS-ID/screenshots/<timestamp>-description.jpg
-   ~/.scitex/scholar/library/<project>/8-DIGITS-ID/screenshots/<timestamp>-description.jpg   
+   ~/.scitex/scholar/library/<project>/8-DIGITS-ID/screenshots/<timestamp>-description.jpg
    ~/.scitex/scholar/library/<project-human-readable>/AUTHOR-YEAR-JOURNAL -> .../8-DIGITS-ID
    ```
 
-   
+
 
 10. Allow for semantic vector search
 
@@ -103,7 +103,7 @@ Python env is in the current directory. Do not change directory as bash handles 
 ## PDF download workflow
 BrowserManager + Authenticator + Chrome extensions (stealth + auth info))
 -> Part of metadata such as title
--> DOI 
+-> DOI
 -> OpenURL
 -> Final URL
 -> Find PDF URLS using zetero translators
@@ -129,7 +129,7 @@ we do not need journal_rank and h_index
 ## DOI resolver
 - [x] All info should be saved to library as json file
 - [x] All info shoudl be associated with source all the time
-- [x] If one field is already filled, no need to override, just skip that field, assuming once entered info is correct 
+- [x] If one field is already filled, no need to override, just skip that field, assuming once entered info is correct
 - [x] How project name, like pac, specified?
   - [x] Is it possible to copy bibtex file when dois are resolved from_bibtex?
   - [x] Is it possible to prepare a summary table to show the results of from_bibtex?
@@ -186,7 +186,7 @@ We need to avoid regression using variety of samples. For paywalled/open-access 
   `/home/ywatanabe/.scitex/scholar/cache/chrome/Profile 1`
   Profile 1 is manually created browser profile; _extension is the one created programatically using scitex.scholar
 
-  
+
 - [ ] Aazhang-2017-IEEE-Transactions-on-Signal-Processing -> ../MASTER/F99329E1 (No DOI)
 - [ ] Agarwal-2018-MATEC-Web-of-Conferences -> ../MASTER/4A0327A5
 - [ ] Ahmad-2020-2020-IEEE-Region-10-Symposium-TENSYMP -> ../MASTER/164DD9BF (IEEE - not subscribed)
@@ -201,13 +201,13 @@ We need to avoid regression using variety of samples. For paywalled/open-access 
 - [x] Bosl-2021-Frontiers-in-Neurology -> ../MASTER/26E1350B ✅ Downloaded
 - [ ] Chang-2018-Nature-Neuroscience -> ../MASTER/A9D6B0E4 (In Chrome for Zotero)
 - [x] Cmpora-2019-Scientific-Reports -> ../MASTER/96EFCB15 ✅ Downloaded
-- [x] Edakawa-2016-Scientific-Reports -> ../MASTER/27CE930A ✅ Downloaded 
-- [ ] El-Samie-2014-EURASIP-Journal-on-Advances-in-Signal-Processing -> ../MASTER/2CEBD4C1 
+- [x] Edakawa-2016-Scientific-Reports -> ../MASTER/27CE930A ✅ Downloaded
+- [ ] El-Samie-2014-EURASIP-Journal-on-Advances-in-Signal-Processing -> ../MASTER/2CEBD4C1
 - [ ] Gagliano-2018-Epilepsy-Research -> ../MASTER/A72E87D0 (In Chrome for Zotero)
 - [x] Gagliano-2019-Scientific-Reports -> ../MASTER/ED7E7BB8 ✅ Downloaded
 - [ ] Garcia-2024-2024-46th-Annual-International-Conference-of-the-IEEE-Engineering-in-Medicine-and-Biology-Society-EMBC (IEEE - not subscribed)
 - [ ] Ghiasvand-2020-The-Neuroscience-Journal-of-Shefaye-Khatam -> ../MASTER/1F60D8D6
-- [ ] Grigorovsky-2020-Brain-Communications -> ../MASTER/9A77D799 
+- [ ] Grigorovsky-2020-Brain-Communications -> ../MASTER/9A77D799
 - [ ] Hasan-2017-Applied-Bionics-and-Biomechanics -> ../MASTER/C9499509
 - [ ] Jin-2022-2022-41st-Chinese-Control-Conference-CCC -> ../MASTER/FD084C7A
 - [ ] Kapoor-2022-Sensors -> ../MASTER/BAC5A831 (MDPI - failed)
@@ -236,12 +236,12 @@ We need to avoid regression using variety of samples. For paywalled/open-access 
 - [ ] Rong-2020-Engineering -> ../MASTER/D5F8B73F (In Chrome for Zotero)
 - [ ] Salimpour-2019-Frontiers-in-Neuroscience -> ../MASTER/D0532643
 - [ ] Schelter-2007 -> ../MASTER/F45A8E5A (No journal info)
-- [ ] Sebaei-2024-South-Eastern-European-Journal-of-Public-Health -> ../MASTER/CF93E994 
+- [ ] Sebaei-2024-South-Eastern-European-Journal-of-Public-Health -> ../MASTER/CF93E994
 - [ ] Seo-2020-Mathematics -> ../MASTER/0AFEF557 (MDPI - failed)
 - [ ] Shirzadi-2024-Diagnostics -> ../MASTER/98763EC9 (MDPI - failed)
 - [ ] Sivathamboo-2020-IEEE-Reviews-in-Biomedical-Engineering -> ../MASTER/ABFB9D35 (IEEE - not subscribed)
 - [ ] Song-2022-Sensors -> ../MASTER/CEB508B6 (MDPI - failed)
-- [ ] Sun-2022-Acta-Epileptologica -> ../MASTER/E8601E3A 
+- [ ] Sun-2022-Acta-Epileptologica -> ../MASTER/E8601E3A
 - [ ] Tang-2015-Bio-Medical-Materials-and-Engineering -> ../MASTER/90E10266 (In Chrome for Zotero)
 - [ ] Ujma-2022-Scientific-Reports -> ../MASTER/9D62A9C5 (DOI issue)
 - [ ] Wang-2020-2020-42nd-Annual-International-Conference-of-the-IEEE-Engineering-in-Medicine-amp-Biology-Society-EMBC -> ../MASTER/FFB1C06B (IEEE - not subscribed)
@@ -249,9 +249,9 @@ We need to avoid regression using variety of samples. For paywalled/open-access 
 - [x] Winter-2020-Scientific-Reports -> ../MASTER/E8361A2E ✅ Downloaded
 - [x] Xie-2017-Scientific-Reports -> ../MASTER/B9F0224C ✅ Downloaded
 - [ ] Yanagisawa-2012-The-Journal-of-Neuroscience -> ../MASTER/54D73605
-- [ ] Yekutieli-2018-Epilepsy-Journal -> ../MASTER/9C6D5B43 
+- [ ] Yekutieli-2018-Epilepsy-Journal -> ../MASTER/9C6D5B43
 - [ ] Yuan-2015-2015-IEEE-International-Conference-on-Digital-Signal-Processing-DSP -> ../MASTER/96980DBC (IEEE - not subscribed)
 - [ ] Zhang-2024-International-Journal-of-Surgery -> ../MASTER/8F313217
-- [ ] Zhou-2016-2016-38th-Annual-International-Conference-of-the-IEEE-Engineering-in-Medicine-and-Biology-Society-EMBC -> ../MASTER/7E53E268 (IEEE - not subscribed) 
+- [ ] Zhou-2016-2016-38th-Annual-International-Conference-of-the-IEEE-Engineering-in-Medicine-and-Biology-Society-EMBC -> ../MASTER/7E53E268 (IEEE - not subscribed)
 
 <!-- EOF -->

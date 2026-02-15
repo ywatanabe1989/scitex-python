@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/cli/download_pdf.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -99,6 +100,7 @@ def main():
     # Execute command
     if args.command == "bibtex":
         from pathlib import Path
+
         from scitex.scholar import Scholar
 
         bibtex_path = Path(args.file)

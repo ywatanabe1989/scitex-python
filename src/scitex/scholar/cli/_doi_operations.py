@@ -2,6 +2,7 @@
 """DOI-related CLI operations for Scholar."""
 
 from pathlib import Path
+
 from scitex import logging
 
 logger = logging.getLogger(__name__)

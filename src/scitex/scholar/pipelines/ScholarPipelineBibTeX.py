@@ -29,20 +29,19 @@ IO:
 
 import asyncio
 from pathlib import Path
-from typing import Optional
-from typing import Union
+from typing import Optional, Union
 
 import scitex as stx
 from scitex import logging
 from scitex.scholar.core import Papers
-from scitex.scholar.pipelines.ScholarPipelineParallel import (
-    ScholarPipelineParallel,
-)
+from scitex.scholar.pipelines.ScholarPipelineParallel import ScholarPipelineParallel
 from scitex.scholar.storage import BibTeXHandler
 
 logger = logging.getLogger(__name__)
 
 """Functions & Classes"""
+
+
 class ScholarPipelineBibTeX:
     """Processes BibTeX files through parallel paper acquisition pipeline"""
 
@@ -138,9 +137,7 @@ class ScholarPipelineBibTeX:
         logger.success(
             f"{self.name}: Processed {len(processed_papers)}/{len(papers)} papers"
         )
-        logger.success(
-            f"{self.name}: Saved enriched BibTeX: {output_bibtex_path}"
-        )
+        logger.success(f"{self.name}: Saved enriched BibTeX: {output_bibtex_path}")
 
         # Update project bibliography if project specified
         if project:
@@ -156,9 +153,7 @@ class ScholarPipelineBibTeX:
                     bibtex_files=[bibtex_path, output_bibtex_path],
                 )
 
-                logger.success(
-                    f"{self.name}: Updated project bibliography: {project}"
-                )
+                logger.success(f"{self.name}: Updated project bibliography: {project}")
             except Exception as e:
                 logger.warning(f"Failed to update bibliography: {e}")
 
@@ -191,9 +186,7 @@ class ScholarPipelineBibTeX:
             logger.warning(f"{self.name}: No papers found in BibTeX text")
             return Papers([], project=project)
 
-        logger.info(
-            f"{self.name}: Loaded {len(papers)} papers from BibTeX text"
-        )
+        logger.info(f"{self.name}: Loaded {len(papers)} papers from BibTeX text")
 
         # Step 2: Process papers in parallel
         papers_collection = Papers(papers, project=project)
@@ -213,9 +206,7 @@ class ScholarPipelineBibTeX:
                 processed_collection,
                 output_path=output_bibtex_path,
             )
-            logger.success(
-                f"{self.name}: Saved enriched BibTeX: {output_bibtex_path}"
-            )
+            logger.success(f"{self.name}: Saved enriched BibTeX: {output_bibtex_path}")
 
         logger.success(
             f"{self.name}: Processed {len(processed_papers)}/{len(papers)} papers"
@@ -286,9 +277,7 @@ def main(
         )
     )
 
-    logger.success(
-        f"BibTeX processing complete: {len(papers)} papers processed"
-    )
+    logger.success(f"BibTeX processing complete: {len(papers)} papers processed")
     return 0
 
 

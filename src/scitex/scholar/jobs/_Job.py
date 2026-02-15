@@ -182,9 +182,11 @@ class Job:
         """Convert job to dictionary for serialization."""
         return {
             "job_id": self.job_id,
-            "job_type": self.job_type.value
-            if isinstance(self.job_type, JobType)
-            else self.job_type,
+            "job_type": (
+                self.job_type.value
+                if isinstance(self.job_type, JobType)
+                else self.job_type
+            ),
             "params": self.params,
             "status": self.status.value,
             "progress": self.progress.to_dict(),

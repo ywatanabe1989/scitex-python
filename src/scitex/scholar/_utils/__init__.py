@@ -12,8 +12,8 @@ Structure:
 For backward compatibility, TextNormalizer is re-exported at top level.
 """
 
-from .text import TextNormalizer
 from .bibtex import parse_bibtex
+from .text import TextNormalizer
 from .validation import DOIValidator
 
 __all__ = [

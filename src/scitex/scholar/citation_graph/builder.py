@@ -5,12 +5,12 @@ Main interface for building citation networks from CrossRef data.
 """
 
 import json
-from pathlib import Path
-from typing import Optional, List
 from collections import Counter
+from pathlib import Path
+from typing import List, Optional
 
 from .database import CitationDatabase
-from .models import PaperNode, CitationEdge, CitationGraph
+from .models import CitationEdge, CitationGraph, PaperNode
 
 
 class CitationGraphBuilder:

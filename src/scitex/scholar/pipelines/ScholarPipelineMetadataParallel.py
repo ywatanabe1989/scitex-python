@@ -27,14 +27,14 @@ IO:
 """
 
 import asyncio
-from typing import List, Optional, Callable, Dict, Any
+from typing import Any, Callable, Dict, List, Optional
 
 from scitex import logging
+from scitex.scholar.config import ScholarConfig
 from scitex.scholar.core import Paper, Papers
 from scitex.scholar.pipelines.ScholarPipelineMetadataSingle import (
     ScholarPipelineMetadataSingle,
 )
-from scitex.scholar.config import ScholarConfig
 
 logger = logging.getLogger(__name__)
 

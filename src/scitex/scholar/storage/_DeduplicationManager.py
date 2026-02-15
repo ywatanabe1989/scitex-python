@@ -4,9 +4,9 @@
 import json
 import re
 import shutil
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Set
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 from scitex import logging
 from scitex.scholar.config import ScholarConfig

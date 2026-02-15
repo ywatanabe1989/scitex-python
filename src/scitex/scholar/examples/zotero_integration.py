@@ -14,8 +14,8 @@ import os
 from pathlib import Path
 
 from scitex import logging
-from scitex.scholar.zotero import ZoteroImporter, ZoteroExporter, ZoteroLinker
 from scitex.scholar.core import Papers
+from scitex.scholar.zotero import ZoteroExporter, ZoteroImporter, ZoteroLinker
 
 logger = logging.getLogger(__name__)
 

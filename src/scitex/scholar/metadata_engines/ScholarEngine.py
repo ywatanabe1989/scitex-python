@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/metadata_engines/ScholarEngine.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/metadata_engines/ScholarEngine.py"
@@ -19,22 +20,23 @@ import asyncio
 import hashlib
 import re
 import time
-from typing import Dict
-from typing import List
+from typing import Dict, List
 
 from tqdm import tqdm
 
 from scitex import logging
 from scitex.scholar import ScholarConfig
 
-from .individual import ArXivEngine
-from .individual import CrossRefEngine
-from .individual import CrossRefLocalEngine
-from .individual import OpenAlexEngine
-from .individual import OpenAlexLocalEngine
-from .individual import PubMedEngine
-from .individual import SemanticScholarEngine
-from .individual import URLDOIEngine
+from .individual import (
+    ArXivEngine,
+    CrossRefEngine,
+    CrossRefLocalEngine,
+    OpenAlexEngine,
+    OpenAlexLocalEngine,
+    PubMedEngine,
+    SemanticScholarEngine,
+    URLDOIEngine,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -114,9 +116,7 @@ class ScholarEngine:
             query_str = (
                 f"title: {title}"
                 if title
-                else f"doi: {doi}"
-                if doi
-                else "unknown query"
+                else f"doi: {doi}" if doi else "unknown query"
             )
             N_PRINT = 50
             if len(query_str) < N_PRINT:

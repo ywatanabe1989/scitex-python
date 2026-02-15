@@ -27,8 +27,8 @@ IO:
   - output: List of paper dictionaries with metadata
 """
 
-from typing import List, Dict, Any, Optional, Literal
 from datetime import datetime
+from typing import Any, Dict, List, Literal, Optional
 
 from scitex import logging
 from scitex.scholar.pipelines.ScholarPipelineSearchParallel import (

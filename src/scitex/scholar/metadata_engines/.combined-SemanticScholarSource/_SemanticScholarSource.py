@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/doi/sources/_SemanticScholarSource.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -17,10 +18,11 @@ import requests
 """Semantic Scholar DOI source implementation.
 
 This module provides DOI resolution through the Semantic Scholar API."""
-from scitex import logging
 from typing import List, Optional
 
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
+
+from scitex import logging
 
 from ._BaseDOISource import BaseDOISource
 

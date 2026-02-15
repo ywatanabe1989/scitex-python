@@ -14,8 +14,8 @@ Public API:
 - ZoteroLinker: Live synchronization with Zotero
 """
 
-from .importer import ZoteroImporter
 from .exporter import ZoteroExporter
+from .importer import ZoteroImporter
 from .linker import ZoteroLinker
 from .mapper import ZoteroMapper
 

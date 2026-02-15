@@ -115,7 +115,9 @@ class PipelineMixin:
             (
                 browser,
                 context,
-            ) = await self._browser_manager.get_authenticated_browser_and_context_async()
+            ) = (
+                await self._browser_manager.get_authenticated_browser_and_context_async()
+            )
             try:
                 url_finder = ScholarURLFinder(context, config=self.config)
                 urls = await url_finder.find_pdf_urls(doi)
@@ -138,7 +140,9 @@ class PipelineMixin:
                 (
                     browser,
                     context,
-                ) = await self._browser_manager.get_authenticated_browser_and_context_async()
+                ) = (
+                    await self._browser_manager.get_authenticated_browser_and_context_async()
+                )
                 try:
                     downloader = ScholarPDFDownloader(context, config=self.config)
 

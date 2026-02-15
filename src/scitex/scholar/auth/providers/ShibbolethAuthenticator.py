@@ -17,18 +17,19 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urlparse, urljoin, parse_qs
+from urllib.parse import parse_qs, urljoin, urlparse
 
 from scitex import logging
 
 try:
-    from playwright.async_api import async_playwright, Page, Browser
+    from playwright.async_api import Browser, Page, async_playwright
 except ImportError:
     async_playwright = None
     Page = None
     Browser = None
 
 from scitex.logging import ScholarError
+
 from .BaseAuthenticator import BaseAuthenticator
 
 logger = logging.getLogger(__name__)
@@ -286,7 +287,7 @@ class ShibbolethAuthenticator(BaseAuthenticator):
                 try:
                     await page.wait_for_function(
                         f"""() => {{
-                            return !window.location.href.includes('idp') && 
+                            return !window.location.href.includes('idp') &&
                                    !window.location.href.includes('wayf') &&
                                    !window.location.href.includes('discovery');
                         }}""",
@@ -591,9 +592,9 @@ class ShibbolethAuthenticator(BaseAuthenticator):
             "idp_url": self.idp_url,
             "entity_id": self.entity_id,
             "saml_attributes": self._saml_attributes,
-            "session_expiry": self._session_expiry.isoformat()
-            if self._session_expiry
-            else None,
+            "session_expiry": (
+                self._session_expiry.isoformat() if self._session_expiry else None
+            ),
             "cookies_count": len(self._cookies),
         }
 

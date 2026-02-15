@@ -17,13 +17,13 @@ These were moved from url/helpers/resolvers as they are authentication
 mechanisms rather than URL discovery mechanisms.
 """
 
-from ._OpenURLResolver import OpenURLResolver
 from ._OpenURLLinkFinder import OpenURLLinkFinder
+from ._OpenURLResolver import OpenURLResolver
 from ._resolve_functions import (
-    normalize_doi_as_http,
-    resolve_publisher_url_by_navigating_to_doi_page,
     extract_doi_from_url,
+    normalize_doi_as_http,
     resolve_openurl,
+    resolve_publisher_url_by_navigating_to_doi_page,
 )
 
 __all__ = [

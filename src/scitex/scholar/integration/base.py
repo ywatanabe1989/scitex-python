@@ -7,14 +7,14 @@ Provides common interface and functionality for all reference managers.
 """
 
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, Callable
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from scitex import logging
 from scitex.scholar.core.Paper import Paper
 from scitex.scholar.core.Papers import Papers
-from scitex.scholar.storage import LibraryManager, BibTeXHandler
+from scitex.scholar.storage import BibTeXHandler, LibraryManager
 
 logger = logging.getLogger(__name__)
 

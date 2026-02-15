@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/utils/validation/DOIValidator.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./src/scitex/scholar/utils/validation/DOIValidator.py"
@@ -18,6 +19,7 @@ Validates DOI accessibility by checking https://doi.org/<DOI> resolution.
 
 import time
 from typing import Optional, Tuple
+
 import requests
 
 from scitex import logging

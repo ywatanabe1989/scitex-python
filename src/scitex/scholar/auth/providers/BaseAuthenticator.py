@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/scitex_repo/src/scitex/scholar/auth/library/_BaseAuthenticator.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__
@@ -22,7 +23,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 from scitex import logging
-
 from scitex.logging import AuthenticationError
 
 """Logger"""

@@ -24,8 +24,8 @@ warnings.warn(
 
 # Import from new location for backward compatibility
 from scitex.scholar.integration.zotero import (
-    ZoteroImporter,
     ZoteroExporter,
+    ZoteroImporter,
     ZoteroLinker,
     ZoteroMapper,
 )

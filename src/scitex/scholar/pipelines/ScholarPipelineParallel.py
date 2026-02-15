@@ -34,9 +34,7 @@ from scitex import logging
 from scitex.browser.core import ChromeProfileManager
 from scitex.scholar.auth import ScholarAuthManager
 from scitex.scholar.core import Paper
-from scitex.scholar.pipelines.ScholarPipelineSingle import (
-    ScholarPipelineSingle,
-)
+from scitex.scholar.pipelines.ScholarPipelineSingle import ScholarPipelineSingle
 
 logger = logging.getLogger(__name__)
 

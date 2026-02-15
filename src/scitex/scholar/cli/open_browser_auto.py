@@ -15,18 +15,18 @@ Usage:
 
 import argparse
 import json
-import sys
 import shutil
-from pathlib import Path
-from typing import List, Dict, Optional
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from scitex.scholar.config import ScholarConfig
-from scitex.scholar.cli._url_utils import get_best_url
 from scitex.logging import getLogger
+from scitex.scholar.cli._url_utils import get_best_url
+from scitex.scholar.config import ScholarConfig
 
 logger = getLogger(__name__)
 

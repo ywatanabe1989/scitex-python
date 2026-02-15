@@ -13,12 +13,13 @@ Features:
   - Rate limit: 100 requests per 5 minutes (API key recommended)
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from scitex import logging
 from scitex.scholar.metadata_engines.individual.SemanticScholarEngine import (
     SemanticScholarEngine,
 )
+
 from .._BaseSearchEngine import BaseSearchEngine
 
 logger = logging.getLogger(__name__)
@@ -146,9 +147,11 @@ class SemanticScholarSearchEngine(SemanticScholarEngine, BaseSearchEngine):
             "urls": {
                 "doi_url": f"https://doi.org/{doi}" if doi else None,
                 "pdf": pdf_url,
-                "publisher": f"https://www.semanticscholar.org/paper/{paper.get('paperId')}"
-                if paper.get("paperId")
-                else None,
+                "publisher": (
+                    f"https://www.semanticscholar.org/paper/{paper.get('paperId')}"
+                    if paper.get("paperId")
+                    else None
+                ),
             },
         }
 

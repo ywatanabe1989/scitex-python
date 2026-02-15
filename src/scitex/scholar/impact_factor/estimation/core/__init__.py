@@ -15,9 +15,9 @@ This module provides legal impact factor calculations using open APIs:
 All calculations are based on publicly available data and transparent methodologies.
 """
 
+from .cache_manager import CacheManager
 from .calculator import ImpactFactorCalculator
 from .journal_matcher import JournalMatcher
-from .cache_manager import CacheManager
 
 __all__ = ["ImpactFactorCalculator", "JournalMatcher", "CacheManager"]
 

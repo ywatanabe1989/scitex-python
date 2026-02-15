@@ -4,6 +4,7 @@
 # File: /home/ywatanabe/proj/SciTeX-Code/src/scitex/scholar/engines/utils/_metadata2bibtex.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = __file__

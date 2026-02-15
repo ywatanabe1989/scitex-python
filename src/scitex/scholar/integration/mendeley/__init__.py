@@ -9,8 +9,8 @@ Features:
 - Link: Real-time citation sync, collaborative groups
 """
 
-from .importer import MendeleyImporter
 from .exporter import MendeleyExporter
+from .importer import MendeleyImporter
 from .linker import MendeleyLinker
 from .mapper import MendeleyMapper
 

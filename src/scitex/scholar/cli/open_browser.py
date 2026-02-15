@@ -24,14 +24,14 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from scitex.scholar.config import ScholarConfig
-from scitex.scholar.cli._url_utils import get_best_url
 from scitex.logging import getLogger
+from scitex.scholar.cli._url_utils import get_best_url
+from scitex.scholar.config import ScholarConfig
 
 logger = getLogger(__name__)
 
@@ -198,12 +198,14 @@ def open_browser_with_urls(
         browser = p.chromium.launch_persistent_context(
             str(profile_dir),
             headless=headless,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--disable-features=UserAgentClientHint",
-            ]
-            if not headless
-            else [],
+            args=(
+                [
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-features=UserAgentClientHint",
+                ]
+                if not headless
+                else []
+            ),
         )
 
         # Open first URL in first tab

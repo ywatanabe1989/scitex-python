@@ -21,10 +21,10 @@ Example usage:
     print(f"Impact Factor: {result['impact_factors']['classical_2year']}")
 """
 
+from .core.cache_manager import CacheManager
 from .core.calculator import ImpactFactorCalculator
 from .core.journal_matcher import JournalMatcher
-from .core.cache_manager import CacheManager
-from .fetchers import OpenAlexFetcher, CrossrefFetcher, SemanticScholarFetcher
+from .fetchers import CrossrefFetcher, OpenAlexFetcher, SemanticScholarFetcher
 
 __author__ = "SciTeX Team"
 __email__ = "contact@scitex.ai"

@@ -13,11 +13,12 @@ Provides utilities for determining if a paper is open access based on:
 
 from __future__ import annotations
 
+import asyncio
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, List, Dict, Any
-import asyncio
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 
 from scitex import logging
@@ -217,9 +218,11 @@ def detect_oa_from_identifiers(
     if source and is_open_access_source(source):
         return OAResult(
             is_open_access=True,
-            status=OAStatus.GREEN
-            if source.lower() in ["arxiv", "pmc", "biorxiv", "medrxiv"]
-            else OAStatus.GOLD,
+            status=(
+                OAStatus.GREEN
+                if source.lower() in ["arxiv", "pmc", "biorxiv", "medrxiv"]
+                else OAStatus.GOLD
+            ),
             source=f"source_{source}",
             confidence=0.95,
         )

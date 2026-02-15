@@ -10,14 +10,14 @@ Provides fast local lookups without per-paper API calls.
 
 from __future__ import annotations
 
+import asyncio
 import json
+import os
 import time
 from pathlib import Path
-from typing import Optional, Set, Dict, Any
-import asyncio
-import aiohttp
+from typing import Any, Dict, Optional, Set
 
-import os
+import aiohttp
 
 from scitex import logging
 

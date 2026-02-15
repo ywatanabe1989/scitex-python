@@ -7,8 +7,8 @@ Maps between Zotero's item format and Scholar's Paper format.
 Handles field translations, data normalization, and metadata enrichment.
 """
 
-from typing import Any, Dict, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from scitex import logging
 from scitex.scholar.core.Paper import Paper

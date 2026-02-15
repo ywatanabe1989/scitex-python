@@ -10,14 +10,12 @@ Usage:
 """
 
 try:
-    from openalex_local import (
+    from openalex_local import (  # Classes; Core functions
         SearchResult,
-        # Classes
         Work,
         count,
         get,
         info,
-        # Core functions
         search,
     )
 except ImportError as e:

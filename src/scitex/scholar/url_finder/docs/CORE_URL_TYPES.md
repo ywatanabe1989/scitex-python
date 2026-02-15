@@ -48,18 +48,18 @@ logger = logging.getLogger(__name__)
 async def download_from_url(context: BrowserContext, pdf_url: str, output_path: Path):
     """
     Download PDF using request context (bypasses Chrome PDF viewer).
-    
+
     This sends HTTP requests with the browser's cookies/auth,
     but doesn't render the response in the browser.
     """
     response = await context.request.get(pdf_url)
-    
+
     if response.ok and response.headers.get('content-type', '').startswith('application/pdf'):
         content = await response.body()
-        
+
         with open(output_path, 'wb') as f:
             f.write(content)
-        
+
         return True
     return False
 
@@ -81,7 +81,7 @@ for ii_pdf, url_pdf in enumerate(urls["url_pdf"]):
 - **Purpose**: Permanent identifier that redirects to current publisher location
 - **Source**: Extracted from metadata or constructed from DOI
 
-### 2. **Publisher URL** (`url_publisher`) 
+### 2. **Publisher URL** (`url_publisher`)
 - **What**: The actual publisher's article page (after DOI redirect)
 - **Example**: `https://www.nature.com/articles/s41593-025-01990-7`
 - **Purpose**: The publisher's canonical article page
@@ -111,32 +111,32 @@ for ii_pdf, url_pdf in enumerate(urls["url_pdf"]):
 {
   "scitex_id": "F99329E1",
   "title": "Addressing artifactual bias in large...",
-  
+
   "doi": "10.1038/s41593-025-01990-7",
   "url_doi": "https://doi.org/10.1038/s41593-025-01990-7",
   "url_doi_source": "CrossRef",
-  
+
   "url_publisher": "https://www.nature.com/articles/s41593-025-01990-7",
   "url_publisher_source": "DOI_resolution",
-  
+
   "url_openurl_query": "https://unimelb.hosted.exlibrisgroup.com/openurl/61UNIMELB/61UNIMELB_INST?sid=scitex&doi=10.1038/s41593-025-01990-7",
   "url_openurl_query_source": "OpenURLGenerator",
-  
+
   "url_openurl_resolved": "https://www-nature-com.eu1.proxy.openathens.net/articles/s41593-025-01990-7",
   "url_openurl_resolved_source": "OpenURLResolver",
-  
+
   "url_final_pdf": "https://www-nature-com.eu1.proxy.openathens.net/articles/s41593-025-01990-7.pdf",
   "url_final_pdf_source": "DirectRequest",
-  
+
   "urls_pdf": [
     "https://www.nature.com/articles/s41593-025-01990-7.pdf",
     "https://www-nature-com.eu1.proxy.openathens.net/articles/s41593-025-01990-7.pdf"
   ],
   "urls_pdf_source": "MultipleStrategies",
-  
+
   "pdf_downloaded": false,
   "pdf_download_attempts": [],
-  
+
   "urls_updated_at": "2025-08-08T00:00:00Z"
 }
 ```

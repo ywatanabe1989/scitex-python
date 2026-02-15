@@ -16,8 +16,8 @@ Each strategy represents a different approach to locating PDFs:
 
 from .find_pdf_urls_by_dropdown import find_pdf_urls_by_dropdown
 from .find_pdf_urls_by_href import find_pdf_urls_by_href
-from .find_pdf_urls_by_publisher_patterns import find_pdf_urls_by_publisher_patterns
 from .find_pdf_urls_by_navigation import find_pdf_urls_by_navigation
+from .find_pdf_urls_by_publisher_patterns import find_pdf_urls_by_publisher_patterns
 from .find_pdf_urls_by_zotero_translators import find_pdf_urls_by_zotero_translators
 from .find_supplementary_urls_by_href import find_supplementary_urls_by_href
 

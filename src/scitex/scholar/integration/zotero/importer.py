@@ -10,14 +10,15 @@ Features:
 - Batch import with progress tracking
 """
 
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-import json
 
 from scitex import logging
 from scitex.scholar.core.Paper import Paper
 from scitex.scholar.core.Papers import Papers
 from scitex.scholar.storage import LibraryManager
+
 from .mapper import ZoteroMapper
 
 logger = logging.getLogger(__name__)

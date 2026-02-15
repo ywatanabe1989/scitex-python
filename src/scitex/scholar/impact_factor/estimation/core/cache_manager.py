@@ -4,18 +4,20 @@
 # File: /home/ywatanabe/proj/scitex-code/src/scitex/scholar/impact_factor/estimation/core/cache_manager.py
 # ----------------------------------------
 from __future__ import annotations
+
 import os
 
 __FILE__ = "./impact_factor/core/cache_manager.py"
 __DIR__ = os.path.dirname(__FILE__)
+import hashlib
+
 # ----------------------------------------
 import json
 import pickle
-import hashlib
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-from datetime import datetime, timedelta
 
 from scitex.config import get_paths
 from scitex.logging import getLogger

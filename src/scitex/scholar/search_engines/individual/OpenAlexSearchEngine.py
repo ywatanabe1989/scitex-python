@@ -13,10 +13,11 @@ Features:
   - Large result sets (up to 200 per page)
 """
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from scitex import logging
 from scitex.scholar.metadata_engines.individual.OpenAlexEngine import OpenAlexEngine
+
 from .._BaseSearchEngine import BaseSearchEngine
 
 logger = logging.getLogger(__name__)

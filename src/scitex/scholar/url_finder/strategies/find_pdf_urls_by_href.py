@@ -5,7 +5,9 @@
 """Find PDF URLs from href attributes and meta tags."""
 
 from typing import List
+
 from playwright.async_api import Page
+
 from scitex import logging
 from scitex.browser import browser_logger
 from scitex.scholar.config import PublisherRules, ScholarConfig

@@ -11,10 +11,10 @@
 
 1. Access to [AI2 Asta](https://asta.allen.ai/chat/) and download bib file for your query by clicking `Export All Citations`
 2. Copy the downloaded bib file (`~/donwloads/papers.bib`) to `./data/descriptive_name.bib`
-3. 
+3.
 ```bash
 ./examples/99_fullpipeline-for-bibtex.py \
-    --bibtex_path ./data/descriptive_name.bib 
+    --bibtex_path ./data/descriptive_name.bib
     --browser_mode interactive
 ```
 
@@ -115,7 +115,7 @@ Expand -> Export All Citations
 
 python -m scitex.scholar.metadata.doi.resolvers._DOIResolver
 python -m scitex.scholar.metadata.enrichment._LibraryEnricher
- 
+
 
 ## Core Objects
 
@@ -403,7 +403,7 @@ LibraryManager      # Paper storage logic
 PathManager         # File system paths
 LibraryCacheManager # Caching layer
 
-# Search/Enrichment engines  
+# Search/Enrichment engines
 CrossRefLocalEngine
 SemanticScholarEngine
 OpenAlexEngine
