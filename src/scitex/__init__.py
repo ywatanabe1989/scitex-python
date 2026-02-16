@@ -56,6 +56,22 @@ class _LazyModule:
         )
 
     def __getattr__(self, attr):
+        # Return sensible defaults for dunder attrs without triggering import
+        # (prevents Sphinx autodoc crashes when optional deps are missing)
+        if attr == "__name__":
+            return f"scitex.{self._name}"
+        if attr == "__module__":
+            return "scitex"
+        if attr == "__qualname__":
+            return self._name
+        if attr == "__path__":
+            return []
+        if attr == "__file__":
+            return None
+        if attr == "__loader__":
+            return None
+        if attr == "__spec__":
+            return None
         try:
             return getattr(self._load_module(), attr)
         except (ImportError, ModuleNotFoundError):
