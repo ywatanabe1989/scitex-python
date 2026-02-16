@@ -14,18 +14,14 @@ sphinx:
   configuration: docs/sphinx/conf.py
   fail_on_warning: false
 
-# Optionally build your docs in additional formats such as PDF and ePub
-formats:
-  - pdf
-  - epub
+# Disable PDF/ePub to avoid LaTeX build failures
+formats: []
 
 # Python configuration
 python:
   install:
-    # Install package with all optional dependencies
+    # Install package (base only - avoid system deps on RTD)
     - method: pip
       path: .
-      extra_requirements:
-        - all
     # Install sphinx documentation requirements
     - requirements: docs/sphinx/requirements.txt
