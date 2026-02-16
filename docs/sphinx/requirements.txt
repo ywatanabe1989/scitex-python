@@ -5,6 +5,24 @@ sphinx-copybutton>=0.5
 sphinx-autodoc-typehints>=1.25
 nbsphinx>=0.9
 
+# Core scientific deps (installable on RTD)
+matplotlib
+scipy
+numpy
+pandas
+scikit-learn
+seaborn
+pillow
+pyyaml
+requests
+natsort
+ruamel.yaml
+joblib
+
 # Thin wrapper dependencies (for autodoc)
 scitex-writer>=2.0
 socialia>=0.3.0
+figrecipe
+crossref-local
+openalex-local
+scitex-linter

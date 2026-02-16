@@ -43,7 +43,7 @@ autodoc_default_options = {
     "exclude-members": "__weakref__,__init__,__dict__,__module__",
 }
 
-# Mock imports for packages with system dependencies that can't be installed on RTD
+# Mock imports for packages that can't install on RTD (system deps, heavy ML, etc.)
 autodoc_mock_imports = [
     # GUI frameworks (require display)
     "PyQt6",
@@ -54,9 +54,33 @@ autodoc_mock_imports = [
     "sounddevice",
     # System-level dependencies
     "cv2",  # OpenCV requires system libs
-    # Optional dependencies that may not be installed
-    "figrecipe",
-    "figrecipe._graph_presets",
+    # Heavy ML/AI packages
+    "torch",
+    "torchvision",
+    "pytorch_pretrained_vit",
+    # LLM API clients (not needed for docs)
+    "openai",
+    "anthropic",
+    "google",
+    "google.genai",
+    "groq",
+    # Optional heavy packages
+    "umap",
+    "sktime",
+    "imbalanced_learn",
+    "imblearn",
+    "xarray",
+    # Audio/browser packages
+    "pyttsx3",
+    "gTTS",
+    "gtts",
+    "pydub",
+    "elevenlabs",
+    "playwright",
+    "mss",
+    "aiohttp",
+    # Cloud package
+    "scitex_cloud",
 ]
 
 # Autosummary settings
