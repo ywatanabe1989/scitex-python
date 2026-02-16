@@ -81,6 +81,8 @@ autodoc_mock_imports = [
     "aiohttp",
     # Cloud package
     "scitex_cloud",
+    # OpenAlex (pulls awscli causing pip deadlock)
+    "openalex_local",
 ]
 
 # Autosummary settings

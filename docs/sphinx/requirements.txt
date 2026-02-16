@@ -46,5 +46,5 @@ scitex-writer>=2.0
 socialia>=0.3.0
 figrecipe
 crossref-local
-openalex-local
+# openalex-local  # Excluded: pulls awscli which causes pip resolver deadlock
 scitex-linter
