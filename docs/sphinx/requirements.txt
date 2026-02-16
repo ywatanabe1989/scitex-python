@@ -5,7 +5,7 @@ sphinx-copybutton>=0.5
 sphinx-autodoc-typehints>=1.25
 nbsphinx>=0.9
 
-# Core scientific deps (installable on RTD)
+# Core scientific packages
 matplotlib
 scipy
 numpy
@@ -18,8 +18,30 @@ requests
 natsort
 ruamel.yaml
 joblib
+tqdm
+xarray
+h5py
+markdown2
 
-# Thin wrapper dependencies (for autodoc)
+# Database
+sqlalchemy
+psycopg2-binary
+
+# IO / parsing
+openpyxl
+xlrd
+lxml
+lxml_html_clean
+beautifulsoup4
+
+# CLI / tools
+click
+GitPython
+ipython
+pyperclip
+readchar
+
+# Ecosystem packages (for autodoc)
 scitex-writer>=2.0
 socialia>=0.3.0
 figrecipe
